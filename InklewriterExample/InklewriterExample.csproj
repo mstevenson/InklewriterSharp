@@ -3,10 +3,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{98CDC893-7F79-47C5-B609-A8FB40F73924}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>Inklewriter</RootNamespace>
-    <AssemblyName>InklewriterSharp</AssemblyName>
+    <ProjectGuid>{3064FF6F-B820-4E3E-B657-CFF109E9A0A3}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>InklewriterExample</RootNamespace>
+    <AssemblyName>InklewriterExample</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -17,7 +17,7 @@
     <DefineConstants>DEBUG;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
+    <Externalconsole>true</Externalconsole>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -25,18 +25,20 @@
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
+    <Externalconsole>true</Externalconsole>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="LitJson">
-      <HintPath>lib\LitJson.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StoryModel.cs" />
-    <Compile Include="StoryPlayer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\InklewriterSharp\InklewriterSharp.csproj">
+      <Project>{98CDC893-7F79-47C5-B609-A8FB40F73924}</Project>
+      <Name>InklewriterSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
