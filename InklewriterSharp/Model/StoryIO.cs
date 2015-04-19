@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using LitJson;
 
 namespace Inklewriter
@@ -11,6 +12,24 @@ namespace Inklewriter
 			Story story = new Story ();
 
 			ReadStoryRoot (reader, story);
+
+			// Post-process
+			var allStitches = story.Stitches;
+			foreach (var key in allStitches.Keys) {
+				var stitch = allStitches [key];
+				if (stitch.Divert != null) {
+					var target = allStitches [stitch.Divert];
+					stitch.DivertTo (target);
+				}
+			}
+
+			// TODO wire up options
+//			T.text(x.option), T.writeModeOnly = x.writeModeOnly, x.linkPath && T.linkStitch(r[x.linkPath].storyStitch), T._parentStitch = y.storyStitch;
+//			if (x.ifConditions)
+//				for (var E = 0; E < x.ifConditions.length; ++E) T._ifConditions.push(x.ifConditions[E].ifCondition);
+//			if (x.notIfConditions)
+//				for (var N = 0; N < x.notIfConditions.length; ++N) T._notIfConditions.push(x.notIfConditions[N].notIfCondition)
+
 			return story;
 		}
 
@@ -131,6 +150,10 @@ namespace Inklewriter
 
 					var stitch = GetOrCreateStitch (story, key);
 					stitch.Text = (string)reader.Value;
+					if (stitch.Text.EndsWith ("[...]") > -1) {
+						stitch.Text = Regex.Replace (stitch.Text, @"\[\.\.\.\]", "");
+						stitch.RunOn = true;
+					}
 
 					// Read all stitch options. Exits when the array end token is read.
 					bool haveMoreStitchContent = false;

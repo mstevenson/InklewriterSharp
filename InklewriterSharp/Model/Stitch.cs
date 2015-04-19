@@ -18,7 +18,18 @@ namespace Inklewriter
 		/// <summary>
 		/// Section label.
 		/// </summary>
-		public string PageLabel { get; set; }
+		public string PageLabel {
+			get {
+				if (string.IsNullOrEmpty (_pageLabel)) {
+					return "Section " + PageNumberLabel;
+				}
+				return _pageLabel;
+			}
+			set {
+				_pageLabel = value;
+			}
+		}
+		string _pageLabel;
 
 		/// <summary>
 		/// Indicates that this stitch should connect to the 'divert' stitch
@@ -98,40 +109,28 @@ namespace Inklewriter
 
 		public int VerticalDistance { set; get; }
 
-		public string PageLabelText {
-			get {
-				if (string.IsNullOrEmpty (PageLabel)) {
-					return "Section " + PageNumberLabel;
-				}
-				return PageLabel;
-			}
-		}
-
-		public string PageNumberLabel {
-			get {
-				// FIXME
-				return "";
-			}
-		}
+//		public string PageLabelText {
+//			get {
+//				if (string.IsNullOrEmpty (PageLabel)) {
+//					return "Section " + PageNumberLabel;
+//				}
+//				return PageLabel;
+//			}
+//		}
 
 		public int SetPageNumberLabel (StoryModel model, int num)
 		{
-			if (num < this.PageNumberHeader && model.MaxPage == PageNumberHeader) {
+			if (num < this.PageNumberLabel && model.MaxPage == PageNumberLabel) {
 				model.MaxPage--;
-				PageNumberHeader = num;
+				PageNumberLabel = num;
 				if (num > model.MaxPage) {
 					model.MaxPage = num;
 				}
 			}
-			return PageNumberHeader;
+			return PageNumberLabel;
 		}
 
-		public int PageNumberHeader { get; set; }
-
-		public void SetPageNumberLabel (int number)
-		{
-			// TODO
-		}
+		public int PageNumberLabel { get; set; }
 
 		public int PageNumber {
 			get {
