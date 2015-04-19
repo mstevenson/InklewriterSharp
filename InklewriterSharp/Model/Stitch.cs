@@ -79,7 +79,7 @@ namespace Inklewriter
 			Text = text;
 		}
 
-		int WordCountOf (string e) {
+		public int WordCountOf (string e) {
 			if (!string.IsNullOrEmpty (e)) {
 				var t = Regex.Matches (e, @"[\S]+");
 				return t.Count;

@@ -2,60 +2,52 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-
 namespace Inklewriter
 {
-
-	public class FlagValue {
-		public string flagName;
-		public int value;
-	}
-
-
 	public class StoryModel
 	{
-		const string defaultStoryName = "Untitled Story";
-		const string defaultAuthorName = "Anonymous";
-		const int maxPreferredPageLength = 8;
+		public class FlagValue {
+			public string flagName;
+			public int value;
+		}
+
+		public const string defaultStoryName = "Untitled Story";
+		public const string defaultAuthorName = "Anonymous";
+		public const int maxPreferredPageLength = 8;
 
 		public int MaxPage { get; set; }
 
 		public Story Story { get; private set; }
 
-		List<string> flagIndex = new List<string> ();
+		public List<string> FlagIndex { get; set; }
+
+		public int EndCount { get; set; }
+
+		public int LooseEndCount { get; set; }
+
+		public Stitch InitialStitch { get; set; }
+
+		public bool Loading { get; set; }
+
+		#region IO
 
 		public void ImportStory (string data)
 		{
-			Story = StoryIO.Read (data);
+			Story = StoryReader.Read (data);
 		}
 
 		public string ExportStory ()
 		{
 			if (Story != null) {
 				NameStitches ();
-				var data = StoryIO.Write (Story);
+				var data = StoryWriter.Write (Story);
 				return data;
 			}
 			return null;
 		}
 
-		public void NameStitches ()
-		{
-			HashSet<string> usedShortNames = new HashSet<string> ();
-			var stitches = Stitches;
-			foreach (var currentStitch in stitches) {
-				string shortName = currentStitch.CreateShortName ();
-				string incrementedShortName = shortName;
-				for (int num = 1; usedShortNames.Contains (shortName); num++) {
-					incrementedShortName = shortName + num;
-				}
-				shortName = incrementedShortName;
-				usedShortNames.Add (shortName);
-				currentStitch.SetName (shortName);
-			}
-		}
+		#endregion
 
-		int EndCount { get; set; }
 
 		public void RebuildBacklinks ()
 		{
@@ -89,7 +81,209 @@ namespace Inklewriter
 			}
 		}
 
-		int LooseEndCount { get; set; }
+		public static bool WatchRefCounts ()
+		{
+			// FIXME
+			return false;
+		}
+
+		public List<Stitch> Stitches {
+			get {
+				return null;
+//				return Story.data.stitches;
+			}
+		}
+
+		#region Flags
+
+		public void CollateFlags ()
+		{
+			FlagIndex = new List<string> ();
+			var stitches = Stitches;
+			for (int e = 0; e < stitches.Count; e++) {
+				var t = stitches[e];
+				for (int n = 0; n < t.FlagNames.Count; n++) {
+					AddFlagToIndex (t.FlagNames[n]);
+				}
+				for (int r = 0; r < t.Options.Count; r++) {
+					for (int n = 0; n < t.Options [r].IfConditions.Count; n++) {
+						AddFlagToIndex (t.Options[r].IfConditions[n]);
+					}
+					for (int n = 0; n < t.Options [r].NotIfConditions.Count; n++) {
+						AddFlagToIndex (t.Options [r].NotIfConditions [n]);
+					}
+				}
+				for (var n = 0; n < t.IfConditions.Count; n++) {
+					AddFlagToIndex (t.IfConditions[n]);
+				}
+				for (var n = 0; n < t.NotIfConditions.Count; n++) {
+					AddFlagToIndex (t.NotIfConditions [n]);
+				}
+			}
+		}
+
+		public void AddFlagToIndex (string flag)
+		{
+			Console.WriteLine ("Adding flag string " + flag);
+			var name = ExtractFlagNameFromExpression (flag);
+			if (!FlagIndex.Contains (name)) {
+				FlagIndex.Add (name);
+			}
+		}
+
+		public int GetIdxOfFlag (string flag, List<FlagValue> allFlags)
+		{
+			// FIXME allFlags should be special flag objects that have a 'value'
+
+			for (var n = 0; n < allFlags.Count; n++) {
+				if (allFlags[n].flagName == flag) {
+					return n;
+				}
+			}
+			return -1;
+		}
+
+		public static string ExtractFlagNameFromExpression (string expression)
+		{
+			var regex = new Regex (@"^(.*?)\s*(\=|\+|\-|\>|\<|\!\=|$)");
+			var match = regex.Match (expression);
+			return match.Captures[1].Value;
+		}
+
+		public int GetValueOfFlag (string flag, List<FlagValue> allFlags)
+		{
+			var n = GetIdxOfFlag (flag, allFlags);
+			return n >= 0 ? allFlags[n].value : 0;
+		}
+
+		public void ProcessFlagSetting (Stitch stitch, List<FlagValue> allFlags) // t == all flags
+		{
+			for (int n = 0; n < stitch.NumberOfFlags; n++) {
+				string r = stitch.FlagByIndex (n);
+				int i = 0;
+				Console.WriteLine ("Flag directive: " + r);
+				var o = new Regex (@"^(.*?)\s*(\=|\+|\-)\s*(\b.*\b)\s*$");
+				var s = o.Matches (r);
+				int u = -1;
+				if (s.Count > 0) {
+					r = s[1].ToString ();
+					u = GetIdxOfFlag(r, allFlags);
+					var m = new Regex (@"\d+");
+					if (m.IsMatch (s [3].ToString ())) {
+						if (s [2].ToString () == "=") {
+							i = int.Parse (s[3].ToString ());
+						}
+					} else {
+						if (u < 0) {
+							i = 0;
+						} else {
+							i = allFlags[u].value;
+						}
+						if (s[2].ToString () == "+") {
+							i += int.Parse (s[3].ToString ());
+						} else {
+							i -= int.Parse (s[3].ToString ());
+						}
+					}
+					if (s[2].ToString () == "=") {
+						i = ConvertStringToBooleanIfAppropriate (s[3].ToString ());
+					} else {
+						Console.WriteLine ("Can't add/subtract a boolean.");
+					}
+				} else {
+					u = GetIdxOfFlag(r, allFlags);
+				}
+				Console.WriteLine ("Assigning value: " + i);
+				if (u >= 0) {
+					allFlags.RemoveAt(u);
+				}
+				var a = new FlagValue {
+					flagName = r,
+					value = i
+				};
+				allFlags.Add(a);
+			}
+		}
+
+		public bool Test (string expression, List<FlagValue> allFlags)
+		{
+			Regex regex = new Regex (@"^(.*?)\s*(\<|\>|\<\=|\>\=|\=|\!\=|\=\=)\s*(\b.*\b)\s*$");
+			bool result = false;
+			MatchCollection matches = regex.Matches (expression);
+			if (regex.IsMatch (expression)) {
+				string flag = matches [1].ToString ();
+				string op = matches [2].ToString ();
+				string valueString = matches [3].ToString ();
+				int value = int.Parse (valueString);
+				
+				int flagValue = GetValueOfFlag (flag, allFlags);
+				Console.WriteLine ("Testing " + flagValue + " " + op + " " + value);
+				if (op == "==" || op == "=") {
+					result = flagValue == value;
+				} else {
+					if (op == "!=" || op == "<>") {
+						result = flagValue != value;
+					} else {
+						if (Regex.IsMatch (valueString, @"\d+")) {
+							throw new System.Exception ("Error - Can't perform an order-test on a boolean.");
+						}
+						if (op == "<") {
+							result = flagValue < value;
+						} else if (op == "<=") {
+							result = flagValue <= value;
+						} else if (op == ">") {
+							result = flagValue > value;
+						} else if (op == ">=") {
+							result = flagValue >= value;
+						}
+					}
+				}
+			} else {
+				//				result = GetValueOfFlag (expression, allFlags) == 1;
+				//				result = ConvertStringToBooleanIfAppropriate(result) == 1;
+				//				if (result == false || result == -1) {
+				//					result = false;
+				//				}
+				//				result = true; // FIXME is this right?
+			}
+			return result;
+		}
+
+		#endregion
+
+		#region Stitches
+
+		public Stitch CreateStitch (string text)
+		{
+			Stitch s = new Stitch (text);
+			Stitches.Add (s);
+			return s;
+		}
+
+		public void RemoveStitch (Stitch e)
+		{
+			if (WatchRefCounts ()) {
+				Console.WriteLine ("Removing " + e.Name + " entirely.");
+			}
+			if (e.RefCount != 0) {
+				RepointStitchToStitch (e, null);
+				Console.WriteLine ("Deleting stitch with references, so first unpointing stitches from this stitch.");
+				if (e.RefCount != 0) {
+					throw new System.Exception ("Fixing ref-count on stitch removal failed.");
+				}
+			}
+			e.Undivert ();
+			for (int t = e.Options.Count - 1; t >= 0; t--) {
+				e.RemoveOption (e.Options [t]);
+			}
+			RemovePageNumber(e, true);
+			for (var t = 0; t < Stitches.Count; ++t) {
+				if (Stitches [t] == e) {
+					Stitches.RemoveAt (t);
+					return;
+				}
+			}
+		}
 
 		public void RepointStitchToStitch (Stitch source, Stitch target)
 		{
@@ -116,268 +310,46 @@ namespace Inklewriter
 			}
 		}
 
-		public static bool WatchRefCounts ()
+		public void NameStitches ()
 		{
-			// FIXME
-			return false;
-		}
-
-		public static string ExtractFlagNameFromExpression (string expression)
-		{
-			var regex = new Regex (@"^(.*?)\s*(\=|\+|\-|\>|\<|\!\=|$)");
-			var match = regex.Match (expression);
-			return match.Captures[1].Value;
-		}
-
-		public List<Stitch> Stitches {
-			get {
-				return null;
-//				return Story.data.stitches;
-			}
-		}
-
-		public void CollateFlags ()
-		{
-//			Story story = CurrentStory
-			// FIXME
-			Story story = null;
-
-
-			flagIndex = new List<string> ();
+			HashSet<string> usedShortNames = new HashSet<string> ();
 			var stitches = Stitches;
-			for (int e = 0; e < stitches.Count; e++) {
-				var t = stitches[e];
-				for (int n = 0; n < t.FlagNames.Count; n++) {
-					AddFlagToIndex (t.FlagNames[n]);
+			foreach (var currentStitch in stitches) {
+				string shortName = currentStitch.CreateShortName ();
+				string incrementedShortName = shortName;
+				for (int num = 1; usedShortNames.Contains (shortName); num++) {
+					incrementedShortName = shortName + num;
 				}
-				for (int r = 0; r < t.Options.Count; r++) {
-					for (int n = 0; n < t.Options [r].IfConditions.Count; n++) {
-						AddFlagToIndex (t.Options[r].IfConditions[n]);
-					}
-					for (int n = 0; n < t.Options [r].NotIfConditions.Count; n++) {
-						AddFlagToIndex (t.Options [r].NotIfConditions [n]);
-					}
-				}
-				for (var n = 0; n < t.IfConditions.Count; n++) {
-					AddFlagToIndex (t.IfConditions[n]);
-				}
-				for (var n = 0; n < t.NotIfConditions.Count; n++) {
-					AddFlagToIndex (t.NotIfConditions [n]);
-				}
+				shortName = incrementedShortName;
+				usedShortNames.Add (shortName);
+				currentStitch.SetName (shortName);
 			}
 		}
 
-		public int GetIdxOfFlag (string flag, List<FlagValue> allFlags)
-		{
-			// FIXME allFlags should be special flag objects that have a 'value'
+		#endregion
 
-			for (var n = 0; n < allFlags.Count; n++) {
-				if (allFlags[n].flagName == flag) {
-					return n;
-				}
-			}
-			return -1;
-		}
+		#region Options
 
-		public void ProcessFlagSetting (Stitch stitch, List<FlagValue> allFlags) // t == all flags
-		{
-			for (int n = 0; n < stitch.NumberOfFlags; n++) {
-				string r = stitch.FlagByIndex (n);
-				int i = 0;
-				Console.WriteLine ("Flag directive: " + r);
-				var o = new Regex (@"^(.*?)\s*(\=|\+|\-)\s*(\b.*\b)\s*$");
-				var s = o.Matches (r);
-				int u = -1;
-				if (s.Count > 0) {
-					r = s[1].ToString ();
-					u = GetIdxOfFlag(r, allFlags);
-					var m = new Regex (@"\d+");
-					if (m.IsMatch (s [3].ToString ())) {
-						if (s [2].ToString () == "=") {
-							i = ParseInt(s[3].ToString ());
-						}
-					} else {
-						if (u < 0) {
-							i = 0;
-						} else {
-							i = allFlags[u].value;
-						}
-						if (s[2].ToString () == "+") {
-							i += ParseInt(s[3].ToString ());
-						} else {
-							i -= ParseInt(s[3].ToString ());
-						}
-					}
-					if (s[2].ToString () == "=") {
-						i = ConvertStringToBooleanIfAppropriate (s[3].ToString ());
-					} else {
-						Console.WriteLine ("Can't add/subtract a boolean.");
-					}
-				} else {
-					u = GetIdxOfFlag(r, allFlags);
-				}
-				Console.WriteLine ("Assigning value: " + i);
-				if (u >= 0) {
-					allFlags.RemoveAt(u);
-				}
-				var a = new FlagValue {
-					flagName = r,
-					value = i
-				};
-				allFlags.Add(a);
-			}
-		}
-
-		int ParseInt (string s)
-		{
-			// FIXME
-			return 0;
-		}
-
-		// FIXME should return a bool, but bools and ints are used interchangebly
-		public bool Test (string expression, List<FlagValue> allFlags) // e == flag
-		{
-			Regex regex = new Regex (@"^(.*?)\s*(\<|\>|\<\=|\>\=|\=|\!\=|\=\=)\s*(\b.*\b)\s*$");
-			bool result = false;
-			MatchCollection matches = regex.Matches (expression);
-			if (regex.IsMatch (expression)) {
-				string flag = matches [1].ToString ();
-				string op = matches [2].ToString ();
-				string valueString = matches [3].ToString ();
-				int value = int.Parse (valueString);
-
-				int flagValue = GetValueOfFlag (flag, allFlags);
-				Console.WriteLine ("Testing " + flagValue + " " + op + " " + value);
-				if (op == "==" || op == "=") {
-					result = flagValue == value;
-				} else {
-					if (op == "!=" || op == "<>") {
-						result = flagValue != value;
-					} else {
-						if (Regex.IsMatch (valueString, @"\d+")) {
-							throw new System.Exception ("Error - Can't perform an order-test on a boolean.");
-						}
-						if (op == "<") {
-							result = flagValue < value;
-						} else if (op == "<=") {
-							result = flagValue <= value;
-						} else if (op == ">") {
-							result = flagValue > value;
-						} else if (op == ">=") {
-							result = flagValue >= value;
-						}
-					}
-				}
-			} else {
-//				result = GetValueOfFlag (expression, allFlags) == 1;
-//				result = ConvertStringToBooleanIfAppropriate(result) == 1;
-//				if (result == false || result == -1) {
-//					result = false;
-//				}
-//				result = true; // FIXME is this right?
-			}
-			return result;
-		}
-
-		Stitch CreateStitch (string text)
-		{
-			Stitch s = new Stitch (text);
-			Stitches.Add (s);
-			return s;
-		}
-
-		void RemoveStitch (Stitch e)
-		{
-			if (WatchRefCounts ()) {
-				Console.WriteLine ("Removing " + e.Name + " entirely.");
-			}
-			if (e.RefCount != 0) {
-				RepointStitchToStitch (e, null);
-				Console.WriteLine ("Deleting stitch with references, so first unpointing stitches from this stitch.");
-				if (e.RefCount != 0) {
-					throw new System.Exception ("Fixing ref-count on stitch removal failed.");
-				}
-			}
-			e.Undivert ();
-			for (int t = e.Options.Count - 1; t >= 0; t--) {
-				e.RemoveOption (e.Options [t]);
-			}
-			RemovePageNumber(e, true);
-			for (var t = 0; t < Stitches.Count; ++t) {
-				if (Stitches [t] == e) {
-					Stitches.RemoveAt (t);
-					return;
-				}
-			}
-		}
-
-		Option CreateOption (Stitch stitch)
+		public Option CreateOption (Stitch stitch)
 		{
 			var t = stitch.AddOption ();
 			return t;
 		}
 
-		void RemoveOption (Stitch stitch, Option opt)
+		public void RemoveOption (Stitch stitch, Option opt)
 		{
 			stitch.RemoveOption (opt);
 		}
 
-		void Purge ()
-		{
-			if (Stitches.Count == 0) {
-				return;
-			}
-			var stitches = Stitches;
-			List<Stitch> stitchesToRemove = new List<Stitch> ();
-			for (var t = 0; t < stitches.Count; ++t) {
-				var n = stitches[t];
-				if (n.IsDead ()) {
-					stitchesToRemove.Add (n);
-				}
-			}
-			for (var t = 0; t < stitchesToRemove.Count; t++) {
-				RemoveStitch (stitchesToRemove [t]);
-			}
-		}
+		#endregion
 
-		void RemovePageNumber (Stitch e, bool doIt)
-		{
-//			var n = e.pageNumberLabel();
-//			if (n <= 0) return;
-//			e.pageNumberLabel(-1);
-//			for (var r = 0; r < StoryModel.stitches.length; r++) {
-//				var i = StoryModel.stitches[r].pageNumberLabel();
-//				i > n && StoryModel.stitches[r].pageNumberLabel(i - 1)
-//			}
-//			t || StoryModel.computePageNumbers()
-		}
-
-		int GetValueOfFlag (string flag, List<FlagValue> allFlags)
-		{
-			var n = GetIdxOfFlag (flag, allFlags);
-			return n >= 0 ? allFlags[n].value : 0;
-		}
-
-		int ConvertStringToBooleanIfAppropriate (string s)
-		{
-			// FIXME bools represented as 0 and 1
-			return 0;
-		}
-
-		public void AddFlagToIndex (string flag)
-		{
-			Console.WriteLine ("Adding flag string " + flag);
-			var name = ExtractFlagNameFromExpression (flag);
-			if (!flagIndex.Contains (name)) {
-				flagIndex.Add (name);
-			}
-		}
+		#region Page Numbers
 
 		public void InsertPageNumber (Stitch e)
 		{
 			if (Loading || e.VerticalDistanceFromHeader < 2
-			    || PageSize (e.PageNumber) < StoryModel.maxPreferredPageLength / 2
-			    || HeaderWithinDistanceOfStitch (3, e))
+				|| PageSize (e.PageNumber) < StoryModel.maxPreferredPageLength / 2
+				|| HeaderWithinDistanceOfStitch (3, e))
 			{
 				return;
 			}
@@ -396,12 +368,24 @@ namespace Inklewriter
 			ComputePageNumbers ();
 		}
 
-		void ComputePageNumbers ()
+		public void RemovePageNumber (Stitch e, bool doIt)
+		{
+//			var n = e.pageNumberLabel();
+//			if (n <= 0) return;
+//			e.pageNumberLabel(-1);
+//			for (var r = 0; r < StoryModel.stitches.length; r++) {
+//				var i = StoryModel.stitches[r].pageNumberLabel();
+//				i > n && StoryModel.stitches[r].pageNumberLabel(i - 1)
+//			}
+//			t || StoryModel.computePageNumbers()
+		}
+
+		public void ComputePageNumbers ()
 		{
 			var e = new List<Stitch> ();
 			var t = 0;
-//			var n = {}		;
-//			var r = {};
+			//			var n = {}		;
+			//			var r = {};
 			var stitches = Stitches;
 			for (var i = 0; i < stitches.Count; i++) {
 				var s = stitches[i].PageNumber;
@@ -411,46 +395,72 @@ namespace Inklewriter
 						t = s;
 					}
 					stitches [i].SetPageNumberLabel (this, s);
-//					n[s] = [];
-//					r[s] = !0;
+					//					n[s] = [];
+					//					r[s] = !0;
 				} else {
 					stitches [i].SetPageNumberLabel (this, 0);
 					stitches[i].SectionStitches = new List<Stitch> ();
 				}
 			}
-//			e.sort(function(e, t) {
-//				return e.pageNumberLabel() - t.pageNumberLabel()
-//				});
+			//			e.sort(function(e, t) {
+			//				return e.pageNumberLabel() - t.pageNumberLabel()
+			//				});
 			for (var i = e.Count - 1; i >= 0; i--) {
-//				var o = function(t, r, s) {
-//					if (!t) return;
-//					if (!r && t.pageNumber() > 0) {
-//						t.verticalDistanceFromHeader() > s && t.pageNumber() == e[i].pageNumber() && t.verticalDistanceFromHeader(s), n[e[i].pageNumber()].push(t.pageNumber());
-//						return
-//						}
-//					t.pageNumber(e[i].pageNumber()), t.headerStitch(e[i]), e[i].sectionStitches.push(t), t.verticalDistanceFromHeader(s), o(t.divertStitch, !1, s + .01);
-//					for (var u = 0; u < t.options.length; u++) o(t.options[u].linkStitch(), !1, s + 1 + .1 * u)
-//					};
-//				o(e[i], !0, 0)
+				//				var o = function(t, r, s) {
+				//					if (!t) return;
+				//					if (!r && t.pageNumber() > 0) {
+				//						t.verticalDistanceFromHeader() > s && t.pageNumber() == e[i].pageNumber() && t.verticalDistanceFromHeader(s), n[e[i].pageNumber()].push(t.pageNumber());
+				//						return
+				//						}
+				//					t.pageNumber(e[i].pageNumber()), t.headerStitch(e[i]), e[i].sectionStitches.push(t), t.verticalDistanceFromHeader(s), o(t.divertStitch, !1, s + .01);
+				//					for (var u = 0; u < t.options.length; u++) o(t.options[u].linkStitch(), !1, s + 1 + .1 * u)
+				//					};
+				//				o(e[i], !0, 0)
 			}
-//			var u = [];
-//			u.push(initialStitch.pageNumber());
-//			while (u.length > 0) {
-//				var a = [];
-//				for (var i = 0; i < u.length; i++)
-//					if (r[u[i]]) {
-//						r[u[i]] = !1;
-//						for (var f = 0; f < n[u[i]].length; f++) a.push(n[u[i]][f])
-//						}
-//				u = a
-//			}
-//			for (var i = 0; i < StoryModel.stitches.length; i++) {
-//				var l = StoryModel.stitches[i].pageNumber();
-//				l && r[l] && (StoryModel.stitches[i].pageNumber(0), StoryModel.stitches[i].sectionStitches = [])
-//			}
+			//			var u = [];
+			//			u.push(initialStitch.pageNumber());
+			//			while (u.length > 0) {
+			//				var a = [];
+			//				for (var i = 0; i < u.length; i++)
+			//					if (r[u[i]]) {
+			//						r[u[i]] = !1;
+			//						for (var f = 0; f < n[u[i]].length; f++) a.push(n[u[i]][f])
+			//						}
+			//				u = a
+			//			}
+			//			for (var i = 0; i < StoryModel.stitches.length; i++) {
+			//				var l = StoryModel.stitches[i].pageNumber();
+			//				l && r[l] && (StoryModel.stitches[i].pageNumber(0), StoryModel.stitches[i].sectionStitches = [])
+			//			}
 		}
 
-		bool HeaderWithinDistanceOfStitch (int distance, Stitch stitch)
+		#endregion
+
+		public void Purge ()
+		{
+			if (Stitches.Count == 0) {
+				return;
+			}
+			var stitches = Stitches;
+			List<Stitch> stitchesToRemove = new List<Stitch> ();
+			for (var t = 0; t < stitches.Count; ++t) {
+				var n = stitches[t];
+				if (n.IsDead ()) {
+					stitchesToRemove.Add (n);
+				}
+			}
+			for (var t = 0; t < stitchesToRemove.Count; t++) {
+				RemoveStitch (stitchesToRemove [t]);
+			}
+		}
+
+		public int ConvertStringToBooleanIfAppropriate (string s)
+		{
+			// FIXME bools represented as 0 and 1
+			return 0;
+		}
+
+		public bool HeaderWithinDistanceOfStitch (int distance, Stitch stitch)
 		{
 //			var n = [],
 //			r = [];
@@ -472,7 +482,7 @@ namespace Inklewriter
 			return false;
 		}
 
-		int PageSize (int pageNumber)
+		public int PageSize (int pageNumber)
 		{
 			var t = 0;
 			var stitches = Stitches;
@@ -484,13 +494,7 @@ namespace Inklewriter
 			return t;
 		}
 
-
-		Stitch InitialStitch {
-			get;
-			set;
-		}
-
-		void ComputeVerticalHeuristic ()
+		public void ComputeVerticalHeuristic ()
 		{
 			if (InitialStitch == null) {
 				return;
@@ -522,11 +526,6 @@ namespace Inklewriter
 //				var r = StoryModel.stitches[n];
 //				r.verticalDistance() == -1 && r.verticalDistance(StoryModel.stitches.length + 1)
 //			}
-		}
-
-		bool Loading {
-			get;
-			set;
 		}
 	}
 }

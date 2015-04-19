@@ -40,8 +40,9 @@
     <Compile Include="Model\Option.cs" />
     <Compile Include="Model\Story.cs" />
     <Compile Include="Model\EditorData.cs" />
-    <Compile Include="Model\StoryIO.cs" />
     <Compile Include="Player.cs" />
+    <Compile Include="Model\StoryReader.cs" />
+    <Compile Include="Model\StoryWriter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

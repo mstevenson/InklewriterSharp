@@ -5,13 +5,13 @@ namespace Inklewriter
 	[System.Serializable]
 	public class EditorData
 	{
-		public string authorName;
+		public string AuthorName { get; set; }
 
-		public bool libraryVisible;
+		public bool LibraryVisible { get; set; }
 
-		public string playPoint;
+		public string PlayPoint { get; set; }
 
-		public int textSize;
+		public int TextSize { get; set; }
 	}
 }
 

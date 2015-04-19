@@ -24,6 +24,11 @@ namespace Inklewriter
 		public EditorData EditorData { get; set; }
 
 		public Dictionary<string, Stitch> Stitches { get; set; }
+
+		public Story ()
+		{
+			Stitches = new Dictionary<string, Stitch> ();
+		}
 	}
 }
 
