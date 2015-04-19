@@ -37,25 +37,22 @@ namespace Inklewriter
 
 		public void Begin ()
 		{
-			ShowStitch (model.Story.data.initial);
+			ShowStitch (model.Story.InitialStitch);
 		}
 
-		void ShowStitch (string id)
+		void ShowStitch (Stitch stitch)
 		{
-			Stitch stitch;
-			if (model.Story.data.stitches.TryGetValue (id, out stitch)) {
-				currentStitch = stitch;
-//				if (stitch.flagNames != null) {
-//					foreach (var f in stitch.flagNames) {
-//						if (!flags.Contains (stitch);
-//					}
+			currentStitch = stitch;
+//			if (stitch.flagNames != null) {
+//				foreach (var f in stitch.flagNames) {
+//					if (!flags.Contains (stitch);
 //				}
-//				if (stitch.options && stitch.options.Count > 0) {
-//					ShowOptions (stitch.options);
-//				}
-				if (!string.IsNullOrEmpty (stitch.divert)) {
-					ShowStitch (stitch.divert);
-				}
+//			}
+//			if (stitch.options && stitch.options.Count > 0) {
+//				ShowOptions (stitch.options);
+//			}
+			if (stitch.Divert == null) {
+				ShowStitch (stitch.Divert);
 			}
 		}
 
@@ -68,7 +65,7 @@ namespace Inklewriter
 			foreach (var flag in flags) {
 				var f = flag.ToLower ();
 				var regex = new Regex (@"^(.*?)\s*(\=|\+|\-)\s*(\b.*\b)\s*$");
-				regex.Match (flag);
+				regex.Match (f);
 //				bool equality = flag.Contains ("=");
 //				bool addition = flag.Contains ("+");
 //				bool subtraction = flag.Contains ("-");

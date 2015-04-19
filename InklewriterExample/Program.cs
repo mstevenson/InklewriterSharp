@@ -12,7 +12,7 @@ namespace InklewriterExample
 			StoryModel model = new StoryModel ();
 			model.ImportStory (storyJson);
 
-			Console.WriteLine ("Loaded story file: " + model.Story.title);
+			Console.WriteLine ("Loaded story file: " + model.Story.Title);
 
 			Player player = new Player (model);
 			player.Begin ();

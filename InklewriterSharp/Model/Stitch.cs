@@ -6,60 +6,66 @@ namespace Inklewriter
 	[System.Serializable]
 	public class Stitch
 	{
-		public string text;
+		public string Text { get; set; }
 
 		/// <summary>
 		/// A URL for an image to display at the top of the stitch.
 		/// </summary>
-		public string image;
+		public string Image { get; set; }
 
-		public int pageNum = -1;
+		public int PageNum { get; set; }
 
 		/// <summary>
 		/// Section label.
 		/// </summary>
-		public string pageLabel;
+		public string PageLabel { get; set; }
 
 		/// <summary>
 		/// Indicates that this stitch should connect to the 'divert' stitch
 		/// without printing a paragraph break.
 		/// </summary>
-		public bool runOn;
+		public bool RunOn { get; set; }
 
 		/// <summary>
 		/// The next stitch to display. If runOn is false, the 'divert' stitch
 		/// will be appended directly to this stitch without a paragraph break.
 		/// </summary>
-		public string divert;
+		public Stitch Divert { get; set; }
 
-		public List<Option> options;
+		public List<Option> Options { get; set; }
 
 		/// <summary>
 		/// Markers that will be set before displaying this stitch.
 		/// </summary>
-		public List<string> flagNames;
+		public List<string> FlagNames { get; set; }
 
 		/// <summary>
 		/// Display this stitch only if the specified markers have been set.
 		/// </summary>
-		public List<string> ifConditions;
+		public List<string> IfConditions { get; set; }
 
 		/// <summary>
 		/// Display this stitch only if the specified markers are not set.
 		/// </summary>
-		public List<string> notIfConditions;
+		public List<string> NotIfConditions { get; set; }
+
+		public List<Stitch> SectionStitches { get; set; }
 
 
 		public Stitch ()
 		{
-			options = new List<Option> ();
+			PageNum = -1;
+			Options = new List<Option> ();
+			FlagNames = new List<string> ();
 			Backlinks = new List<Stitch> ();
+			IfConditions = new List<string> ();
+			NotIfConditions = new List<string> ();
 		}
 
-		public Stitch (string text)
+		public Stitch (string text) : this()
 		{
 			RefCount = 0;
-			this.text = text;
+			Text = text;
 			WordCount = WordCountOf (text);
 		}
 
@@ -71,9 +77,7 @@ namespace Inklewriter
 			return 0;
 		}
 
-		public int WordCount {
-			get; set;
-		}
+		public int WordCount { get; set; }
 
 		public int ComputedPageNumber {
 			get {
@@ -81,45 +85,45 @@ namespace Inklewriter
 			}
 		}
 
-
 		public int VerticalDistanceFromHeader {
 			get {
 				return VerticalDistanceFromPageNumberHeader;
 			}
 		}
 
-		public int VerticalDistanceFromPageNumberHeader {
-			get;
-			set;
-		}
+		public int VerticalDistanceFromPageNumberHeader { get; set; }
 
-		public int VerticalDistance {
-			set;
-			get;
-		}
-
+		public int VerticalDistance { set; get; }
 
 		public string PageLabelText {
 			get {
-				if (string.IsNullOrEmpty (pageLabel)) {
+				if (string.IsNullOrEmpty (PageLabel)) {
 					return "Section " + PageNumberLabel;
 				}
-				return pageLabel;
+				return PageLabel;
 			}
 		}
 
 		public string PageNumberLabel {
 			get {
-				// FIXME implement
-				// return e && (e < this._pageNumberHeader && StoryModel.maxPage == this._pageNumberHeader && StoryModel.maxPage--, this._pageNumberHeader = e, e > StoryModel.maxPage && (StoryModel.maxPage = e)), this._pageNumberHeader
+				// FIXME
 				return "";
 			}
 		}
 
-		public List<Stitch> SectionStitches {
-			get;
-			set;
+		public int SetPageNumberLabel (StoryModel model, int num)
+		{
+			if (num < this.PageNumberHeader && model.MaxPage == PageNumberHeader) {
+				model.MaxPage--;
+				PageNumberHeader = num;
+				if (num > model.MaxPage) {
+					model.MaxPage = num;
+				}
+			}
+			return PageNumberHeader;
 		}
+
+		public int PageNumberHeader { get; set; }
 
 		public void SetPageNumberLabel (int number)
 		{
@@ -136,15 +140,15 @@ namespace Inklewriter
 
 		public string CreateShortName ()
 		{
-			if (string.IsNullOrEmpty (text)) {
+			if (string.IsNullOrEmpty (Text)) {
 				return "blankStitch";
 			}
-			string shortName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase (text.ToLower ());
+			string shortName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase (Text.ToLower ());
 			shortName = Regex.Replace(shortName, @"[^\w]", string.Empty);
 			if (shortName.Length == 0) {
 				return "punctuatedStitch";
 			}
-			shortName.Substring (0, System.Math.Min (16, text.Length));
+			shortName.Substring (0, System.Math.Min (16, Text.Length));
 			var result = char.ToLowerInvariant (shortName [0]).ToString ();
 			if (shortName.Length > 1) {
 				result += shortName.Substring (1);
@@ -152,7 +156,7 @@ namespace Inklewriter
 			return result;
 		}
 
-		public void Divert (Stitch stitch, bool doDivert)
+		public void DivertTo (Stitch stitch, bool doDivert)
 		{
 			if (stitch == this) {
 				throw new System.Exception ("Diverted a stitch back to itself");
@@ -176,30 +180,22 @@ namespace Inklewriter
 		public Option AddOption ()
 		{
 			var newOption = new Option (this);
-			options.Add (newOption);
+			Options.Add (newOption);
 			return newOption;
 		}
 
 		public void RemoveOption (Option option)
 		{
 			option.Unlink ();
-			options.Remove (option);
+			Options.Remove (option);
 		}
 
 		public bool IsDead (Story story = null)
 		{
-			return false;
-
-			//			return text.Trim ().Length == 0
-			//				&& NumberOfFlags == 0
-			//				&& RefCount == 0
-			//				&& this != story.InitialStitch;
-		}
-
-		public bool RunOn ()
-		{
-			// TODO not sure what argument this requires
-			return false;
+			return Text.Trim ().Length == 0
+				&& NumberOfFlags == 0
+				&& RefCount == 0
+				&& this != story.InitialStitch;
 		}
 
 		public class StitchStats
@@ -214,11 +210,11 @@ namespace Inklewriter
 		public StitchStats GetStats ()
 		{
 			var stats = new StitchStats ();
-			stats.numOptions = options.Count;
-			if (options.Count > 0) {
+			stats.numOptions = Options.Count;
+			if (Options.Count > 0) {
 				stats.numLinked = 0;
 				for (int i = 0; i < stats.numOptions; i++) {
-					Option n = this.options [i];
+					Option n = this.Options [i];
 					if (n.LinkStitch != null) {
 						stats.numLinked++;
 					} else {
@@ -232,15 +228,15 @@ namespace Inklewriter
 
 		public int NumberOfFlags {
 			get {
-				return flagNames.Count;
+				return FlagNames.Count;
 			}
 		}
 
 		bool FlagIsUsed (string expression)
 		{
 			string flag = StoryModel.ExtractFlagNameFromExpression (expression);
-			for (int i = 0; i < flagNames.Count; i++) {
-				string n = StoryModel.ExtractFlagNameFromExpression (flagNames[i]);
+			for (int i = 0; i < FlagNames.Count; i++) {
+				string n = StoryModel.ExtractFlagNameFromExpression (FlagNames[i]);
 				if (n == flag) {
 					return true;
 				}
@@ -264,20 +260,20 @@ namespace Inklewriter
 
 		public string FlagByIndex (int index)
 		{
-			if (index < 0 || index >= flagNames.Count) {
+			if (index < 0 || index >= FlagNames.Count) {
 				return "";
 			}
-			return flagNames [index];
+			return FlagNames [index];
 		}
 
 		public void EditFlag (string flag, StoryModel model)
 		{
-			int index = flagNames.IndexOf (flag);
+			int index = FlagNames.IndexOf (flag);
 			if (index == -1) {
-				flagNames.Add (flag);
+				FlagNames.Add (flag);
 				model.AddFlagToIndex (flag);
 			} else {
-				flagNames.RemoveAt (index);
+				FlagNames.RemoveAt (index);
 				model.CollateFlags ();
 			}
 		}

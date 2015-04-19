@@ -9,33 +9,32 @@ namespace Inklewriter
 		/// <summary>
 		/// The option text.
 		/// </summary>
-		public string option;
+		public string Text { get; set; }
 
-		/// <summary>
-		/// The stitch to display after selecting this option.
-		/// </summary>
-		public string linkPath;
+//		/// <summary>
+//		/// The stitch to display after selecting this option.
+//		/// </summary>
+//		public string LinkPath { get; set; }
 
 		/// <summary>
 		/// Display this option only if the specified markers have been set.
 		/// </summary>
-		public List<string> ifConditions = new List<string> ();
+		public List<string> IfConditions { get; set; }
 
 		/// <summary>
 		/// Display this option only if the specified markers are not set.
 		/// </summary>
-		public List<string> notIfConditions = new List<string> ();
-
+		public List<string> NotIfConditions = new List<string> ();
 
 		public Stitch LinkStitch { get; set; }
 
 		public Stitch ParentStitch { get; set; }
 
-		public string Text { get; set; }
-
 		public Option (Stitch parent = null)
 		{
 			Text = "";
+			IfConditions = new List<string> ();
+			NotIfConditions = new List<string> ();
 			ParentStitch = parent;
 		}
 

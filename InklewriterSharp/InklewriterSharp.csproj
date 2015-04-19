@@ -39,7 +39,6 @@
     <Compile Include="Model\Stitch.cs" />
     <Compile Include="Model\Option.cs" />
     <Compile Include="Model\Story.cs" />
-    <Compile Include="Model\Data.cs" />
     <Compile Include="Model\EditorData.cs" />
     <Compile Include="Model\StoryIO.cs" />
     <Compile Include="Player.cs" />

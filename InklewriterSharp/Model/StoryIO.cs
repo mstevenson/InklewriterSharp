@@ -29,19 +29,19 @@ namespace Inklewriter
 				reader.Read ();
 				switch (propertyName) {
 				case "created_at":
-					story.createdAt = (string)reader.Value;
+					story.CreatedAt = (string)reader.Value;
 					break;
 				case "data":
 					ReadData (reader, story);
 					break;
 				case "title":
-					story.title = (string)reader.Value;
+					story.Title = (string)reader.Value;
 					break;
 				case "updated_at":
-					story.updatedAt = (string)reader.Value;
+					story.UpdatedAt = (string)reader.Value;
 					break;
 				case "url_key":
-					story.urlKey = (string)reader.Value;
+					story.UrlKey = (string)reader.Value;
 					break;
 				}
 			}
@@ -49,8 +49,6 @@ namespace Inklewriter
 
 		static void ReadData (JsonReader reader, Story story)
 		{
-			story.data = new Data ();
-
 			// read object start
 			reader.Read ();
 
@@ -65,16 +63,17 @@ namespace Inklewriter
 				reader.Read ();
 				switch (propertyName) {
 				case "allowCheckpoints":
-					story.data.allowCheckpoints = (bool)reader.Value;
+					story.AllowCheckpoints = (bool)reader.Value;
 					break;
 				case "editorData":
 					ReadDataEditor (reader, story);
 					break;
 				case "initial":
-					story.data.initial = (string)reader.Value;
+					var stitchName = (string)reader.Value;
+					story.InitialStitch = GetOrCreateStitch (story, stitchName);
 					break;
 				case "optionMirroring":
-					story.data.optionMirroring = (bool)reader.Value;
+					story.OptionMirroring = (bool)reader.Value;
 					break;
 				case "stitches":
 					ReadStitches (reader, story);
@@ -85,7 +84,7 @@ namespace Inklewriter
 
 		static void ReadDataEditor (JsonReader reader, Story story)
 		{
-			story.data.editorData = new EditorData ();
+			story.EditorData = new EditorData ();
 
 			// read object start
 			reader.Read ();
@@ -101,16 +100,16 @@ namespace Inklewriter
 				reader.Read ();
 				switch (propertyName) {
 				case "authorName":
-					story.data.editorData.authorName = (string)reader.Value;
+					story.EditorData.authorName = (string)reader.Value;
 					break;
 				case "libraryVisible":
-					story.data.editorData.libraryVisible = (bool)reader.Value;
+					story.EditorData.libraryVisible = (bool)reader.Value;
 					break;
 				case "playPoint":
-					story.data.editorData.playPoint = (string)reader.Value;
+					story.EditorData.playPoint = (string)reader.Value;
 					break;
 				case "textSize":
-					story.data.editorData.textSize = (int)reader.Value;
+					story.EditorData.textSize = (int)reader.Value;
 					break;
 				}
 			}
@@ -118,7 +117,7 @@ namespace Inklewriter
 
 		static void ReadStitches (JsonReader reader, Story story)
 		{
-			story.data.stitches = new Dictionary<string, Stitch> ();
+			story.Stitches = new Dictionary<string, Stitch> ();
 
 			while (reader.Read ()) {
 				// We've overrun the stitches
@@ -140,7 +139,7 @@ namespace Inklewriter
 					reader.Read ();
 
 					// Main text
-					stitch.text = (string)reader.Value;
+					stitch.Text = (string)reader.Value;
 
 					// Read all stitch options. Exits when the array end token is read.
 					bool haveMoreStitchContent = false;
@@ -150,7 +149,7 @@ namespace Inklewriter
 
 					// Read stitch's object end token, save the stitch
 					reader.Read ();
-					story.data.stitches.Add (key, stitch);
+					story.Stitches.Add (key, stitch);
 				}
 			}
 		}
@@ -241,29 +240,41 @@ namespace Inklewriter
 
 			if (option != null) { // is an option object
 				var newOption = new Option ();
-				newOption.option = option;
-				newOption.ifConditions = ifConditions;
-				newOption.notIfConditions = notIfConditions;
-				newOption.linkPath = linkPath;
-				if (stitch.options == null) {
-					stitch.options = new List<Option> ();
+				newOption.Text = option;
+				newOption.IfConditions = ifConditions;
+				newOption.NotIfConditions = notIfConditions;
+
+				newOption.LinkStitch = GetOrCreateStitch (story, linkPath);
+
+				if (stitch.Options == null) {
+					stitch.Options = new List<Option> ();
 				}
-				stitch.options.Add (newOption);
+				stitch.Options.Add (newOption);
 			} else {
-				stitch.ifConditions = ifConditions;
-				stitch.notIfConditions = notIfConditions;
-				stitch.image = image;
+				stitch.IfConditions = ifConditions;
+				stitch.NotIfConditions = notIfConditions;
+				stitch.Image = image;
 				if (pageNum.HasValue) {
-					stitch.pageNum = pageNum.Value;
+					stitch.PageNum = pageNum.Value;
 				}
-				stitch.pageLabel = pageLabel;
+				stitch.PageLabel = pageLabel;
 				if (runOn.HasValue) {
-					stitch.runOn = runOn.Value;
+					stitch.RunOn = runOn.Value;
 				}
-				stitch.divert = divert;
-				stitch.flagNames = flagNames;
+				stitch.Divert = GetOrCreateStitch (story, divert);
+				stitch.FlagNames = flagNames;
 			}
 			return true;
+		}
+
+		static Stitch GetOrCreateStitch (Story story, string stitchName)
+		{
+			Stitch s;
+			if (!story.Stitches.TryGetValue (stitchName, out s)) {
+				s = new Stitch ();
+				story.Stitches.Add (stitchName, s);
+			}
+			return s;
 		}
 
 		static List<string> ReadOptionConditions (JsonReader reader)
@@ -299,14 +310,14 @@ namespace Inklewriter
 
 			writer.WritePropertyName ("created_at");
 			// FIXME doesn't match correct date formatting
-			writer.Write (story.createdAt);
+			writer.Write (story.CreatedAt);
 
 			// Data
 			writer.WritePropertyName ("data");
 			writer.WriteObjectStart ();
 
 			writer.WritePropertyName ("allowCheckpoints");
-			writer.Write (story.data.allowCheckpoints);
+			writer.Write (story.AllowCheckpoints);
 
 			writer.WritePropertyName ("editorData");
 			{
@@ -314,66 +325,66 @@ namespace Inklewriter
 				writer.WriteObjectStart ();
 
 				writer.WritePropertyName ("authorName");
-				writer.Write (story.data.editorData.authorName);
+				writer.Write (story.EditorData.authorName);
 
 				writer.WritePropertyName ("libraryVisible");
-				writer.Write (story.data.editorData.libraryVisible);
+				writer.Write (story.EditorData.libraryVisible);
 
 				writer.WritePropertyName ("playPoint");
-				writer.Write (story.data.editorData.playPoint);
+				writer.Write (story.EditorData.playPoint);
 
 				writer.WritePropertyName ("textSize");
-				writer.Write (story.data.editorData.textSize);
+				writer.Write (story.EditorData.textSize);
 
 				writer.WriteObjectEnd ();
 			}
 
 			writer.WritePropertyName ("initial");
-			writer.Write (story.data.initial);
+			writer.Write (story.InitialStitch.Name);
 
 			writer.WritePropertyName ("optionMirroring");
-			writer.Write (story.data.optionMirroring);
+			writer.Write (story.OptionMirroring);
 
 			writer.WritePropertyName ("stitches");
 			{
 				// Stitches
 				writer.WriteObjectStart ();
-				foreach (var kvp in story.data.stitches) {
+				foreach (var kvp in story.Stitches) {
 					writer.WritePropertyName (kvp.Key);
 					writer.WriteObjectStart ();
 					writer.WritePropertyName ("content");
 					writer.WriteArrayStart ();
 					{
 						var stitch = kvp.Value;
-						writer.Write (stitch.text);
+						writer.Write (stitch.Text);
 
-						if (stitch.divert != null) {
+						if (stitch.Divert != null) {
 							writer.WriteObjectStart ();
 							writer.WritePropertyName ("divert");
-							writer.Write (stitch.divert);
+							writer.Write (stitch.Divert.Name);
 							writer.WriteObjectEnd ();
 						}
-						if (stitch.flagNames != null) {
-							foreach (var flag in stitch.flagNames) {
+						if (stitch.FlagNames != null) {
+							foreach (var flag in stitch.FlagNames) {
 								writer.WriteObjectStart ();
 								writer.WritePropertyName ("flagName");
 								writer.Write (flag);
 								writer.WriteObjectEnd ();
 							}
 						}
-						if (stitch.image != null) {
+						if (stitch.Image != null) {
 							writer.WriteObjectStart ();
 							writer.WritePropertyName ("image");
-							writer.Write (stitch.image);
+							writer.Write (stitch.Image);
 							writer.WriteObjectEnd ();
 						}
-						if (stitch.options != null) {
-							foreach (var opt in stitch.options) {
+						if (stitch.Options != null) {
+							foreach (var opt in stitch.Options) {
 								writer.WriteObjectStart ();
 
 								writer.WritePropertyName ("ifConditions");
-								if (opt.ifConditions != null) {
-									foreach (var condition in opt.ifConditions) {
+								if (opt.IfConditions != null) {
+									foreach (var condition in opt.IfConditions) {
 										writer.WriteObjectStart ();
 										writer.WritePropertyName ("ifCondition");
 										writer.Write (condition);
@@ -384,11 +395,11 @@ namespace Inklewriter
 								}
 
 								writer.WritePropertyName ("linkPath");
-								writer.Write (opt.linkPath);
+								writer.Write (opt.LinkStitch != null ? opt.LinkStitch.Name : null);
 
 								writer.WritePropertyName ("notIfConditions");
-								if (opt.notIfConditions != null) {
-									foreach (var condition in opt.notIfConditions) {
+								if (opt.NotIfConditions != null) {
+									foreach (var condition in opt.NotIfConditions) {
 										writer.WriteObjectStart ();
 										writer.WritePropertyName ("notIfCondition");
 										writer.Write (condition);
@@ -399,40 +410,40 @@ namespace Inklewriter
 								}
 
 								writer.WritePropertyName ("option");
-								writer.Write (opt.option);
+								writer.Write (opt.Text);
 
 								writer.WriteObjectEnd ();
 							}
 						}
-						if (stitch.pageLabel != null) {
+						if (stitch.PageLabel != null) {
 							writer.WriteObjectStart ();
 							writer.WritePropertyName ("pageLabel");
-							writer.Write (stitch.pageLabel);
+							writer.Write (stitch.PageLabel);
 							writer.WriteObjectEnd ();
 						}
-						if (stitch.pageNum != -1) {
+						if (stitch.PageNum != -1) {
 							writer.WriteObjectStart ();
 							writer.WritePropertyName ("pageNum");
-							writer.Write (stitch.pageNum);
+							writer.Write (stitch.PageNum);
 							writer.WriteObjectEnd ();
 						}
-						if (stitch.runOn) {
+						if (stitch.RunOn) {
 							writer.WriteObjectStart ();
 							writer.WritePropertyName ("runOn");
-							writer.Write (stitch.runOn);
+							writer.Write (stitch.RunOn);
 							writer.WriteObjectEnd ();
 						}
-						if (stitch.ifConditions != null) {
+						if (stitch.IfConditions != null) {
 							writer.WriteObjectStart ();
-							foreach (var condition in stitch.ifConditions) {
+							foreach (var condition in stitch.IfConditions) {
 								writer.WritePropertyName ("ifCondition");
 								writer.Write (condition);
 							}
 							writer.WriteObjectEnd ();
 						}
-						if (stitch.notIfConditions != null) {
+						if (stitch.NotIfConditions != null) {
 							writer.WriteObjectStart ();
-							foreach (var condition in stitch.notIfConditions) {
+							foreach (var condition in stitch.NotIfConditions) {
 								writer.WritePropertyName ("notIfCondition");
 								writer.Write (condition);
 							}
@@ -448,13 +459,13 @@ namespace Inklewriter
 			writer.WriteObjectEnd ();
 
 			writer.WritePropertyName ("title");
-			writer.Write (story.title);
+			writer.Write (story.Title);
 
 			writer.WritePropertyName ("updated_at");
-			writer.Write (story.updatedAt);
+			writer.Write (story.UpdatedAt);
 
 			writer.WritePropertyName ("url_key");
-			writer.Write (story.urlKey);
+			writer.Write (story.UrlKey);
 
 			writer.WriteObjectEnd ();
 

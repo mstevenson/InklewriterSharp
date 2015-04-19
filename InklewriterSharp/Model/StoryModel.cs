@@ -18,6 +18,8 @@ namespace Inklewriter
 		const string defaultAuthorName = "Anonymous";
 		const int maxPreferredPageLength = 8;
 
+		public int MaxPage { get; set; }
+
 		public Story Story { get; private set; }
 
 		List<string> flagIndex = new List<string> ();
@@ -30,6 +32,7 @@ namespace Inklewriter
 		public string ExportStory ()
 		{
 			if (Story != null) {
+				NameStitches ();
 				var data = StoryIO.Write (Story);
 				return data;
 			}
@@ -62,10 +65,10 @@ namespace Inklewriter
 				stitches [e].Backlinks = new List<Stitch> ();
 			}
 			for (int e = 0; e < stitches.Count; e++)
-				if (stitches [e].options.Count > 0) {
-					for (var t = 0; t < stitches [e].options.Count; t++) {
-						if (stitches [e].options [t].LinkStitch != null) {
-							stitches [e].options [t].LinkStitch.Backlinks.Add (stitches [e]);
+				if (stitches [e].Options.Count > 0) {
+					for (var t = 0; t < stitches [e].Options.Count; t++) {
+						if (stitches [e].Options [t].LinkStitch != null) {
+							stitches [e].Options [t].LinkStitch.Backlinks.Add (stitches [e]);
 						} else {
 							LooseEndCount++;
 						}
@@ -80,7 +83,7 @@ namespace Inklewriter
 			if (WatchRefCounts ()) {
 				for (int e = 0; e < stitches.Count; e++) {
 					if (stitches[e].Backlinks.Count != stitches[e].RefCount) {
-						throw new System.Exception ("Stitch with text '" + stitches[e].text + "' has invalid ref-count!");
+						throw new System.Exception ("Stitch with text '" + stitches[e].Text + "' has invalid ref-count!");
 					}
 				}
 			}
@@ -99,14 +102,14 @@ namespace Inklewriter
 				if (r.DivertedStitch == source) {
 					r.Undivert ();
 					if (target != null) {
-						r.Divert (target, true);
+						r.DivertTo (target, true);
 					}
 				}
-				for (var i = 0; i < r.options.Count; i++) {
-					if (r.options[i].LinkStitch == source) {
-						r.options [i].Unlink ();
+				for (var i = 0; i < r.Options.Count; i++) {
+					if (r.Options[i].LinkStitch == source) {
+						r.Options [i].Unlink ();
 						if (target != null) {
-							r.options [i].CreateLinkStitch (target);
+							r.Options [i].CreateLinkStitch (target);
 						}
 					}
 				}
@@ -144,22 +147,22 @@ namespace Inklewriter
 			var stitches = Stitches;
 			for (int e = 0; e < stitches.Count; e++) {
 				var t = stitches[e];
-				for (int n = 0; n < t.flagNames.Count; n++) {
-					AddFlagToIndex (t.flagNames[n]);
+				for (int n = 0; n < t.FlagNames.Count; n++) {
+					AddFlagToIndex (t.FlagNames[n]);
 				}
-				for (int r = 0; r < t.options.Count; r++) {
-					for (int n = 0; n < t.options [r].ifConditions.Count; n++) {
-						AddFlagToIndex (t.options[r].ifConditions[n]);
+				for (int r = 0; r < t.Options.Count; r++) {
+					for (int n = 0; n < t.Options [r].IfConditions.Count; n++) {
+						AddFlagToIndex (t.Options[r].IfConditions[n]);
 					}
-					for (int n = 0; n < t.options [r].notIfConditions.Count; n++) {
-						AddFlagToIndex (t.options [r].notIfConditions [n]);
+					for (int n = 0; n < t.Options [r].NotIfConditions.Count; n++) {
+						AddFlagToIndex (t.Options [r].NotIfConditions [n]);
 					}
 				}
-				for (var n = 0; n < t.ifConditions.Count; n++) {
-					AddFlagToIndex (t.ifConditions[n]);
+				for (var n = 0; n < t.IfConditions.Count; n++) {
+					AddFlagToIndex (t.IfConditions[n]);
 				}
-				for (var n = 0; n < t.notIfConditions.Count; n++) {
-					AddFlagToIndex (t.notIfConditions [n]);
+				for (var n = 0; n < t.NotIfConditions.Count; n++) {
+					AddFlagToIndex (t.NotIfConditions [n]);
 				}
 			}
 		}
@@ -296,8 +299,8 @@ namespace Inklewriter
 				}
 			}
 			e.Undivert ();
-			for (int t = e.options.Count - 1; t >= 0; t--) {
-				e.RemoveOption (e.options [t]);
+			for (int t = e.Options.Count - 1; t >= 0; t--) {
+				e.RemoveOption (e.Options [t]);
 			}
 			RemovePageNumber(e, true);
 			for (var t = 0; t < Stitches.Count; ++t) {
