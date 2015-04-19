@@ -342,6 +342,14 @@ namespace Inklewriter
 
 		void RemovePageNumber (Stitch e, bool doIt)
 		{
+//			var n = e.pageNumberLabel();
+//			if (n <= 0) return;
+//			e.pageNumberLabel(-1);
+//			for (var r = 0; r < StoryModel.stitches.length; r++) {
+//				var i = StoryModel.stitches[r].pageNumberLabel();
+//				i > n && StoryModel.stitches[r].pageNumberLabel(i - 1)
+//			}
+//			t || StoryModel.computePageNumbers()
 		}
 
 		int GetValueOfFlag (string flag, List<FlagValue> allFlags)
@@ -444,6 +452,22 @@ namespace Inklewriter
 
 		bool HeaderWithinDistanceOfStitch (int distance, Stitch stitch)
 		{
+//			var n = [],
+//			r = [];
+//			n.push(t);
+//			for (var i = 0; i <= e; i++) {
+//				for (var s = 0; s < n.length; s++) {
+//					var o = n[s];
+//					if (o) {
+//						if (o.pageNumberLabel() > 0) return !0;
+//						r.push(o.divertStitch);
+//						for (var u = 0; u < o.options.length; u++) r.push(o.options[u]._linkStitch)
+//						}
+//				}
+//				n = r, r = []
+//			}
+//			return !1
+
 			// FIXME
 			return false;
 		}

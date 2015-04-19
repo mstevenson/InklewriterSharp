@@ -9,6 +9,7 @@ namespace Inklewriter
 		{
 			JsonReader reader = new JsonReader (data);
 			Story story = new Story ();
+
 			ReadStoryRoot (reader, story);
 			return story;
 		}
@@ -49,12 +50,9 @@ namespace Inklewriter
 
 		static void ReadData (JsonReader reader, Story story)
 		{
-			// read object start
-			reader.Read ();
-
 			while (reader.Read ()) {
 				if (reader.Token == JsonToken.ObjectEnd) {
-					return;
+					break;
 				}
 				if (reader.Token != JsonToken.PropertyName) {
 					continue;
@@ -86,18 +84,13 @@ namespace Inklewriter
 		{
 			story.EditorData = new EditorData ();
 
-			// read object start
-			reader.Read ();
-
 			while (reader.Read ()) {
 				if (reader.Token == JsonToken.ObjectEnd) {
-					return;
+					break;
 				}
-				if (reader.Token != JsonToken.PropertyName) {
-					continue;
-				}
-				string propertyName = reader.Value as string;
+				string propertyName = (string)reader.Value;
 				reader.Read ();
+
 				switch (propertyName) {
 				case "authorName":
 					story.EditorData.authorName = (string)reader.Value;
@@ -120,13 +113,11 @@ namespace Inklewriter
 			story.Stitches = new Dictionary<string, Stitch> ();
 
 			while (reader.Read ()) {
-				// We've overrun the stitches
 				if (reader.Token == JsonToken.ObjectEnd) {
-					return;
+					break;
 				}
 
 				string key = (string)reader.Value;
-				Stitch stitch = new Stitch ();
 				//Begin object containing only 'content' array
 				reader.Read ();
 
@@ -138,7 +129,7 @@ namespace Inklewriter
 					// read stitch's raw text
 					reader.Read ();
 
-					// Main text
+					var stitch = GetOrCreateStitch (story, key);
 					stitch.Text = (string)reader.Value;
 
 					// Read all stitch options. Exits when the array end token is read.
@@ -149,7 +140,6 @@ namespace Inklewriter
 
 					// Read stitch's object end token, save the stitch
 					reader.Read ();
-					story.Stitches.Add (key, stitch);
 				}
 			}
 		}
@@ -175,10 +165,9 @@ namespace Inklewriter
 			string divert = null;
 			List<string> flagNames = null;
 
-			while (reader.Token != JsonToken.ObjectEnd) {
-				reader.Read ();
-				if (reader.Token != JsonToken.PropertyName) {
-					continue;
+			while (reader.Read ()) {
+				if (reader.Token == JsonToken.ObjectEnd) {
+					break;
 				}
 				string propertyName = reader.Value as string;
 				reader.Read ();
@@ -267,16 +256,6 @@ namespace Inklewriter
 			return true;
 		}
 
-		static Stitch GetOrCreateStitch (Story story, string stitchName)
-		{
-			Stitch s;
-			if (!story.Stitches.TryGetValue (stitchName, out s)) {
-				s = new Stitch ();
-				story.Stitches.Add (stitchName, s);
-			}
-			return s;
-		}
-
 		static List<string> ReadOptionConditions (JsonReader reader)
 		{
 			if (reader.Token == JsonToken.Null) {
@@ -301,6 +280,23 @@ namespace Inklewriter
 			}
 			return conditions;
 		}
+
+		static Stitch GetOrCreateStitch (Story story, string stitchName)
+		{
+			if (string.IsNullOrEmpty (stitchName)) {
+				return null;
+			}
+			if (story.Stitches == null) {
+				story.Stitches = new Dictionary<string, Stitch> ();
+			}
+			Stitch s = null;
+			if (!story.Stitches.TryGetValue (stitchName, out s)) {
+				s = new Stitch ();
+				story.Stitches.Add (stitchName, s);
+			}
+			return s;
+		}
+
 
 		public static string Write (Story story)
 		{

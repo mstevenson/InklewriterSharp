@@ -66,7 +66,6 @@ namespace Inklewriter
 		{
 			RefCount = 0;
 			Text = text;
-			WordCount = WordCountOf (text);
 		}
 
 		int WordCountOf (string e) {
@@ -77,7 +76,11 @@ namespace Inklewriter
 			return 0;
 		}
 
-		public int WordCount { get; set; }
+		public int WordCount {
+			get {
+				return WordCountOf (Text);
+			}
+		}
 
 		public int ComputedPageNumber {
 			get {
