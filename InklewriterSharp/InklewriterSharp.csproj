@@ -37,6 +37,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StoryPlayer.cs" />
     <Compile Include="Model\StoryModel.cs" />
+    <Compile Include="Model\Stitch.cs" />
+    <Compile Include="Model\Option.cs" />
+    <Compile Include="Model\Story.cs" />
+    <Compile Include="Model\Data.cs" />
+    <Compile Include="Model\EditorData.cs" />
+    <Compile Include="Model\StoryIO.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
