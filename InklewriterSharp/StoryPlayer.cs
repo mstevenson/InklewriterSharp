@@ -28,7 +28,7 @@ namespace Inklewriter
 		Story story;
 		Stitch currentStitch;
 
-		List<string> flagIndex = new List<string> ();
+
 
 		public StoryPlayer (Story story)
 		{
@@ -59,30 +59,9 @@ namespace Inklewriter
 			}
 		}
 
-		public string ExtractFlagNameFromExpression (string expression)
-		{
-			var regex = new Regex (@"^(.*?)\s*(\=|\+|\-|\>|\<|\!\=|$)");
-			var match = regex.Match (expression);
-			return match.Captures[0].Value;
-		}
 
-		public void AddFlagToIndex (string flag)
-		{
-			var name = ExtractFlagNameFromExpression (flag);
-			if (!flagIndex.Contains (name)) {
-				flagIndex.Add (name);
-			}
-		}
 
-		void CollateFlags (Story story)
-		{
-			flagIndex = new List<string> ();
-			foreach (KeyValuePair<string, Stitch> kvp in story.data.stitches) {
-				foreach (var flag in kvp.Value.flagNames) {
-					AddFlagToIndex (flag);
-				}
-			}
-		}
+
 
 		void ProcessFlags (List<string> flags)
 		{

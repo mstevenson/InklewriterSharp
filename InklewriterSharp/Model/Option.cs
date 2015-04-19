@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Inklewriter
 {
@@ -18,18 +19,50 @@ namespace Inklewriter
 		/// <summary>
 		/// Display this option only if the specified markers have been set.
 		/// </summary>
-		public List<string> ifConditions;
+		public List<string> ifConditions = new List<string> ();
 
 		/// <summary>
 		/// Display this option only if the specified markers are not set.
 		/// </summary>
-		public List<string> notIfConditions;
+		public List<string> notIfConditions = new List<string> ();
 
 
-		public bool LinkSwitch ()
+		public Stitch LinkStitch { get; set; }
+
+		public Stitch ParentStitch { get; set; }
+
+		public string Text { get; set; }
+
+		public Option (Stitch parent = null)
 		{
-			// TODO implement
-			return false;
+			Text = "";
+			ParentStitch = parent;
+		}
+
+		public void CreateLinkStitch (Stitch target)
+		{
+			if (target == null) {
+				return;
+			}
+			if (LinkStitch != target) {
+				if (LinkStitch != null) {
+					LinkStitch.RefCount--;
+				}
+				LinkStitch = target;
+				LinkStitch.RefCount++;
+			}
+		}
+
+		public void Unlink ()
+		{
+			if (LinkStitch == null) {
+				return;
+			}
+			LinkStitch.RefCount--;
+			if (StoryModel.WatchRefCounts ()) {
+				Console.WriteLine ("Unlinking " + Text + " - option on " + ParentStitch.Name);
+			}
+			LinkStitch = null;
 		}
 	}
 }

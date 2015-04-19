@@ -50,6 +50,12 @@ namespace Inklewriter
 		public List<string> notIfConditions;
 
 
+		public Stitch ()
+		{
+			options = new List<Option> ();
+			Backlinks = new List<Stitch> ();
+		}
+
 		public int ComputedPageNumber {
 			get {
 				return 0;
@@ -93,7 +99,7 @@ namespace Inklewriter
 			return result;
 		}
 
-		public void Divert (Stitch stitch)
+		public void Divert (Stitch stitch, bool doDivert)
 		{
 			if (stitch == this) {
 				throw new System.Exception ("Diverted a stitch back to itself");
@@ -116,14 +122,14 @@ namespace Inklewriter
 
 		public void AddOption ()
 		{
-			//			var newOption = new Option (this);
-			//			options.Add (newOption);
+			var newOption = new Option (this);
+			options.Add (newOption);
 		}
 
 		public void RemoveOption (Option option)
 		{
-			//			option.Unlink ();
-			//			options.Remove (option);
+			option.Unlink ();
+			options.Remove (option);
 		}
 
 		public bool IsDead (Story story)
@@ -151,7 +157,7 @@ namespace Inklewriter
 			public int numLinked;
 		}
 
-		public StitchStats Stats ()
+		public StitchStats GetStats ()
 		{
 			var stats = new StitchStats ();
 			stats.numOptions = options.Count;
@@ -159,7 +165,7 @@ namespace Inklewriter
 				stats.numLinked = 0;
 				for (int i = 0; i < stats.numOptions; i++) {
 					Option n = this.options [i];
-					if (n.LinkSwitch ()) {
+					if (n.LinkStitch != null) {
 						stats.numLinked++;
 					} else {
 						stats.looseEnds.Add (n);
@@ -170,22 +176,67 @@ namespace Inklewriter
 			return stats;
 		}
 
-		int NumberOfFlags {
+		public int NumberOfFlags {
 			get {
-
-				// FIXME
-
-
-				return 0;
+				return flagNames.Count;
 			}
 		}
 
-		public void Name (string shortName)
+		bool FlagIsUsed (string expression)
+		{
+			string flag = StoryModel.ExtractFlagNameFromExpression (expression);
+			for (int i = 0; i < flagNames.Count; i++) {
+				string n = StoryModel.ExtractFlagNameFromExpression (flagNames[i]);
+				if (n == flag) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public void SetName (string shortName)
 		{
 			// TODO
 		}
 
+		public void DivertStitch ()
+		{
+		}
+
+		public string Name {
+			get;
+			set;
+		}
+
+		public string FlagByIndex (int index)
+		{
+			if (index < 0 || index >= flagNames.Count) {
+				return "";
+			}
+			return flagNames [index];
+		}
+
+		public void EditFlag (string flag, StoryModel model)
+		{
+			int index = flagNames.IndexOf (flag);
+			if (index == -1) {
+				flagNames.Add (flag);
+				model.AddFlagToIndex (flag);
+			} else {
+				flagNames.RemoveAt (index);
+				model.CollateFlags ();
+			}
+		}
+
+//		public int NumberOfConditionals {
+//			get {
+//				
+//			}
+//		}
+
 		public Stitch DivertedStitch { get; private set; }
+
+		public List<Stitch> Backlinks { get; set; }
 	}
 }
 
