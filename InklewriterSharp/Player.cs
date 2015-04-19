@@ -23,14 +23,14 @@ namespace Inklewriter
 		}
 	}
 
-	public class StoryPlayer
+	public class Player
 	{
 		Story story;
 		Stitch currentStitch;
 
 
 
-		public StoryPlayer (Story story)
+		public Player (Story story)
 		{
 			this.story = story;
 		}

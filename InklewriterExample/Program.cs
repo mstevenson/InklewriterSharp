@@ -14,7 +14,7 @@ namespace InklewriterExample
 
 			Console.WriteLine ("Loaded story file: " + story.title);
 
-			StoryPlayer player = new StoryPlayer (story);
+			Player player = new Player (story);
 			player.Begin ();
 
 			Console.WriteLine ("Began story.");

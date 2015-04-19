@@ -267,8 +267,75 @@ namespace Inklewriter
 			return result;
 		}
 
-		int GetValueOfFlag (string flag)
+		Stitch CreateStitch (Stitch parent = null)
 		{
+			Stitch s = new Stitch (parent);
+			Stitches.Add (s);
+			return s;
+		}
+
+		void RemoveStitch (Stitch e)
+		{
+			if (WatchRefCounts ()) {
+				Console.WriteLine ("Removing " + e.Name + " entirely.");
+			}
+			if (e.RefCount != 0) {
+				RepointStitchToStitch (e, null);
+				Console.WriteLine ("Deleting stitch with references, so first unpointing stitches from this stitch.");
+				if (e.RefCount != 0) {
+					throw new System.Exception ("Fixing ref-count on stitch removal failed.");
+				}
+			}
+			e.Undivert ();
+			for (int t = e.options.Count - 1; t >= 0; t--) {
+				e.RemoveOption (e.options [t]);
+			}
+			RemovePageNumber(e, true);
+			for (var t = 0; t < Stitches.Count; ++t) {
+				if (Stitches [t] == e) {
+					Stitches.RemoveAt (t);
+					return;
+				}
+			}
+		}
+
+		void CreateOption (Stitch stitch)
+		{
+			var t = stitch.AddOption ();
+			return t;
+		}
+
+		void RemoveOption (Stitch stitch, Option opt)
+		{
+			stitch.RemoveOption (opt);
+		}
+
+		void Purge ()
+		{
+			if (Stitches.Count == 0) {
+				return;
+			}
+			var stitches = Stitches;
+			List<Stitch> stitchesToRemove = new List<Stitch> ();
+			for (var t = 0; t < stitches.Count; ++t) {
+				var n = stitches[t];
+				if (n.IsDead) {
+					stitchesToRemove.Add (n);
+				}
+			}
+			for (var t = 0; t < stitchesToRemove.Count; t++) {
+				RemoveStitch (stitchesToRemove [t]);
+			}
+		}
+
+		void RemovePageNumber (Stitch e, bool doIt)
+		{
+		}
+
+		bool GetValueOfFlag (string flag, List<FlagValue> allFlags)
+		{
+			var n = GetIdxOfFlag (flag, allFlags);
+			return n >= 0 ? allFlags[n].value : false;
 		}
 
 		bool ConvertStringToBooleanIfAppropriate (string s)
