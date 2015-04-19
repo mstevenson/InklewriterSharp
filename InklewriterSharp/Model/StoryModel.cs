@@ -102,7 +102,7 @@ namespace Inklewriter
 				if (r.DivertedStitch == source) {
 					r.Undivert ();
 					if (target != null) {
-						r.DivertTo (target, true);
+						r.DivertTo (target);
 					}
 				}
 				for (var i = 0; i < r.Options.Count; i++) {
@@ -389,10 +389,10 @@ namespace Inklewriter
 			for (var r = 0; r < stitches.Count; r++) {
 				var i = stitches[r].PageNumber;
 				if (i >= n) {
-					stitches [r].SetPageNumberLabel (i + 1);
+					stitches [r].SetPageNumberLabel (this, i + 1);
 				}
 			}
-			e.SetPageNumberLabel (n);
+			e.SetPageNumberLabel (this, n);
 			ComputePageNumbers ();
 		}
 
@@ -410,11 +410,11 @@ namespace Inklewriter
 					if (s > t) {
 						t = s;
 					}
-					stitches [i].SetPageNumberLabel (s);
+					stitches [i].SetPageNumberLabel (this, s);
 //					n[s] = [];
 //					r[s] = !0;
 				} else {
-					stitches [i].SetPageNumberLabel (0);
+					stitches [i].SetPageNumberLabel (this, 0);
 					stitches[i].SectionStitches = new List<Stitch> ();
 				}
 			}

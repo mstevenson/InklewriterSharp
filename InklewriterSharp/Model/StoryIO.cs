@@ -18,7 +18,7 @@ namespace Inklewriter
 			foreach (var key in allStitches.Keys) {
 				var stitch = allStitches [key];
 				if (stitch.Divert != null) {
-					var target = allStitches [stitch.Divert];
+					var target = allStitches [stitch.Divert.Name];
 					stitch.DivertTo (target);
 				}
 			}
@@ -29,6 +29,32 @@ namespace Inklewriter
 //				for (var E = 0; E < x.ifConditions.length; ++E) T._ifConditions.push(x.ifConditions[E].ifCondition);
 //			if (x.notIfConditions)
 //				for (var N = 0; N < x.notIfConditions.length; ++N) T._notIfConditions.push(x.notIfConditions[N].notIfCondition)
+
+
+
+//			if (r[t.initial]) StoryModel.initialStitch = r[t.initial].storyStitch;
+//			else {
+//				StoryModel.initialStitch = StoryModel.stitches[0];
+//				for (var C = 0; C < StoryModel.stitches.length; C++) {
+//					var k = StoryModel.stitches[C].pageNumberLabel();
+//					k > 0 && StoryModel.stitches[C].pageNumberLabel(k + 1)
+//				}
+//				StoryModel.initialStitch.pageNumberLabel(1)
+//			}
+//			return StoryModel.optionMirroring =
+//				t.optionMirroring !== undefined ? t.optionMirroring : !0,
+//			StoryModel.allowCheckpoints = t.allowCheckpoints !== undefined ? t.allowCheckpoints : !1, t.editorData
+//			&& (t.editorData.playPoint
+//				&& r[t.editorData.playPoint] ?
+//				n.playPoint = r[t.editorData.playPoint].storyStitch :
+//				n.playPoint = StoryModel.initialStitch,
+//				n.libraryVisible = t.editorData.libraryVisible,
+//				t.editorData.textSize !== undefined ?
+//				n.textSize = t.editorData.textSize :
+//				n.textSize = 0, t.editorData.authorName
+//				&& StoryModel.setAuthorName(t.editorData.authorName)),
+//			StoryModel.loading = !1, StoryModel.updateGraphModel(),
+//			StoryModel.collateFlags(), n
 
 			return story;
 		}
@@ -150,7 +176,7 @@ namespace Inklewriter
 
 					var stitch = GetOrCreateStitch (story, key);
 					stitch.Text = (string)reader.Value;
-					if (stitch.Text.EndsWith ("[...]") > -1) {
+					if (stitch.Text.EndsWith ("[...]")) {
 						stitch.Text = Regex.Replace (stitch.Text, @"\[\.\.\.\]", "");
 						stitch.RunOn = true;
 					}

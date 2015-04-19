@@ -158,7 +158,7 @@ namespace Inklewriter
 			return result;
 		}
 
-		public void DivertTo (Stitch stitch, bool doDivert)
+		public void DivertTo (Stitch stitch)
 		{
 			if (stitch == this) {
 				throw new System.Exception ("Diverted a stitch back to itself");
