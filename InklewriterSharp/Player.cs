@@ -25,25 +25,25 @@ namespace Inklewriter
 
 	public class Player
 	{
-		Story story;
+		StoryModel model;
 		Stitch currentStitch;
 
 
 
-		public Player (Story story)
+		public Player (StoryModel model)
 		{
-			this.story = story;
+			this.model = model;
 		}
 
 		public void Begin ()
 		{
-			ShowStitch (story.data.initial);
+			ShowStitch (model.Story.data.initial);
 		}
 
 		void ShowStitch (string id)
 		{
 			Stitch stitch;
-			if (story.data.stitches.TryGetValue (id, out stitch)) {
+			if (model.Story.data.stitches.TryGetValue (id, out stitch)) {
 				currentStitch = stitch;
 //				if (stitch.flagNames != null) {
 //					foreach (var f in stitch.flagNames) {

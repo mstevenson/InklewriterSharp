@@ -8,7 +8,7 @@ namespace Inklewriter
 
 	public class FlagValue {
 		public string flagName;
-		public bool value;
+		public int value;
 	}
 
 
@@ -128,12 +128,18 @@ namespace Inklewriter
 
 		public List<Stitch> Stitches {
 			get {
-				return Story.data.stitches;
+				return null;
+//				return Story.data.stitches;
 			}
 		}
 
-		public void CollateFlags (Story story)
+		public void CollateFlags ()
 		{
+//			Story story = CurrentStory
+			// FIXME
+			Story story = null;
+
+
 			flagIndex = new List<string> ();
 			var stitches = Stitches;
 			for (int e = 0; e < stitches.Count; e++) {
@@ -174,19 +180,18 @@ namespace Inklewriter
 		{
 			for (int n = 0; n < stitch.NumberOfFlags; n++) {
 				string r = stitch.FlagByIndex (n);
-				bool i = true;
-				bool s = false;
+				int i = 0;
 				Console.WriteLine ("Flag directive: " + r);
 				var o = new Regex (@"^(.*?)\s*(\=|\+|\-)\s*(\b.*\b)\s*$");
-				s = o.IsMatch (r);
+				var s = o.Matches (r);
 				int u = -1;
-				if (s) {
-					r = s[1];
+				if (s.Count > 0) {
+					r = s[1].ToString ();
 					u = GetIdxOfFlag(r, allFlags);
 					var m = new Regex (@"\d+");
-					if (m.IsMatch (s [3])) {
-						if (s [2] == "=") {
-							i = ParseInt(s[3]);
+					if (m.IsMatch (s [3].ToString ())) {
+						if (s [2].ToString () == "=") {
+							i = ParseInt(s[3].ToString ());
 						}
 					} else {
 						if (u < 0) {
@@ -194,14 +199,14 @@ namespace Inklewriter
 						} else {
 							i = allFlags[u].value;
 						}
-						if (s[2] == "+") {
-							i += ParseInt(s[3]);
+						if (s[2].ToString () == "+") {
+							i += ParseInt(s[3].ToString ());
 						} else {
-							i -= ParseInt(s[3]);
+							i -= ParseInt(s[3].ToString ());
 						}
 					}
-					if (s[2] == "=") {
-						i = ConvertStringToBooleanIfAppropriate (s[3]);
+					if (s[2].ToString () == "=") {
+						i = ConvertStringToBooleanIfAppropriate (s[3].ToString ());
 					} else {
 						Console.WriteLine ("Can't add/subtract a boolean.");
 					}
@@ -222,54 +227,58 @@ namespace Inklewriter
 
 		int ParseInt (string s)
 		{
+			// FIXME
+			return 0;
 		}
 
+		// FIXME should return a bool, but bools and ints are used interchangebly
 		public bool Test (string expression, List<FlagValue> allFlags) // e == flag
 		{
-			var regex = new Regex (@"^(.*?)\s*(\<|\>|\<\=|\>\=|\=|\!\=|\=\=)\s*(\b.*\b)\s*$");
-			var result = false;
-			var matches = regex.Matches (expression);
+			Regex regex = new Regex (@"^(.*?)\s*(\<|\>|\<\=|\>\=|\=|\!\=|\=\=)\s*(\b.*\b)\s*$");
+			bool result = false;
+			MatchCollection matches = regex.Matches (expression);
 			if (regex.IsMatch (expression)) {
-				var flag = matches [1];
-				var op = matches [2];
-				var value = matches [3];
+				string flag = matches [1].ToString ();
+				string op = matches [2].ToString ();
+				string valueString = matches [3].ToString ();
+				int value = int.Parse (valueString);
 
-				var flagValue = GetValueOfFlag (flag, allFlags);
+				int flagValue = GetValueOfFlag (flag, allFlags);
 				Console.WriteLine ("Testing " + flagValue + " " + op + " " + value);
 				if (op == "==" || op == "=") {
 					result = flagValue == value;
 				} else {
 					if (op == "!=" || op == "<>") {
-						result = flagValue != matches[3];
+						result = flagValue != value;
 					} else {
-						if (Regex.IsMatch (value, @"\d+")) {
+						if (Regex.IsMatch (valueString, @"\d+")) {
 							throw new System.Exception ("Error - Can't perform an order-test on a boolean.");
 						}
-						if (matches[2] == "<") {
+						if (op == "<") {
 							result = flagValue < value;
-						} else if (matches[2] == "<=") {
+						} else if (op == "<=") {
 							result = flagValue <= value;
-						} else if (matches[2] == ">") {
+						} else if (op == ">") {
 							result = flagValue > value;
-						} else if (matches[2] == ">=") {
+						} else if (op == ">=") {
 							result = flagValue >= value;
 						}
 					}
 				}
 			} else {
-				result = StoryModel.GetValueOfFlag (expression, allFlags);
-				result = ConvertStringToBooleanIfAppropriate(result);
-				if (result == 0 || result == -1) {
-					result = !1;
-				}
-				result = true; // FIXME is this right?
+//				result = GetValueOfFlag (expression, allFlags) == 1;
+//				result = ConvertStringToBooleanIfAppropriate(result) == 1;
+//				if (result == false || result == -1) {
+//					result = false;
+//				}
+//				result = true; // FIXME is this right?
 			}
 			return result;
 		}
 
-		Stitch CreateStitch (Stitch parent = null)
+		Stitch CreateStitch (string text)
 		{
-			Stitch s = new Stitch (parent);
+			Stitch s = new Stitch (text);
 			Stitches.Add (s);
 			return s;
 		}
@@ -299,7 +308,7 @@ namespace Inklewriter
 			}
 		}
 
-		void CreateOption (Stitch stitch)
+		Option CreateOption (Stitch stitch)
 		{
 			var t = stitch.AddOption ();
 			return t;
@@ -319,7 +328,7 @@ namespace Inklewriter
 			List<Stitch> stitchesToRemove = new List<Stitch> ();
 			for (var t = 0; t < stitches.Count; ++t) {
 				var n = stitches[t];
-				if (n.IsDead) {
+				if (n.IsDead ()) {
 					stitchesToRemove.Add (n);
 				}
 			}
@@ -332,14 +341,16 @@ namespace Inklewriter
 		{
 		}
 
-		bool GetValueOfFlag (string flag, List<FlagValue> allFlags)
+		int GetValueOfFlag (string flag, List<FlagValue> allFlags)
 		{
 			var n = GetIdxOfFlag (flag, allFlags);
-			return n >= 0 ? allFlags[n].value : false;
+			return n >= 0 ? allFlags[n].value : 0;
 		}
 
-		bool ConvertStringToBooleanIfAppropriate (string s)
+		int ConvertStringToBooleanIfAppropriate (string s)
 		{
+			// FIXME bools represented as 0 and 1
+			return 0;
 		}
 
 		public void AddFlagToIndex (string flag)
@@ -349,6 +360,146 @@ namespace Inklewriter
 			if (!flagIndex.Contains (name)) {
 				flagIndex.Add (name);
 			}
+		}
+
+		public void InsertPageNumber (Stitch e)
+		{
+			if (Loading || e.VerticalDistanceFromHeader < 2
+			    || PageSize (e.PageNumber) < StoryModel.maxPreferredPageLength / 2
+			    || HeaderWithinDistanceOfStitch (3, e))
+			{
+				return;
+			}
+			if (e.PageNumber != 0) {
+				return;
+			}
+			var n = e.PageNumber + 1;
+			var stitches = Stitches;
+			for (var r = 0; r < stitches.Count; r++) {
+				var i = stitches[r].PageNumber;
+				if (i >= n) {
+					stitches [r].SetPageNumberLabel (i + 1);
+				}
+			}
+			e.SetPageNumberLabel (n);
+			ComputePageNumbers ();
+		}
+
+		void ComputePageNumbers ()
+		{
+			var e = new List<Stitch> ();
+			var t = 0;
+//			var n = {}		;
+//			var r = {};
+			var stitches = Stitches;
+			for (var i = 0; i < stitches.Count; i++) {
+				var s = stitches[i].PageNumber;
+				if (s > 0) {
+					e.Add (stitches [i]);
+					if (s > t) {
+						t = s;
+					}
+					stitches [i].SetPageNumberLabel (s);
+//					n[s] = [];
+//					r[s] = !0;
+				} else {
+					stitches [i].SetPageNumberLabel (0);
+					stitches[i].SectionStitches = new List<Stitch> ();
+				}
+			}
+//			e.sort(function(e, t) {
+//				return e.pageNumberLabel() - t.pageNumberLabel()
+//				});
+			for (var i = e.Count - 1; i >= 0; i--) {
+//				var o = function(t, r, s) {
+//					if (!t) return;
+//					if (!r && t.pageNumber() > 0) {
+//						t.verticalDistanceFromHeader() > s && t.pageNumber() == e[i].pageNumber() && t.verticalDistanceFromHeader(s), n[e[i].pageNumber()].push(t.pageNumber());
+//						return
+//						}
+//					t.pageNumber(e[i].pageNumber()), t.headerStitch(e[i]), e[i].sectionStitches.push(t), t.verticalDistanceFromHeader(s), o(t.divertStitch, !1, s + .01);
+//					for (var u = 0; u < t.options.length; u++) o(t.options[u].linkStitch(), !1, s + 1 + .1 * u)
+//					};
+//				o(e[i], !0, 0)
+			}
+//			var u = [];
+//			u.push(initialStitch.pageNumber());
+//			while (u.length > 0) {
+//				var a = [];
+//				for (var i = 0; i < u.length; i++)
+//					if (r[u[i]]) {
+//						r[u[i]] = !1;
+//						for (var f = 0; f < n[u[i]].length; f++) a.push(n[u[i]][f])
+//						}
+//				u = a
+//			}
+//			for (var i = 0; i < StoryModel.stitches.length; i++) {
+//				var l = StoryModel.stitches[i].pageNumber();
+//				l && r[l] && (StoryModel.stitches[i].pageNumber(0), StoryModel.stitches[i].sectionStitches = [])
+//			}
+		}
+
+		bool HeaderWithinDistanceOfStitch (int distance, Stitch stitch)
+		{
+			// FIXME
+			return false;
+		}
+
+		int PageSize (int pageNumber)
+		{
+			var t = 0;
+			var stitches = Stitches;
+			for (var n = 0; n < stitches.Count; n++) {
+				if (stitches [n].PageNumber == pageNumber) {
+					t++;
+				}
+			}
+			return t;
+		}
+
+
+		Stitch InitialStitch {
+			get;
+			set;
+		}
+
+		void ComputeVerticalHeuristic ()
+		{
+			if (InitialStitch == null) {
+				return;
+			}
+//			var e = [];
+//			t = [];
+			var stitches = Stitches;
+//			for (var n = 0; n < stitches.Count; n++) {
+//				var r = stitches[n];
+//				r.VerticalDistance (-1);
+//			}
+//			e.push(StoryModel.initialStitch), StoryModel.initialStitch.verticalDistance(1);
+//			while (e.length > 0) {
+//				for (var n = 0; n < e.length; n++) {
+//					var r = e[n];
+//					if (r.divertStitch) {
+//						var i = r.divertStitch;
+//						i.verticalDistance() == -1 && (i.verticalDistance(r.verticalDistance() + .01), t.push(i))
+//					} else
+//						for (var s = 0; s < r.options.length; s++)
+//							if (r.options[s].linkStitch()) {
+//								var i = r.options[s].linkStitch();
+//								i.verticalDistance() == -1 && (i.verticalDistance(r.verticalDistance() + 1 + .1 * s), t.push(i))
+//							}
+//				}
+//				e = t, t = []
+//			}
+//			for (var n = 0; n < StoryModel.stitches.length; n++) {
+//				var r = StoryModel.stitches[n];
+//				r.verticalDistance() == -1 && r.verticalDistance(StoryModel.stitches.length + 1)
+//			}
+		}
+
+		bool Loading {
+			get;
+			set;
 		}
 	}
 }

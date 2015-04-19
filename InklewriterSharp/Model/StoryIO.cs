@@ -13,7 +13,7 @@ namespace Inklewriter
 			return story;
 		}
 
-		void ReadStoryRoot (JsonReader reader, Story story)
+		static void ReadStoryRoot (JsonReader reader, Story story)
 		{
 			// read object start
 			reader.Read ();
@@ -47,7 +47,7 @@ namespace Inklewriter
 			}
 		}
 
-		void ReadData (JsonReader reader, Story story)
+		static void ReadData (JsonReader reader, Story story)
 		{
 			story.data = new Data ();
 
@@ -83,7 +83,7 @@ namespace Inklewriter
 			}
 		}
 
-		void ReadDataEditor (JsonReader reader, Story story)
+		static void ReadDataEditor (JsonReader reader, Story story)
 		{
 			story.data.editorData = new EditorData ();
 
@@ -116,7 +116,7 @@ namespace Inklewriter
 			}
 		}
 
-		void ReadStitches (JsonReader reader, Story story)
+		static void ReadStitches (JsonReader reader, Story story)
 		{
 			story.data.stitches = new Dictionary<string, Stitch> ();
 
@@ -155,7 +155,7 @@ namespace Inklewriter
 			}
 		}
 
-		bool ReadStitchContent (JsonReader reader, Story story, Stitch stitch)
+		static bool ReadStitchContent (JsonReader reader, Story story, Stitch stitch)
 		{
 			// Start object
 			reader.Read ();
@@ -266,7 +266,7 @@ namespace Inklewriter
 			return true;
 		}
 
-		List<string> ReadOptionConditions (JsonReader reader)
+		static List<string> ReadOptionConditions (JsonReader reader)
 		{
 			if (reader.Token == JsonToken.Null) {
 				return null;

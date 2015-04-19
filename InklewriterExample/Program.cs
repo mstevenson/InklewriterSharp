@@ -10,15 +10,14 @@ namespace InklewriterExample
 		{
 			string storyJson = File.ReadAllText ("tutorial.json");
 			StoryModel model = new StoryModel ();
-			Story story = model.ImportStory (storyJson);
+			model.ImportStory (storyJson);
 
-			Console.WriteLine ("Loaded story file: " + story.title);
+			Console.WriteLine ("Loaded story file: " + model.Story.title);
 
-			Player player = new Player (story);
+			Player player = new Player (model);
 			player.Begin ();
 
 			Console.WriteLine ("Began story.");
-
 		}
 	}
 }

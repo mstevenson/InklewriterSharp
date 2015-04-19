@@ -56,11 +56,48 @@ namespace Inklewriter
 			Backlinks = new List<Stitch> ();
 		}
 
+		public Stitch (string text)
+		{
+			RefCount = 0;
+			this.text = text;
+			WordCount = WordCountOf (text);
+		}
+
+		int WordCountOf (string e) {
+			if (!string.IsNullOrEmpty (e)) {
+				var t = Regex.Matches (e, @"[\S]+");
+				return t.Count;
+			}
+			return 0;
+		}
+
+		public int WordCount {
+			get; set;
+		}
+
 		public int ComputedPageNumber {
 			get {
 				return 0;
 			}
 		}
+
+
+		public int VerticalDistanceFromHeader {
+			get {
+				return VerticalDistanceFromPageNumberHeader;
+			}
+		}
+
+		public int VerticalDistanceFromPageNumberHeader {
+			get;
+			set;
+		}
+
+		public int VerticalDistance {
+			set;
+			get;
+		}
+
 
 		public string PageLabelText {
 			get {
@@ -76,6 +113,22 @@ namespace Inklewriter
 				// FIXME implement
 				// return e && (e < this._pageNumberHeader && StoryModel.maxPage == this._pageNumberHeader && StoryModel.maxPage--, this._pageNumberHeader = e, e > StoryModel.maxPage && (StoryModel.maxPage = e)), this._pageNumberHeader
 				return "";
+			}
+		}
+
+		public List<Stitch> SectionStitches {
+			get;
+			set;
+		}
+
+		public void SetPageNumberLabel (int number)
+		{
+			// TODO
+		}
+
+		public int PageNumber {
+			get {
+				return ComputedPageNumber;
 			}
 		}
 
@@ -120,10 +173,11 @@ namespace Inklewriter
 			DivertedStitch = null;
 		}
 
-		public void AddOption ()
+		public Option AddOption ()
 		{
 			var newOption = new Option (this);
 			options.Add (newOption);
+			return newOption;
 		}
 
 		public void RemoveOption (Option option)
@@ -132,7 +186,7 @@ namespace Inklewriter
 			options.Remove (option);
 		}
 
-		public bool IsDead (Story story)
+		public bool IsDead (Story story = null)
 		{
 			return false;
 
