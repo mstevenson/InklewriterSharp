@@ -11,11 +11,6 @@ namespace Inklewriter
 		/// </summary>
 		public string Text { get; set; }
 
-//		/// <summary>
-//		/// The stitch to display after selecting this option.
-//		/// </summary>
-//		public string LinkPath { get; set; }
-
 		/// <summary>
 		/// Display this option only if the specified markers have been set.
 		/// </summary>

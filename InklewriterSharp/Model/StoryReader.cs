@@ -17,8 +17,8 @@ namespace Inklewriter
 			var allStitches = story.Stitches;
 			foreach (var key in allStitches.Keys) {
 				var stitch = allStitches [key];
-				if (stitch.Divert != null) {
-					var target = allStitches [stitch.Divert.Name];
+				if (stitch.DivertStitch != null) {
+					var target = allStitches [stitch.DivertStitch.Name];
 					stitch.DivertTo (target);
 				}
 			}
@@ -293,14 +293,14 @@ namespace Inklewriter
 				stitch.NotIfConditions = notIfConditions;
 				stitch.Image = image;
 				if (pageNum.HasValue) {
-					stitch.PageNum = pageNum.Value;
+					stitch.PageNumber = pageNum.Value;
 				}
 				stitch.PageLabel = pageLabel;
 				if (runOn.HasValue) {
 					stitch.RunOn = runOn.Value;
 				}
-				stitch.Divert = GetOrCreateStitch (story, divert);
-				stitch.FlagNames = flagNames;
+				stitch.DivertStitch = GetOrCreateStitch (story, divert);
+				stitch.Flags = flagNames;
 			}
 			return true;
 		}

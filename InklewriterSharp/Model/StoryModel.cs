@@ -66,8 +66,8 @@ namespace Inklewriter
 						}
 					}
 				} else {
-					if (stitches [e].DivertedStitch != null) {
-						stitches [e].DivertedStitch.Backlinks.Add (stitches [e]);
+					if (stitches [e].DivertStitch != null) {
+						stitches [e].DivertStitch.Backlinks.Add (stitches [e]);
 					} else {
 						EndCount++;
 					}
@@ -102,8 +102,8 @@ namespace Inklewriter
 			var stitches = Stitches;
 			for (int e = 0; e < stitches.Count; e++) {
 				var t = stitches[e];
-				for (int n = 0; n < t.FlagNames.Count; n++) {
-					AddFlagToIndex (t.FlagNames[n]);
+				for (int n = 0; n < t.Flags.Count; n++) {
+					AddFlagToIndex (t.Flags[n]);
 				}
 				for (int r = 0; r < t.Options.Count; r++) {
 					for (int n = 0; n < t.Options [r].IfConditions.Count; n++) {
@@ -158,7 +158,7 @@ namespace Inklewriter
 
 		public void ProcessFlagSetting (Stitch stitch, List<FlagValue> allFlags) // t == all flags
 		{
-			for (int n = 0; n < stitch.NumberOfFlags; n++) {
+			for (int n = 0; n < stitch.Flags.Count; n++) {
 				string r = stitch.FlagByIndex (n);
 				int i = 0;
 				Console.WriteLine ("Flag directive: " + r);
@@ -293,7 +293,7 @@ namespace Inklewriter
 			var stitches = Stitches;
 			for (int n = 0; n < stitches.Count; n++) {
 				var r = stitches[n];
-				if (r.DivertedStitch == source) {
+				if (r.DivertStitch == source) {
 					r.Undivert ();
 					if (target != null) {
 						r.DivertTo (target);
@@ -322,7 +322,7 @@ namespace Inklewriter
 				}
 				shortName = incrementedShortName;
 				usedShortNames.Add (shortName);
-				currentStitch.SetName (shortName);
+				currentStitch.Name = shortName;
 			}
 		}
 
@@ -399,7 +399,6 @@ namespace Inklewriter
 					//					r[s] = !0;
 				} else {
 					stitches [i].SetPageNumberLabel (this, 0);
-					stitches[i].SectionStitches = new List<Stitch> ();
 				}
 			}
 			//			e.sort(function(e, t) {

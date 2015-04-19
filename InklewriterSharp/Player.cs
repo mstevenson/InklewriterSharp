@@ -51,8 +51,8 @@ namespace Inklewriter
 //			if (stitch.options && stitch.options.Count > 0) {
 //				ShowOptions (stitch.options);
 //			}
-			if (stitch.Divert == null) {
-				ShowStitch (stitch.Divert);
+			if (stitch.DivertStitch == null) {
+				ShowStitch (stitch.DivertStitch);
 			}
 		}
 

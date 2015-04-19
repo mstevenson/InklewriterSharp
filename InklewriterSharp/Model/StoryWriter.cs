@@ -61,14 +61,14 @@ namespace Inklewriter
 						var stitch = kvp.Value;
 						writer.Write (stitch.Text);
 
-						if (stitch.Divert != null) {
+						if (stitch.DivertStitch != null) {
 							writer.WriteObjectStart ();
 							writer.WritePropertyName ("divert");
-							writer.Write (stitch.Divert.Name);
+							writer.Write (stitch.DivertStitch.Name);
 							writer.WriteObjectEnd ();
 						}
-						if (stitch.FlagNames != null) {
-							foreach (var flag in stitch.FlagNames) {
+						if (stitch.Flags != null) {
+							foreach (var flag in stitch.Flags) {
 								writer.WriteObjectStart ();
 								writer.WritePropertyName ("flagName");
 								writer.Write (flag);
@@ -124,10 +124,10 @@ namespace Inklewriter
 							writer.Write (stitch.PageLabel);
 							writer.WriteObjectEnd ();
 						}
-						if (stitch.PageNum != -1) {
+						if (stitch.PageNumber != -1) {
 							writer.WriteObjectStart ();
 							writer.WritePropertyName ("pageNum");
-							writer.Write (stitch.PageNum);
+							writer.Write (stitch.PageNumber);
 							writer.WriteObjectEnd ();
 						}
 						if (stitch.RunOn) {
