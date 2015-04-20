@@ -42,6 +42,9 @@ namespace Inklewriter
 		public string PageLabel {
 			get {
 				if (string.IsNullOrEmpty (_pageLabel)) {
+					if (PageNumber == -1) {
+						return null;
+					}
 					return "Section " + PageNumber;
 				}
 				return _pageLabel;
@@ -103,21 +106,17 @@ namespace Inklewriter
 
 		public List<Stitch> Backlinks { get; set; }
 
-		public bool IsDead (Story story = null)
-		{
-			return Text.Trim ().Length == 0
-				&& Flags.Count == 0
-				&& RefCount == 0
-				&& this != story.InitialStitch;
+		// FIXME if the stitch is a Story's initial stitch, it should never be dead.
+		// Check this from within Story
+		public bool IsDead {
+			get {
+				return (string.IsNullOrEmpty (Text) || Text.Trim ().Length == 0)
+					&& Flags.Count == 0
+					&& RefCount == 0;
+			}
 		}
 
 		#region Layout
-
-		public int VerticalDistanceFromHeader {
-			get {
-				return VerticalDistanceFromPageNumberHeader;
-			}
-		}
 
 		public int VerticalDistanceFromPageNumberHeader { get; set; }
 
@@ -152,11 +151,11 @@ namespace Inklewriter
 			if (shortName.Length == 0) {
 				return "punctuatedStitch";
 			}
-			shortName.Substring (0, System.Math.Min (16, Text.Length));
 			var result = char.ToLowerInvariant (shortName [0]).ToString ();
 			if (shortName.Length > 1) {
 				result += shortName.Substring (1);
 			}
+			result = result.Substring (0, 16);
 			return result;
 		}
 

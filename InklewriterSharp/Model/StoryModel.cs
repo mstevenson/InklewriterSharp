@@ -347,7 +347,7 @@ namespace Inklewriter
 
 		public void InsertPageNumber (Stitch e)
 		{
-			if (Loading || e.VerticalDistanceFromHeader < 2
+			if (Loading || e.VerticalDistanceFromPageNumberHeader < 2
 				|| PageSize (e.PageNumber) < StoryModel.maxPreferredPageLength / 2
 				|| HeaderWithinDistanceOfStitch (3, e))
 			{
@@ -444,7 +444,7 @@ namespace Inklewriter
 			List<Stitch> stitchesToRemove = new List<Stitch> ();
 			for (var t = 0; t < stitches.Count; ++t) {
 				var n = stitches[t];
-				if (n.IsDead ()) {
+				if (n.IsDead) {
 					stitchesToRemove.Add (n);
 				}
 			}

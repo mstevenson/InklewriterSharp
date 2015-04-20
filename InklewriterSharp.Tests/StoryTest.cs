@@ -28,9 +28,8 @@ namespace Inklewriter.Tests
 				string.Format ("Dates are not equal:  {0}  {1}", updatedString, nowString));
 			Assert.IsNotNull (story.EditorData);
 			Assert.IsNull (story.InitialStitch);
-			Assert.IsNotNull (story.Stitches);
+			Assert.IsEmpty (story.Stitches);
 			Assert.IsNull (story.Title);
-
 		}
 	}
 }
