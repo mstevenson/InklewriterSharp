@@ -2,7 +2,7 @@
 using System.IO;
 using Inklewriter;
 
-namespace InklewriterExample
+namespace Inklewriter.Examples
 {
 	class MainClass
 	{

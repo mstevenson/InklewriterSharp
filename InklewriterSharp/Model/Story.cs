@@ -30,6 +30,7 @@ namespace Inklewriter
 			Stitches = new List<Stitch> ();
 			CreatedAt = DateTime.UtcNow;
 			UpdatedAt = DateTime.UtcNow;
+			EditorData = new EditorData ();
 		}
 	}
 }
