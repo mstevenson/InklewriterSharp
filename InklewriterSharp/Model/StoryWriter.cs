@@ -5,6 +5,12 @@ namespace Inklewriter
 {
 	public class StoryWriter
 	{
+		static string GetDateTimeString (System.DateTime date)
+		{
+			string format = "YYYY-MM-DD'T'HH:mm:ss'Z'";
+			return date.ToUniversalTime ().ToString (format, System.Globalization.CultureInfo.InvariantCulture);
+		}
+
 		public static string Write (Story story)
 		{
 			JsonWriter writer = new JsonWriter ();
@@ -13,7 +19,7 @@ namespace Inklewriter
 
 			writer.WritePropertyName ("created_at");
 			// FIXME doesn't match correct date formatting
-			writer.Write (story.CreatedAt);
+			writer.Write (GetDateTimeString (story.CreatedAt));
 
 			// Data
 			writer.WritePropertyName ("data");
@@ -52,13 +58,12 @@ namespace Inklewriter
 			{
 				// Stitches
 				writer.WriteObjectStart ();
-				foreach (var kvp in story.Stitches) {
-					writer.WritePropertyName (kvp.Key);
+				foreach (var stitch in story.Stitches) {
+					writer.WritePropertyName (stitch.Name);
 					writer.WriteObjectStart ();
 					writer.WritePropertyName ("content");
 					writer.WriteArrayStart ();
 					{
-						var stitch = kvp.Value;
 						writer.Write (stitch.Text);
 
 						if (stitch.DivertStitch != null) {
@@ -165,7 +170,7 @@ namespace Inklewriter
 			writer.Write (story.Title);
 
 			writer.WritePropertyName ("updated_at");
-			writer.Write (story.UpdatedAt);
+			writer.Write (GetDateTimeString (story.UpdatedAt));
 
 			writer.WritePropertyName ("url_key");
 			writer.Write (story.UrlKey);

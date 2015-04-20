@@ -8,9 +8,9 @@ namespace Inklewriter
 	{
 		public string Title { get; set; }
 
-		public string CreatedAt { get; set; }
+		public DateTime CreatedAt { get; set; }
 
-		public string UpdatedAt { get; set; }
+		public DateTime UpdatedAt { get; set; }
 
 		public string UrlKey { get; set; }
 
@@ -23,11 +23,13 @@ namespace Inklewriter
 
 		public EditorData EditorData { get; set; }
 
-		public Dictionary<string, Stitch> Stitches { get; set; }
+		public List<Stitch> Stitches { get; set; }
 
 		public Story ()
 		{
-			Stitches = new Dictionary<string, Stitch> ();
+			Stitches = new List<Stitch> ();
+			CreatedAt = DateTime.UtcNow;
+			UpdatedAt = DateTime.UtcNow;
 		}
 	}
 }

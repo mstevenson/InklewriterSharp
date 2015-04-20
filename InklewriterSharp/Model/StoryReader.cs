@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using LitJson;
+using System.Linq;
 
 namespace Inklewriter
 {
@@ -15,12 +16,11 @@ namespace Inklewriter
 
 			// Post-process
 			var allStitches = story.Stitches;
-			foreach (var key in allStitches.Keys) {
-				var stitch = allStitches [key];
-				if (stitch.DivertStitch != null) {
-					var target = allStitches [stitch.DivertStitch.Name];
-					stitch.DivertTo (target);
-				}
+			foreach (var stitch in allStitches) {
+//				if (stitch.DivertStitch != null) {
+//					var target = allStitches [stitch.DivertStitch.Name];
+//					stitch.DivertTo (target);
+//				}
 			}
 
 			// TODO wire up options
@@ -75,7 +75,7 @@ namespace Inklewriter
 				reader.Read ();
 				switch (propertyName) {
 				case "created_at":
-					story.CreatedAt = (string)reader.Value;
+					story.CreatedAt = GetDateTime ((string)reader.Value);
 					break;
 				case "data":
 					ReadData (reader, story);
@@ -84,13 +84,20 @@ namespace Inklewriter
 					story.Title = (string)reader.Value;
 					break;
 				case "updated_at":
-					story.UpdatedAt = (string)reader.Value;
+					story.UpdatedAt = GetDateTime ((string)reader.Value);
 					break;
 				case "url_key":
 					story.UrlKey = (string)reader.Value;
 					break;
 				}
 			}
+		}
+
+		static System.DateTime GetDateTime (string s)
+		{
+			string dateString = s;
+			string format = "YYYY-MM-DD'T'HH:mm:ss'Z'";
+			return System.DateTime.ParseExact (dateString, format, System.Globalization.CultureInfo.InvariantCulture);
 		}
 
 		static void ReadData (JsonReader reader, Story story)
@@ -155,8 +162,6 @@ namespace Inklewriter
 
 		static void ReadStitches (JsonReader reader, Story story)
 		{
-			story.Stitches = new Dictionary<string, Stitch> ();
-
 			while (reader.Read ()) {
 				if (reader.Token == JsonToken.ObjectEnd) {
 					break;
@@ -335,15 +340,13 @@ namespace Inklewriter
 			if (string.IsNullOrEmpty (stitchName)) {
 				return null;
 			}
-			if (story.Stitches == null) {
-				story.Stitches = new Dictionary<string, Stitch> ();
+			Stitch stitch = story.Stitches.FirstOrDefault (s => s.Name == stitchName);
+			if (stitch == null) {
+				stitch = new Stitch ();
+				stitch.Name = stitchName;
+				story.Stitches.Add (stitch);
 			}
-			Stitch s = null;
-			if (!story.Stitches.TryGetValue (stitchName, out s)) {
-				s = new Stitch ();
-				story.Stitches.Add (stitchName, s);
-			}
-			return s;
+			return stitch;
 		}
 	}
 }
