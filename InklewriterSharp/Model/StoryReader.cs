@@ -1,342 +1,244 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using LitJson;
 using System.Linq;
 
 namespace Inklewriter
 {
 	public class StoryReader
 	{
-		public static Story Read (string data)
+		public static Story Read (string jsonData)
 		{
-			JsonReader reader = new JsonReader (data);
 			Story story = new Story ();
-
-			ReadStoryRoot (reader, story);
-
-			// Post-process
-//			foreach (var stitch in story.Stitches) {
-//				if (stitch.DivertStitch != null) {
-//					var target = story.Stitches [stitch.DivertStitch.Name];
-//					stitch.DivertTo (target);
-//				}
-//			}
-
-			// TODO wire up options
-//			T.text(x.option), T.writeModeOnly = x.writeModeOnly, x.linkPath && T.linkStitch(r[x.linkPath].storyStitch), T._parentStitch = y.storyStitch;
-//			if (x.ifConditions)
-//				for (var E = 0; E < x.ifConditions.length; ++E) T._ifConditions.push(x.ifConditions[E].ifCondition);
-//			if (x.notIfConditions)
-//				for (var N = 0; N < x.notIfConditions.length; ++N) T._notIfConditions.push(x.notIfConditions[N].notIfCondition)
-
-
-
-//			if (r[t.initial]) StoryModel.initialStitch = r[t.initial].storyStitch;
-//			else {
-//				StoryModel.initialStitch = StoryModel.stitches[0];
-//				for (var C = 0; C < StoryModel.stitches.length; C++) {
-//					var k = StoryModel.stitches[C].pageNumberLabel();
-//					k > 0 && StoryModel.stitches[C].pageNumberLabel(k + 1)
-//				}
-//				StoryModel.initialStitch.pageNumberLabel(1)
-//			}
-//			return StoryModel.optionMirroring =
-//				t.optionMirroring !== undefined ? t.optionMirroring : !0,
-//			StoryModel.allowCheckpoints = t.allowCheckpoints !== undefined ? t.allowCheckpoints : !1, t.editorData
-//			&& (t.editorData.playPoint
-//				&& r[t.editorData.playPoint] ?
-//				n.playPoint = r[t.editorData.playPoint].storyStitch :
-//				n.playPoint = StoryModel.initialStitch,
-//				n.libraryVisible = t.editorData.libraryVisible,
-//				t.editorData.textSize !== undefined ?
-//				n.textSize = t.editorData.textSize :
-//				n.textSize = 0, t.editorData.authorName
-//				&& StoryModel.setAuthorName(t.editorData.authorName)),
-//			StoryModel.loading = !1, StoryModel.updateGraphModel(),
-//			StoryModel.collateFlags(), n
-
+			var obj = (JsonObject)SimpleJson.DeserializeObject (jsonData);
+			ReadStoryRoot (obj, story);
 			return story;
+
+//
+//			ReadStoryRoot (reader, story);
+//
+//			// Post-process
+////			foreach (var stitch in story.Stitches) {
+////				if (stitch.DivertStitch != null) {
+////					var target = story.Stitches [stitch.DivertStitch.Name];
+////					stitch.DivertTo (target);
+////				}
+////			}
+//
+//			// TODO wire up options
+////			T.text(x.option), T.writeModeOnly = x.writeModeOnly, x.linkPath && T.linkStitch(r[x.linkPath].storyStitch), T._parentStitch = y.storyStitch;
+////			if (x.ifConditions)
+////				for (var E = 0; E < x.ifConditions.length; ++E) T._ifConditions.push(x.ifConditions[E].ifCondition);
+////			if (x.notIfConditions)
+////				for (var N = 0; N < x.notIfConditions.length; ++N) T._notIfConditions.push(x.notIfConditions[N].notIfCondition)
+//
+//
+//
+////			if (r[t.initial]) StoryModel.initialStitch = r[t.initial].storyStitch;
+////			else {
+////				StoryModel.initialStitch = StoryModel.stitches[0];
+////				for (var C = 0; C < StoryModel.stitches.length; C++) {
+////					var k = StoryModel.stitches[C].pageNumberLabel();
+////					k > 0 && StoryModel.stitches[C].pageNumberLabel(k + 1)
+////				}
+////				StoryModel.initialStitch.pageNumberLabel(1)
+////			}
+////			return StoryModel.optionMirroring =
+////				t.optionMirroring !== undefined ? t.optionMirroring : !0,
+////			StoryModel.allowCheckpoints = t.allowCheckpoints !== undefined ? t.allowCheckpoints : !1, t.editorData
+////			&& (t.editorData.playPoint
+////				&& r[t.editorData.playPoint] ?
+////				n.playPoint = r[t.editorData.playPoint].storyStitch :
+////				n.playPoint = StoryModel.initialStitch,
+////				n.libraryVisible = t.editorData.libraryVisible,
+////				t.editorData.textSize !== undefined ?
+////				n.textSize = t.editorData.textSize :
+////				n.textSize = 0, t.editorData.authorName
+////				&& StoryModel.setAuthorName(t.editorData.authorName)),
+////			StoryModel.loading = !1, StoryModel.updateGraphModel(),
+////			StoryModel.collateFlags(), n
+//
+//			return story;
 		}
 
-		static void ReadStoryRoot (JsonReader reader, Story story)
+		static void ReadStoryRoot (JsonObject obj, Story story)
 		{
-			// read object start
-			reader.Read ();
+			story.Title = (string)obj ["title"];
+			JsonObject data = (JsonObject)obj ["data"];
+			JsonObject editorData = (JsonObject)data ["editorData"];
+			story.EditorData.AuthorName = (string)editorData["authorName"];
 
-			while (reader.Read ()) {
-				if (reader.Token == JsonToken.ObjectEnd) {
-					return;
-				}
-				if (reader.Token != JsonToken.PropertyName) {
-					continue;
-				}
-				string propertyName = (string)reader.Value;
-				reader.Read ();
-				switch (propertyName) {
+			foreach (var kvp in obj) {
+				string property = kvp.Key;
+				object value = kvp.Value;
+				switch (property) {
 				case "created_at":
-					var createdString = (string)reader.Value;
-					if (!string.IsNullOrEmpty (createdString)) {
-						story.CreatedAt = System.DateTime.Parse (createdString);
-					}
+					story.CreatedAt = System.DateTime.Parse ((string)value);
 					break;
 				case "data":
-					ReadData (reader, story);
+					ReadData ((JsonObject)value, story);
 					break;
 				case "title":
-					story.Title = (string)reader.Value;
+					story.Title = (string)value;
 					break;
 				case "updated_at":
-					var updatedString = (string)reader.Value;
-					if (!string.IsNullOrEmpty (updatedString)) {
-						story.UpdatedAt = System.DateTime.Parse (updatedString);
-					}
+					story.UpdatedAt = System.DateTime.Parse ((string)value);
 					break;
 				case "url_key":
-					story.UrlKey = (string)reader.Value;
+					story.UrlKey = (string)value;
 					break;
 				}
 			}
 		}
 
-		static void ReadData (JsonReader reader, Story story)
+		static void ReadData (JsonObject obj, Story story)
 		{
-			while (reader.Read ()) {
-				if (reader.Token == JsonToken.ObjectEnd) {
-					break;
-				}
-				if (reader.Token != JsonToken.PropertyName) {
-					continue;
-				}
-				string propertyName = (string)reader.Value;
-				reader.Read ();
-				switch (propertyName) {
+			foreach (var kvp in obj) {
+				string property = kvp.Key;
+				object value = kvp.Value;
+				switch (property) {
 				case "allowCheckpoints":
-					story.AllowCheckpoints = (bool)reader.Value;
+					story.AllowCheckpoints = (bool)value;
 					break;
 				case "editorData":
-					ReadDataEditor (reader, story);
+					ReadDataEditor ((JsonObject)value, story);
 					break;
 				case "initial":
-					var stitchName = (string)reader.Value;
+					var stitchName = (string)value;
 					story.InitialStitch = GetOrCreateStitch (story, stitchName);
 					break;
 				case "optionMirroring":
-					story.OptionMirroring = (bool)reader.Value;
+					story.OptionMirroring = (bool)value;
 					break;
 				case "stitches":
-					ReadStitches (reader, story);
+					ReadStitches ((JsonObject)value, story);
 					break;
 				}
 			}
 		}
 
-		static void ReadDataEditor (JsonReader reader, Story story)
+		static void ReadDataEditor (JsonObject obj, Story story)
 		{
 			story.EditorData = new EditorData ();
-
-			while (reader.Read ()) {
-				if (reader.Token == JsonToken.ObjectEnd) {
-					break;
-				}
-				string propertyName = (string)reader.Value;
-				reader.Read ();
-
-				switch (propertyName) {
+			foreach (var kvp in obj) {
+				string property = kvp.Key;
+				object value = kvp.Value;
+				switch (property) {
 				case "authorName":
-					story.EditorData.AuthorName = (string)reader.Value;
+					story.EditorData.AuthorName = (string)value;
 					break;
 				case "libraryVisible":
-					story.EditorData.LibraryVisible = (bool)reader.Value;
+					story.EditorData.LibraryVisible = (bool)value;
 					break;
 				case "playPoint":
-					story.EditorData.PlayPoint = (string)reader.Value;
+					story.EditorData.PlayPoint = (string)value;
 					break;
 				case "textSize":
-					story.EditorData.TextSize = (EditorData.TextSizeType)((int)reader.Value);
+					story.EditorData.TextSize = (EditorData.TextSizeType)(ParseInt(value));
 					break;
 				}
 			}
 		}
 
-		static void ReadStitches (JsonReader reader, Story story)
+		static int ParseInt (object obj)
 		{
-			while (reader.Read ()) {
-				if (reader.Token == JsonToken.ObjectEnd) {
-					break;
+			return System.Convert.ToInt32 ((long)obj);
+		}
+
+		static void ReadStitches (JsonObject obj, Story story)
+		{
+			foreach (var kvp in obj) {
+				string name = (string)kvp.Key;
+				JsonArray content = (JsonArray)(((JsonObject)obj [name])["content"]);
+
+				var stitch = GetOrCreateStitch (story, name);
+
+				// Set body text
+				stitch.Text = (string)content[0];
+				if (stitch.Text.EndsWith ("[...]")) {
+					stitch.Text = Regex.Replace (stitch.Text, @"\[\.\.\.\]", "");
+					stitch.RunOn = true;
 				}
 
-				string key = (string)reader.Value;
-				//Begin object containing only 'content' array
-				reader.Read ();
-
-				if (reader.Token == JsonToken.ObjectStart) {
-					// reader 'content'
-					reader.Read ();
-					// enter 'content' array start
-					reader.Read ();
-					// read stitch's raw text
-					reader.Read ();
-
-					var stitch = GetOrCreateStitch (story, key);
-					stitch.Text = (string)reader.Value;
-					if (stitch.Text.EndsWith ("[...]")) {
-						stitch.Text = Regex.Replace (stitch.Text, @"\[\.\.\.\]", "");
-						stitch.RunOn = true;
+				// Parse content objects
+				if (content.Count > 1) {
+					for (int i = 1; i < content.Count; i++) {
+						ReadStitchContent ((JsonObject)content [i], story, stitch);
 					}
-
-					// Read all stitch options. Exits when the array end token is read.
-					bool haveMoreStitchContent;
-					do {
-						haveMoreStitchContent = ReadStitchContent (reader, story, stitch);
-					} while (haveMoreStitchContent);
-
-					// Read stitch's object end token, save the stitch
-					reader.Read ();
 				}
 			}
 		}
 
-		static bool ReadStitchContent (JsonReader reader, Story story, Stitch stitch)
+		static void ReadStitchContent (JsonObject obj, Story story, Stitch stitch)
 		{
-			// Start object
-			reader.Read ();
-			if (reader.Token != JsonToken.ObjectStart) {
-				return false;
-			}
-
-			string linkPath = null;
-			string option = null;
-
-			List<string> ifConditions = null;
-			List<string> notIfConditions = null;
-
-			string image = null;
-			int? pageNum = null;
-			string pageLabel = null;
-			bool? runOn = null;
-			string divert = null;
-			List<string> flagNames = null;
-
-			while (reader.Read ()) {
-				if (reader.Token == JsonToken.ObjectEnd) {
-					break;
-				}
-				string propertyName = reader.Value as string;
-				reader.Read ();
-
-				if (reader.Token == JsonToken.Null) {
-					continue;
-				}
-
-				switch (propertyName) {
-				case "option":
-					option = (string)reader.Value;
-					break;
-				case "linkPath":
-					linkPath = (string)reader.Value;
-					break;
-				case "ifCondition": // belongs to stitch
-					if (ifConditions == null) {
-						ifConditions = new List<string> ();
+			// Parse option content object
+			if (obj.ContainsKey ("option")) {
+				Option option = stitch.AddOption ();
+				foreach (var kvp in obj) {
+					string property = kvp.Key;
+					object value = kvp.Value;
+					switch (property) {
+					case "option":
+						option.Text = (string)value;
+						break;
+					case "linkPath":
+						option.LinkStitch = GetOrCreateStitch (story, (string)value);
+						break;
+					case "ifConditions":
+						var ifConditionsArray = (JsonArray)value;
+						if (ifConditionsArray == null) {
+							break;
+						}
+						foreach (var c in ifConditionsArray) {
+							var val = (string)((JsonObject)c) ["ifCondition"];
+							option.IfConditions.Add (val);
+						}
+						break;
+					case "notIfConditions":
+						var notIfConditionsArray = (JsonArray)value;
+						if (notIfConditionsArray == null) {
+							break;
+						}
+						foreach (var c in notIfConditionsArray)
+						{
+							var val = (string)((JsonObject)c)["notIfCondition"];
+							option.NotIfConditions.Add (val);
+						}
+						break;
 					}
-					string ifCondition = (string)reader.Value;
-					ifConditions.Add (ifCondition);
-					break;
-				case "notIfCondition": // belongs to stitch
-					if (notIfConditions == null) {
-						notIfConditions = new List<string> ();
+				}
+			} else {
+				foreach (var kvp in obj) {
+					string property = (string)kvp.Key;
+					object value = kvp.Value;
+					switch (property) {
+					case "runOn":
+						stitch.RunOn = (bool)value;
+						break;
+					case "pageNum":
+						stitch.PageNumber = ParseInt (value);
+						break;
+					case "pageLabel":
+						stitch.PageLabel = (string)value;
+						break;
+					case "divert":
+						var divertStitch = GetOrCreateStitch (story, (string)value);
+						stitch.DivertTo (divertStitch);
+						break;
+					case "image":
+						stitch.Image = (string)value;
+						break;
+					case "flagName":
+						stitch.Flags.Add ((string)value);
+						break;
+					case "ifCondition":
+						stitch.IfConditions.Add ((string)value);
+						break;
+					case "notIfCondition":
+						stitch.NotIfConditions.Add ((string)value);
+						break;
 					}
-					string notIfCondition = (string)reader.Value;
-					notIfConditions.Add (notIfCondition);
-					break;
-				case "ifConditions": // belongs to option
-					ifConditions = ReadOptionConditions (reader);
-					break;
-				case "notIfConditions": // belongs to option
-					notIfConditions = ReadOptionConditions (reader);
-					break;
-				case "image":
-					image = (string)reader.Value;
-					break;
-				case "pageNum":
-					pageNum = (int)reader.Value;
-					break;
-				case "pageLabel":
-					pageLabel = (string)reader.Value;
-					break;
-				case "runOn":
-					runOn = (bool)reader.Value;
-					break;
-				case "divert":
-					divert = (string)reader.Value;
-					break;
-				case "flagName":
-					if (flagNames == null) {
-						flagNames = new List<string> ();
-					}
-					flagNames.Add ((string)reader.Value);
-					break;
 				}
 			}
-
-			if (option != null) { // is an option object
-				var newOption = new Option ();
-				newOption.Text = option;
-				newOption.IfConditions = ifConditions;
-				newOption.NotIfConditions = notIfConditions;
-
-				newOption.LinkStitch = GetOrCreateStitch (story, linkPath);
-
-				if (stitch.Options == null) {
-					stitch.Options = new List<Option> ();
-				}
-				stitch.Options.Add (newOption);
-			} else if (ifConditions != null) {
-				stitch.IfConditions = ifConditions;
-			} else if (notIfConditions != null) {
-				stitch.NotIfConditions = notIfConditions;
-			} else if (!string.IsNullOrEmpty (image)) {
-				stitch.Image = image;
-			} else if (pageNum.HasValue) {
-				stitch.PageNumber = pageNum.Value;
-			} else if (!string.IsNullOrEmpty (pageLabel)) {
-				stitch.PageLabel = pageLabel;
-			} else if (runOn.HasValue) {
-				stitch.RunOn = runOn.Value;
-			} else if (!string.IsNullOrEmpty (divert)) {
-				stitch.DivertStitch = GetOrCreateStitch (story, divert);
-			} else if (flagNames != null) {
-				stitch.Flags = flagNames;
-			}
-			return true;
-		}
-
-		static List<string> ReadOptionConditions (JsonReader reader)
-		{
-			if (reader.Token == JsonToken.Null) {
-				return null;
-			}
-
-			// Read array start
-			reader.Read ();
-
-			// Read first object start
-			reader.Read ();
-
-			List<string> conditions = new List<string> ();
-
-			while (reader.Read ()) {
-				if (reader.Token == JsonToken.ArrayEnd) {
-					break;
-				}
-				reader.Read ();
-				string condition = (string)reader.Value;
-				conditions.Add (condition);
-				reader.Read ();
-				// Read next object start, or the end of the array
-				reader.Read ();
-			}
-			return conditions;
 		}
 
 		static Stitch GetOrCreateStitch (Story story, string stitchName)
