@@ -276,6 +276,28 @@ namespace Inklewriter
 //				
 //			}
 //		}
+
+		public override int GetHashCode ()
+		{
+			return Name.GetHashCode ();
+		}
+
+		public override bool Equals (object obj)
+		{
+			if (obj == null) {
+				return false;
+			}
+			Stitch s = obj as Stitch;
+			if ((System.Object)s == null) {
+				return false;
+			}
+			return s.Name == Name;
+		}
+
+		public bool Equals (Stitch s)
+		{
+			return s.Name == Name;
+		}
 	}
 }
 
