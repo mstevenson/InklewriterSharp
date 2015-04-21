@@ -25,11 +25,15 @@ namespace Inklewriter
 
 		public Stitch ParentStitch { get; set; }
 
-		public Option (Stitch parent = null)
+		public Option ()
 		{
 			Text = "";
 			IfConditions = new List<string> ();
 			NotIfConditions = new List<string> ();
+		}
+
+		public Option (Stitch parent) : this()
+		{
 			ParentStitch = parent;
 		}
 
@@ -38,13 +42,14 @@ namespace Inklewriter
 			if (target == null) {
 				return;
 			}
-			if (LinkStitch != target) {
-				if (LinkStitch != null) {
-					LinkStitch.RefCount--;
-				}
-				LinkStitch = target;
-				LinkStitch.RefCount++;
+			if (LinkStitch == target) {
+				return;
 			}
+			if (LinkStitch != null) {
+				LinkStitch.RefCount--;
+			}
+			LinkStitch = target;
+			LinkStitch.RefCount++;
 		}
 
 		public void Unlink ()

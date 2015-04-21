@@ -7,11 +7,6 @@ namespace Inklewriter.Tests
 	[TestFixture]
 	public class StoryTest
 	{
-		[SetUp]
-		public void Setup ()
-		{
-		}
-
 		[Test]
 		public void EmptyConstructor ()
 		{

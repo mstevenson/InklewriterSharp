@@ -7,11 +7,6 @@ namespace Inklewriter.Tests
 	[TestFixture]
 	public class StitchTest
 	{
-		[SetUp]
-		public void Setup ()
-		{
-		}
-
 		[Test]
 		public void EmptyConstructor ()
 		{
@@ -40,6 +35,7 @@ namespace Inklewriter.Tests
 		{
 			string body = "This is a stitch.";
 			Stitch stitch = new Stitch (body);
+
 			Assert.AreEqual (stitch.Text, body);
 		}
 
@@ -47,6 +43,7 @@ namespace Inklewriter.Tests
 		public void AutomaticPageLabel ()
 		{
 			Stitch stitch = new Stitch ();
+
 			stitch.PageNumber = 3;
 			Assert.AreEqual ("Section 3", stitch.PageLabel);
 		}
@@ -55,6 +52,7 @@ namespace Inklewriter.Tests
 		public void ExplicitPageLabel ()
 		{
 			Stitch stitch = new Stitch ();
+
 			string originalLabel = "Section 3";
 			string customLabel = "Custom Label";
 			stitch.PageNumber = 3;
@@ -70,6 +68,7 @@ namespace Inklewriter.Tests
 		public void WordCount ()
 		{
 			Stitch stitch = new Stitch ();
+
 			stitch.Text = "One two three.";
 			Assert.AreEqual (stitch.WordCount, 3);
 		}
@@ -78,6 +77,7 @@ namespace Inklewriter.Tests
 		public void IsDead ()
 		{
 			Stitch stitch = new Stitch ();
+
 			Assert.IsTrue (stitch.IsDead);
 			stitch.Text = "Text";
 			Assert.IsFalse (stitch.IsDead);
@@ -87,6 +87,7 @@ namespace Inklewriter.Tests
 		public void ShortName ()
 		{
 			Stitch stitch = new Stitch ();
+
 			string expected = "blankStitch";
 			string name = stitch.CreateShortName ();
 			Assert.AreEqual (expected, name);
