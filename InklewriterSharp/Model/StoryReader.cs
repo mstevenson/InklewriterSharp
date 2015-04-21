@@ -325,7 +325,10 @@ namespace Inklewriter
 
 			List<string> conditions = new List<string> ();
 
-			while (reader.Token != JsonToken.ArrayEnd) {
+			while (reader.Read ()) {
+				if (reader.Token == JsonToken.ArrayEnd) {
+					break;
+				}
 				reader.Read ();
 				string condition = (string)reader.Value;
 				conditions.Add (condition);
