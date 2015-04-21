@@ -42,7 +42,16 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="tutorial.json">
+    <Folder Include="Stories\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Stories\tutorial.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Stories\musgraveritual.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Stories\neighbourhoodpredators.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
