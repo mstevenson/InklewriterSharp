@@ -8,7 +8,7 @@ namespace Inklewriter.Examples
 	{
 		public static void Main (string[] args)
 		{
-			string storyJson = File.ReadAllText ("tutorial.json");
+			string storyJson = File.ReadAllText ("Stories/tutorial.json");
 			StoryModel model = new StoryModel ();
 			model.ImportStory (storyJson);
 
