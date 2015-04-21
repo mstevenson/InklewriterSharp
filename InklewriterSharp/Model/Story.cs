@@ -14,11 +14,16 @@ namespace Inklewriter
 
 		public string UrlKey { get; set; }
 
-
+		/// <summary>
+		/// Provides more rewind points.
+		/// </summary>
 		public bool AllowCheckpoints { get; set; }
 
 		public Stitch InitialStitch { get; set; }
 
+		/// <summary>
+		/// Displays an option once chosen.
+		/// </summary>
 		public bool OptionMirroring { get; set; }
 
 		public EditorData EditorData { get; set; }
