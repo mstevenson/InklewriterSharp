@@ -25,8 +25,6 @@ namespace Inklewriter
 
 		public int LooseEndCount { get; set; }
 
-		public Stitch InitialStitch { get; set; }
-
 		public bool Loading { get; set; }
 
 		#region IO
@@ -495,7 +493,7 @@ namespace Inklewriter
 
 		public void ComputeVerticalHeuristic ()
 		{
-			if (InitialStitch == null) {
+			if (Story.InitialStitch == null) {
 				return;
 			}
 //			var e = [];
