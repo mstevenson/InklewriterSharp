@@ -43,7 +43,7 @@ namespace Inklewriter
 				writer.Write (story.EditorData.PlayPoint);
 
 				writer.WritePropertyName ("textSize");
-				writer.Write (story.EditorData.TextSize);
+				writer.Write ((int)story.EditorData.TextSize);
 
 				writer.WriteObjectEnd ();
 			}

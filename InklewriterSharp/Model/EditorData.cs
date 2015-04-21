@@ -11,7 +11,9 @@ namespace Inklewriter
 
 		public string PlayPoint { get; set; }
 
-		public int TextSize { get; set; }
+		public enum TextSizeType { Unknown = -1, Normal = 0, Compact = 1, Dense = 2 }
+
+		public TextSizeType TextSize { get; set; }
 	}
 }
 

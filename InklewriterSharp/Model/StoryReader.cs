@@ -75,7 +75,7 @@ namespace Inklewriter
 				reader.Read ();
 				switch (propertyName) {
 				case "created_at":
-					story.CreatedAt = GetDateTime ((string)reader.Value);
+					story.CreatedAt = System.DateTime.Parse ((string)reader.Value);
 					break;
 				case "data":
 					ReadData (reader, story);
@@ -84,20 +84,13 @@ namespace Inklewriter
 					story.Title = (string)reader.Value;
 					break;
 				case "updated_at":
-					story.UpdatedAt = GetDateTime ((string)reader.Value);
+					story.UpdatedAt = System.DateTime.Parse ((string)reader.Value);
 					break;
 				case "url_key":
 					story.UrlKey = (string)reader.Value;
 					break;
 				}
 			}
-		}
-
-		static System.DateTime GetDateTime (string s)
-		{
-			string dateString = s;
-			string format = "YYYY-MM-DD'T'HH:mm:ss'Z'";
-			return System.DateTime.ParseExact (dateString, format, System.Globalization.CultureInfo.InvariantCulture);
 		}
 
 		static void ReadData (JsonReader reader, Story story)
@@ -154,7 +147,7 @@ namespace Inklewriter
 					story.EditorData.PlayPoint = (string)reader.Value;
 					break;
 				case "textSize":
-					story.EditorData.TextSize = (int)reader.Value;
+					story.EditorData.TextSize = (EditorData.TextSizeType)((int)reader.Value);
 					break;
 				}
 			}
