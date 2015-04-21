@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InklewriterSharp", "InklewriterSharp\InklewriterSharp.csproj", "{98CDC893-7F79-47C5-B609-A8FB40F73924}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Inklewriter.Examples", "InklewriterExample\Inklewriter.Examples.csproj", "{3064FF6F-B820-4E3E-B657-CFF109E9A0A3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InklewriterSharp.Examples", "InklewriterSharp.Examples\InklewriterSharp.Examples.csproj", "{3064FF6F-B820-4E3E-B657-CFF109E9A0A3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InklewriterSharp.Tests", "InklewriterSharp.Tests\InklewriterSharp.Tests.csproj", "{7AEFD4DF-AB2E-4188-B1FF-DE7CEC9C52BD}"
 EndProject

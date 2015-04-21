@@ -6,7 +6,7 @@
     <ProjectGuid>{7AEFD4DF-AB2E-4188-B1FF-DE7CEC9C52BD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Inklewriter.Tests</RootNamespace>
-    <AssemblyName>InklewriterSharp.Tests</AssemblyName>
+    <AssemblyName>Inklewriter.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
