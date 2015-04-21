@@ -185,7 +185,7 @@ namespace Inklewriter
 					}
 
 					// Read all stitch options. Exits when the array end token is read.
-					bool haveMoreStitchContent = false;
+					bool haveMoreStitchContent;
 					do {
 						haveMoreStitchContent = ReadStitchContent (reader, story, stitch);
 					} while (haveMoreStitchContent);
@@ -291,18 +291,21 @@ namespace Inklewriter
 					stitch.Options = new List<Option> ();
 				}
 				stitch.Options.Add (newOption);
-			} else {
+			} else if (ifConditions != null) {
 				stitch.IfConditions = ifConditions;
+			} else if (notIfConditions != null) {
 				stitch.NotIfConditions = notIfConditions;
+			} else if (!string.IsNullOrEmpty (image)) {
 				stitch.Image = image;
-				if (pageNum.HasValue) {
-					stitch.PageNumber = pageNum.Value;
-				}
+			} else if (pageNum.HasValue) {
+				stitch.PageNumber = pageNum.Value;
+			} else if (!string.IsNullOrEmpty (pageLabel)) {
 				stitch.PageLabel = pageLabel;
-				if (runOn.HasValue) {
-					stitch.RunOn = runOn.Value;
-				}
+			} else if (runOn.HasValue) {
+				stitch.RunOn = runOn.Value;
+			} else if (!string.IsNullOrEmpty (divert)) {
 				stitch.DivertStitch = GetOrCreateStitch (story, divert);
+			} else if (flagNames != null) {
 				stitch.Flags = flagNames;
 			}
 			return true;
