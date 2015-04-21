@@ -15,13 +15,12 @@ namespace Inklewriter
 			ReadStoryRoot (reader, story);
 
 			// Post-process
-			var allStitches = story.Stitches;
-			foreach (var stitch in allStitches) {
+//			foreach (var stitch in story.Stitches) {
 //				if (stitch.DivertStitch != null) {
-//					var target = allStitches [stitch.DivertStitch.Name];
+//					var target = story.Stitches [stitch.DivertStitch.Name];
 //					stitch.DivertTo (target);
 //				}
-			}
+//			}
 
 			// TODO wire up options
 //			T.text(x.option), T.writeModeOnly = x.writeModeOnly, x.linkPath && T.linkStitch(r[x.linkPath].storyStitch), T._parentStitch = y.storyStitch;
@@ -75,7 +74,10 @@ namespace Inklewriter
 				reader.Read ();
 				switch (propertyName) {
 				case "created_at":
-					story.CreatedAt = System.DateTime.Parse ((string)reader.Value);
+					var createdString = (string)reader.Value;
+					if (!string.IsNullOrEmpty (createdString)) {
+						story.CreatedAt = System.DateTime.Parse (createdString);
+					}
 					break;
 				case "data":
 					ReadData (reader, story);
@@ -84,7 +86,10 @@ namespace Inklewriter
 					story.Title = (string)reader.Value;
 					break;
 				case "updated_at":
-					story.UpdatedAt = System.DateTime.Parse ((string)reader.Value);
+					var updatedString = (string)reader.Value;
+					if (!string.IsNullOrEmpty (updatedString)) {
+						story.UpdatedAt = System.DateTime.Parse (updatedString);
+					}
 					break;
 				case "url_key":
 					story.UrlKey = (string)reader.Value;
