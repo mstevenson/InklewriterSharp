@@ -46,38 +46,37 @@ namespace Inklewriter
 
 		#endregion
 
-
-		public void RebuildBacklinks ()
-		{
-			EndCount = 0;
-			var stitches = Stitches;
-			for (int e = 0; e < stitches.Count; e++) {
-				stitches [e].Backlinks = new List<Stitch> ();
-			}
-			for (int e = 0; e < stitches.Count; e++)
-				if (stitches [e].Options.Count > 0) {
-					for (var t = 0; t < stitches [e].Options.Count; t++) {
-						if (stitches [e].Options [t].LinkStitch != null) {
-							stitches [e].Options [t].LinkStitch.Backlinks.Add (stitches [e]);
-						} else {
-							LooseEndCount++;
-						}
-					}
-				} else {
-					if (stitches [e].DivertStitch != null) {
-						stitches [e].DivertStitch.Backlinks.Add (stitches [e]);
-					} else {
-						EndCount++;
-					}
-				}
-			if (WatchRefCounts ()) {
-				for (int e = 0; e < stitches.Count; e++) {
-					if (stitches[e].Backlinks.Count != stitches[e].RefCount) {
-						throw new System.Exception ("Stitch with text '" + stitches[e].Text + "' has invalid ref-count!");
-					}
-				}
-			}
-		}
+//		public void RebuildBacklinks ()
+//		{
+//			EndCount = 0;
+//			var stitches = Stitches;
+//			for (int e = 0; e < stitches.Count; e++) {
+//				stitches [e].Backlinks = new List<Stitch> ();
+//			}
+//			for (int e = 0; e < stitches.Count; e++)
+//				if (stitches [e].Options.Count > 0) {
+//					for (var t = 0; t < stitches [e].Options.Count; t++) {
+//						if (stitches [e].Options [t].LinkStitch != null) {
+//							stitches [e].Options [t].LinkStitch.Backlinks.Add (stitches [e]);
+//						} else {
+//							LooseEndCount++;
+//						}
+//					}
+//				} else {
+//					if (stitches [e].DivertStitch != null) {
+//						stitches [e].DivertStitch.Backlinks.Add (stitches [e]);
+//					} else {
+//						EndCount++;
+//					}
+//				}
+//			if (WatchRefCounts ()) {
+//				for (int e = 0; e < stitches.Count; e++) {
+//					if (stitches[e].Backlinks.Count != stitches[e].RefCount) {
+//						throw new System.Exception ("Stitch with text '" + stitches[e].Text + "' has invalid ref-count!");
+//					}
+//				}
+//			}
+//		}
 
 		public static bool WatchRefCounts ()
 		{
@@ -94,28 +93,29 @@ namespace Inklewriter
 
 		#region Flags
 
+		/// <summary>
+		/// Preprocesses and stores all flags set in all stitches.
+		/// </summary>
 		public void CollateFlags ()
 		{
 			FlagIndex = new List<string> ();
-			var stitches = Stitches;
-			for (int e = 0; e < stitches.Count; e++) {
-				var t = stitches[e];
-				for (int n = 0; n < t.Flags.Count; n++) {
-					AddFlagToIndex (t.Flags[n]);
+			foreach (var stitch in Stitches) {
+				foreach (var flag in stitch.Flags) {
+					AddFlagToIndex (flag);
 				}
-				for (int r = 0; r < t.Options.Count; r++) {
-					for (int n = 0; n < t.Options [r].IfConditions.Count; n++) {
-						AddFlagToIndex (t.Options[r].IfConditions[n]);
+				foreach (var option in stitch.Options) {
+					foreach (var ifCondition in option.IfConditions) {
+						AddFlagToIndex (ifCondition);
 					}
-					for (int n = 0; n < t.Options [r].NotIfConditions.Count; n++) {
-						AddFlagToIndex (t.Options [r].NotIfConditions [n]);
+					foreach (var notIfCondition in option.NotIfConditions) {
+						AddFlagToIndex (notIfCondition);
 					}
 				}
-				for (var n = 0; n < t.IfConditions.Count; n++) {
-					AddFlagToIndex (t.IfConditions[n]);
+				foreach (var ifCondition in stitch.IfConditions) {
+					AddFlagToIndex (ifCondition);
 				}
-				for (var n = 0; n < t.NotIfConditions.Count; n++) {
-					AddFlagToIndex (t.NotIfConditions [n]);
+				foreach (var notIfCondition in stitch.NotIfConditions) {
+					AddFlagToIndex (notIfCondition);
 				}
 			}
 		}
@@ -131,11 +131,9 @@ namespace Inklewriter
 
 		public int GetIdxOfFlag (string flag, List<FlagValue> allFlags)
 		{
-			// FIXME allFlags should be special flag objects that have a 'value'
-
-			for (var n = 0; n < allFlags.Count; n++) {
-				if (allFlags[n].flagName == flag) {
-					return n;
+			for (var i = 0; i < allFlags.Count; i++) {
+				if (allFlags[i].flagName == flag) {
+					return i;
 				}
 			}
 			return -1;
