@@ -27,6 +27,11 @@ namespace Inklewriter
 
 		public bool Loading { get; set; }
 
+		public StoryModel ()
+		{
+			FlagIndex = new List<string> ();
+		}
+
 		#region IO
 
 		public void ImportStory (string data)
@@ -120,6 +125,9 @@ namespace Inklewriter
 			}
 		}
 
+		/// <summary>
+		/// Adds a flag name to the index, but strips off the value in a flag expression.
+		/// </summary>
 		public void AddFlagToIndex (string flag)
 		{
 			Console.WriteLine ("Adding flag string " + flag);
@@ -129,10 +137,10 @@ namespace Inklewriter
 			}
 		}
 
-		public int GetIdxOfFlag (string flag, List<FlagValue> allFlags)
+		public int GetIndexOfFlag (string flag, List<FlagValue> allFlags)
 		{
 			for (var i = 0; i < allFlags.Count; i++) {
-				if (allFlags[i].flagName == flag) {
+				if (allFlags[i].flagName == flag.ToLower ()) {
 					return i;
 				}
 			}
@@ -149,11 +157,11 @@ namespace Inklewriter
 
 		public int GetValueOfFlag (string flag, List<FlagValue> allFlags)
 		{
-			var n = GetIdxOfFlag (flag, allFlags);
+			var n = GetIndexOfFlag (flag, allFlags);
 			return n >= 0 ? allFlags[n].value : 0;
 		}
 
-		public void ProcessFlagSetting (Stitch stitch, List<FlagValue> allFlags) // t == all flags
+		public void ProcessFlagSetting (Stitch stitch, List<FlagValue> allFlags)
 		{
 			for (int n = 0; n < stitch.Flags.Count; n++) {
 				string r = stitch.FlagByIndex (n);
@@ -164,7 +172,7 @@ namespace Inklewriter
 				int u = -1;
 				if (s.Count > 0) {
 					r = s[1].ToString ();
-					u = GetIdxOfFlag(r, allFlags);
+					u = GetIndexOfFlag(r, allFlags);
 					var m = new Regex (@"\d+");
 					if (m.IsMatch (s [3].ToString ())) {
 						if (s [2].ToString () == "=") {
@@ -188,7 +196,7 @@ namespace Inklewriter
 						Console.WriteLine ("Can't add/subtract a boolean.");
 					}
 				} else {
-					u = GetIdxOfFlag(r, allFlags);
+					u = GetIndexOfFlag(r, allFlags);
 				}
 				Console.WriteLine ("Assigning value: " + i);
 				if (u >= 0) {
