@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 namespace Inklewriter
 {
@@ -23,45 +24,59 @@ namespace Inklewriter
 		}
 	}
 
+
 	public class Player
 	{
+		public event Action<PlayChunk> OnChunkShown;
+
+		public class PlayChunk
+		{
+			public List<Stitch> stitches;
+			
+			internal void AddStitch (Stitch stitch)
+			{
+				stitches.Add (stitch);
+			}
+		}
+
 		StoryModel model;
-		Stitch currentStitch;
 
-
+		public List<string> FlagsCollected { get; private set; }
 
 		public Player (StoryModel model)
 		{
 			this.model = model;
+			FlagsCollected = new List<string> ();
 		}
 
 		public void Begin ()
 		{
-			ShowStitch (model.Story.InitialStitch);
+			ShowChunk (model.Story.InitialStitch);
 		}
 
-		void ShowStitch (Stitch stitch)
+		PlayChunk ShowChunk (Stitch stitch)
 		{
-			currentStitch = stitch;
-//			if (stitch.flagNames != null) {
-//				foreach (var f in stitch.flagNames) {
-//					if (!flags.Contains (stitch);
-//				}
-//			}
-//			if (stitch.options && stitch.options.Count > 0) {
-//				ShowOptions (stitch.options);
-//			}
-			if (stitch.DivertStitch == null) {
-				ShowStitch (stitch.DivertStitch);
+			PlayChunk chunk = new PlayChunk ();
+			Stitch current = stitch;
+			while (current != null) {
+				ProcessFlags (current.Flags);
+				chunk.AddStitch (current);
+				current = current.DivertStitch;
 			}
+			return chunk;
 		}
 
 
-
+		public void SelectOption (int index)
+		{
+		}
 
 
 		void ProcessFlags (List<string> flags)
 		{
+			if (flags == null) {
+				return;
+			}
 			foreach (var flag in flags) {
 				var f = flag.ToLower ();
 				var regex = new Regex (@"^(.*?)\s*(\=|\+|\-)\s*(\b.*\b)\s*$");
