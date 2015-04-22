@@ -73,11 +73,32 @@ namespace Inklewriter.Tests
 		}
 
 		[Test]
-		public void Write ()
+		public void Title ()
 		{
 			string data = StoryWriter.Write (story);
+			JsonObject obj = (JsonObject)SimpleJson.DeserializeObject (data);
 
-			// TODO parse the resulting json, check integrity
+			Assert.AreEqual ("Test Story", obj ["title"]);
+		}
+
+		[Test]
+		public void UrlKey ()
+		{
+			string data = StoryWriter.Write (story);
+			JsonObject obj = (JsonObject)SimpleJson.DeserializeObject (data);
+
+			Assert.AreEqual ("abcd", obj ["url_key"]);
+		}
+
+		[Test]
+		public void Author ()
+		{
+			string data = StoryWriter.Write (story);
+			JsonObject obj = (JsonObject)SimpleJson.DeserializeObject (data);
+
+			var d = (JsonObject)obj["data"];
+			var e = (JsonObject)d["editorData"];
+			Assert.AreEqual ("inkle", e["authorName"]);
 		}
 	}
 }

@@ -13,7 +13,11 @@ namespace Inklewriter
 		public static string Write (Story story)
 		{
 			JsonObject rootObj = new JsonObject ();
+
+			rootObj ["title"] = story.Title;
+			rootObj ["url_key"] = story.UrlKey;
 			rootObj ["created_at"] = GetDateTimeString (story.CreatedAt);
+			rootObj ["updated_at"] = GetDateTimeString (story.UpdatedAt);
 
 			var dataObj = new JsonObject ();
 			rootObj ["data"] = dataObj;
