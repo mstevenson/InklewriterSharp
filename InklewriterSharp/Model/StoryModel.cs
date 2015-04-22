@@ -6,7 +6,9 @@ namespace Inklewriter
 {
 	public class StoryModel
 	{
-		public class FlagValue {
+		public class FlagValue
+		{
+			public bool isBoolean;
 			public string flagName;
 			public int value;
 		}
@@ -164,49 +166,51 @@ namespace Inklewriter
 		public void ProcessFlagSetting (Stitch stitch, List<FlagValue> allFlags)
 		{
 			for (int n = 0; n < stitch.Flags.Count; n++) {
-				string r = stitch.FlagByIndex (n);
-				int i = 0;
-				Console.WriteLine ("Flag directive: " + r);
-				var o = new Regex (@"^(.*?)\s*(\=|\+|\-)\s*(\b.*\b)\s*$");
-				var s = o.Matches (r);
-				int u = -1;
-				if (s.Count > 0) {
-					r = s[1].ToString ();
-					u = GetIndexOfFlag(r, allFlags);
-					var m = new Regex (@"\d+");
-					if (m.IsMatch (s [3].ToString ())) {
-						if (s [2].ToString () == "=") {
-							i = int.Parse (s[3].ToString ());
+				string flag = stitch.FlagByIndex (n);
+				int newValue = 0;
+
+				Console.WriteLine ("Flag directive: " + flag);
+				var expressionRegex = new Regex (@"^(.*?)\s*(\=|\+|\-)\s*(\b.*\b)\s*$");
+				var matches = expressionRegex.Matches (flag);
+				int flagIndex = -1;
+				bool isBoolean = false;
+
+				if (matches.Count > 0) {
+					flag = matches[1].ToString ();
+					flagIndex = GetIndexOfFlag(flag, allFlags);
+					var matchedOperator = matches [2].ToString ();
+					var matchedValue = matches [3].ToString ();
+
+					bool isValueNumerical = Regex.IsMatch (matchedValue, @"\d+");
+					if (isValueNumerical) {
+						// Handle numerical value
+						isBoolean = false;
+						if (matchedOperator == "=") {
+							newValue = int.Parse (matchedValue);
+						} else {
+							newValue = (flagIndex < 0) ? 0 : allFlags [flagIndex].value;
+							if (matchedOperator == "+") {
+								newValue += int.Parse (matchedValue);
+							} else if (matchedOperator == "-") {
+								newValue -= int.Parse (matchedValue);
+							}
 						}
 					} else {
-						if (u < 0) {
-							i = 0;
+						// Handle boolean value
+						isBoolean = true;
+						if (matchedOperator == "=") {
+							newValue = ConvertStringToBooleanIfAppropriate (matchedValue);
 						} else {
-							i = allFlags[u].value;
+							Console.WriteLine ("Can't add/subtract a boolean.");
 						}
-						if (s[2].ToString () == "+") {
-							i += int.Parse (s[3].ToString ());
-						} else {
-							i -= int.Parse (s[3].ToString ());
-						}
-					}
-					if (s[2].ToString () == "=") {
-						i = ConvertStringToBooleanIfAppropriate (s[3].ToString ());
-					} else {
-						Console.WriteLine ("Can't add/subtract a boolean.");
 					}
 				} else {
-					u = GetIndexOfFlag(r, allFlags);
+					flagIndex = GetIndexOfFlag(flag, allFlags);
 				}
-				Console.WriteLine ("Assigning value: " + i);
-				if (u >= 0) {
-					allFlags.RemoveAt(u);
-				}
-				var a = new FlagValue {
-					flagName = r,
-					value = i
-				};
-				allFlags.Add(a);
+
+				Console.WriteLine ("Assigning value: " + newValue);
+				allFlags [flagIndex].isBoolean = isBoolean;
+				allFlags [flagIndex].value = newValue;
 			}
 		}
 
@@ -460,7 +464,9 @@ namespace Inklewriter
 
 		public int ConvertStringToBooleanIfAppropriate (string s)
 		{
-			// FIXME bools represented as 0 and 1
+			if (s.ToLower () == "true") {
+				return 1;
+			}
 			return 0;
 		}
 
