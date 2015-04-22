@@ -36,6 +36,19 @@ namespace Inklewriter.Tests
 		{
 			Assert.AreEqual ("test", StoryModel.ExtractFlagNameFromExpression ("Test = 3"));
 		}
+
+		[Test]
+		public void GetValueOfFlag ()
+		{
+			List<StoryModel.FlagValue> flags = new List<StoryModel.FlagValue> {
+				new StoryModel.FlagValue { flagName = "test a", value = 10 },
+				new StoryModel.FlagValue { flagName = "test b", value = 20 },
+				new StoryModel.FlagValue { flagName = "test c", value = 30 },
+			};
+			StoryModel model = new StoryModel ();
+
+			Assert.AreEqual (20, model.GetValueOfFlag ("Test B", flags));
+		}
 	}
 
 }
