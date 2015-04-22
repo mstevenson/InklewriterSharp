@@ -155,7 +155,7 @@ namespace Inklewriter
 			if (shortName.Length > 1) {
 				result += shortName.Substring (1);
 			}
-			result = result.Substring (0, 16);
+			result = result.Substring (0, System.Math.Min (result.Length, 16));
 			return result;
 		}
 
