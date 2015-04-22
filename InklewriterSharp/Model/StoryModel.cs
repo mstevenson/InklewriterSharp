@@ -91,13 +91,6 @@ namespace Inklewriter
 			return false;
 		}
 
-		public List<Stitch> Stitches {
-			get {
-				return null;
-//				return Story.data.stitches;
-			}
-		}
-
 		#region Flags
 
 		/// <summary>
@@ -106,7 +99,7 @@ namespace Inklewriter
 		public void CollateFlags ()
 		{
 			FlagIndex = new List<string> ();
-			foreach (var stitch in Stitches) {
+			foreach (var stitch in Story.Stitches) {
 				foreach (var flag in stitch.Flags) {
 					AddFlagToIndex (flag);
 				}
@@ -265,7 +258,7 @@ namespace Inklewriter
 		public Stitch CreateStitch (string text)
 		{
 			Stitch s = new Stitch (text);
-			Stitches.Add (s);
+			Story.Stitches.Add (s);
 			return s;
 		}
 
@@ -286,9 +279,9 @@ namespace Inklewriter
 				e.RemoveOption (e.Options [t]);
 			}
 			RemovePageNumber(e, true);
-			for (var t = 0; t < Stitches.Count; ++t) {
-				if (Stitches [t] == e) {
-					Stitches.RemoveAt (t);
+			for (var t = 0; t < Story.Stitches.Count; ++t) {
+				if (Story.Stitches [t] == e) {
+					Story.Stitches.RemoveAt (t);
 					return;
 				}
 			}
@@ -299,7 +292,7 @@ namespace Inklewriter
 			if (WatchRefCounts ()) {
 				Console.WriteLine ("Repointing stitch links from " + source.Name + " to " + (target != null ? target.Name : "to null."));
 			}
-			var stitches = Stitches;
+			var stitches = Story.Stitches;
 			for (int n = 0; n < stitches.Count; n++) {
 				var r = stitches[n];
 				if (r.DivertStitch == source) {
@@ -322,8 +315,7 @@ namespace Inklewriter
 		public void NameStitches ()
 		{
 			HashSet<string> usedShortNames = new HashSet<string> ();
-			var stitches = Stitches;
-			foreach (var currentStitch in stitches) {
+			foreach (var currentStitch in Story.Stitches) {
 				string shortName = currentStitch.CreateShortName ();
 				string incrementedShortName = shortName;
 				for (int num = 1; usedShortNames.Contains (shortName); num++) {
@@ -366,7 +358,7 @@ namespace Inklewriter
 				return;
 			}
 			var n = e.PageNumber + 1;
-			var stitches = Stitches;
+			var stitches = Story.Stitches;
 			for (var r = 0; r < stitches.Count; r++) {
 				var i = stitches[r].PageNumber;
 				if (i >= n) {
@@ -395,7 +387,7 @@ namespace Inklewriter
 			var t = 0;
 			//			var n = {}		;
 			//			var r = {};
-			var stitches = Stitches;
+			var stitches = Story.Stitches;
 			for (var i = 0; i < stitches.Count; i++) {
 				var s = stitches[i].PageNumber;
 				if (s > 0) {
@@ -446,10 +438,10 @@ namespace Inklewriter
 
 		public void Purge ()
 		{
-			if (Stitches.Count == 0) {
+			if (Story.Stitches.Count == 0) {
 				return;
 			}
-			var stitches = Stitches;
+			var stitches = Story.Stitches;
 			List<Stitch> stitchesToRemove = new List<Stitch> ();
 			for (var t = 0; t < stitches.Count; ++t) {
 				var n = stitches[t];
@@ -495,7 +487,7 @@ namespace Inklewriter
 		public int PageSize (int pageNumber)
 		{
 			var t = 0;
-			var stitches = Stitches;
+			var stitches = Story.Stitches;
 			for (var n = 0; n < stitches.Count; n++) {
 				if (stitches [n].PageNumber == pageNumber) {
 					t++;
@@ -511,7 +503,7 @@ namespace Inklewriter
 			}
 //			var e = [];
 //			t = [];
-			var stitches = Stitches;
+			var stitches = Story.Stitches;
 //			for (var n = 0; n < stitches.Count; n++) {
 //				var r = stitches[n];
 //				r.VerticalDistance (-1);
