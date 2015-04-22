@@ -162,81 +162,86 @@ namespace Inklewriter
 				// Parse content objects
 				if (content.Count > 1) {
 					for (int i = 1; i < content.Count; i++) {
-						ReadStitchContent ((JsonObject)content [i], story, stitch);
+						var contentItem = (JsonObject)content [i];
+						if (contentItem.ContainsKey ("option")) {
+							ReadOptionContentItem (contentItem, story, stitch);
+						} else {
+							ReadContentItem (contentItem, story, stitch);
+						}
 					}
 				}
 			}
 		}
 
-		static void ReadStitchContent (JsonObject obj, Story story, Stitch stitch)
+		static void ReadOptionContentItem (JsonObject obj, Story story, Stitch stitch)
 		{
-			// Parse option content object
-			if (obj.ContainsKey ("option")) {
-				Option option = stitch.AddOption ();
-				foreach (var kvp in obj) {
-					string property = kvp.Key;
-					object value = kvp.Value;
-					switch (property) {
-					case "option":
-						option.Text = (string)value;
-						break;
-					case "linkPath":
-						option.LinkStitch = GetOrCreateStitch (story, (string)value);
-						break;
-					case "ifConditions":
-						var ifConditionsArray = (JsonArray)value;
-						if (ifConditionsArray == null) {
-							break;
-						}
-						foreach (var c in ifConditionsArray) {
-							var val = (string)((JsonObject)c) ["ifCondition"];
-							option.IfConditions.Add (val);
-						}
-						break;
-					case "notIfConditions":
-						var notIfConditionsArray = (JsonArray)value;
-						if (notIfConditionsArray == null) {
-							break;
-						}
-						foreach (var c in notIfConditionsArray)
-						{
-							var val = (string)((JsonObject)c)["notIfCondition"];
-							option.NotIfConditions.Add (val);
-						}
+			Option option = stitch.AddOption ();
+			foreach (var kvp in obj) {
+				string property = kvp.Key;
+				object value = kvp.Value;
+				switch (property) {
+				case "option":
+					option.Text = (string)value;
+					break;
+				case "linkPath":
+					option.LinkStitch = GetOrCreateStitch (story, (string)value);
+					break;
+				case "ifConditions":
+					var ifConditionsArray = (JsonArray)value;
+					if (ifConditionsArray == null) {
 						break;
 					}
+					foreach (var c in ifConditionsArray) {
+						var val = (string)((JsonObject)c) ["ifCondition"];
+						option.IfConditions.Add (val);
+					}
+					break;
+				case "notIfConditions":
+					var notIfConditionsArray = (JsonArray)value;
+					if (notIfConditionsArray == null) {
+						break;
+					}
+					foreach (var c in notIfConditionsArray)
+					{
+						var val = (string)((JsonObject)c)["notIfCondition"];
+						option.NotIfConditions.Add (val);
+					}
+					break;
 				}
-			} else {
-				foreach (var kvp in obj) {
-					string property = (string)kvp.Key;
-					object value = kvp.Value;
-					switch (property) {
-					case "runOn":
-						stitch.RunOn = (bool)value;
-						break;
-					case "pageNum":
-						stitch.PageNumber = ParseInt (value);
-						break;
-					case "pageLabel":
-						stitch.PageLabel = (string)value;
-						break;
-					case "divert":
-						var divertStitch = GetOrCreateStitch (story, (string)value);
-						stitch.DivertTo (divertStitch);
-						break;
-					case "image":
-						stitch.Image = (string)value;
-						break;
-					case "flagName":
-						stitch.Flags.Add ((string)value);
-						break;
-					case "ifCondition":
-						stitch.IfConditions.Add ((string)value);
-						break;
-					case "notIfCondition":
-						stitch.NotIfConditions.Add ((string)value);
-						break;
-					}
+			}
+		}
+
+		static void ReadContentItem (JsonObject obj, Story story, Stitch stitch)
+		{
+			foreach (var kvp in obj) {
+				string property = (string)kvp.Key;
+				object value = kvp.Value;
+				switch (property) {
+				case "runOn":
+					stitch.RunOn = (bool)value;
+					break;
+				case "pageNum":
+					stitch.PageNumber = ParseInt (value);
+					break;
+				case "pageLabel":
+					stitch.PageLabel = (string)value;
+					break;
+				case "divert":
+					var divertStitch = GetOrCreateStitch (story, (string)value);
+					stitch.DivertTo (divertStitch);
+					break;
+				case "image":
+					stitch.Image = (string)value;
+					break;
+				case "flagName":
+					stitch.Flags.Add ((string)value);
+					break;
+				case "ifCondition":
+					stitch.IfConditions.Add ((string)value);
+					break;
+				case "notIfCondition":
+					stitch.NotIfConditions.Add ((string)value);
+					break;
 				}
 			}
 		}
