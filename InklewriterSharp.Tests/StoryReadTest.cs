@@ -5,7 +5,7 @@ using Inklewriter;
 namespace Inklewriter.Tests
 {
 	[TestFixture]
-	public class ReadTest
+	public class StoryReadTest
 	{
 		string data;
 		Story story;
@@ -71,17 +71,15 @@ namespace Inklewriter.Tests
 		}
 
 		[Test]
-		[Ignore]
 		public void InitialStitch ()
 		{
-			
+			Assert.AreEqual ("thisIsTheInitial", story.InitialStitch.Name);
 		}
 
 		[Test]
-		[Ignore]
 		public void PlayPoint ()
 		{
-			// Test the a stitch object referenced by PlayPoint
+			Assert.AreEqual ("thisIsTheThirdPa1", story.EditorData.PlayPoint.Name);
 		}
 
 		[Test]
@@ -95,6 +93,62 @@ namespace Inklewriter.Tests
 		{
 			Assert.IsTrue (story.EditorData.LibraryVisible);
 		}
+
+		[Test]
+		public void StitchText ()
+		{
+		}
+
+		[Test]
+		public void OptionsName ()
+		{
+		}
+
+		[Test]
+		public void OptionsLinkStitch ()
+		{
+		}
+
+		[Test]
+		public void OptionsConditions ()
+		{
+		}
+
+		[Test]
+		public void StitchConditions ()
+		{
+		}
+
+		[Test]
+		public void RunOn ()
+		{
+		}
+
+		[Test]
+		public void PageNum ()
+		{
+		}
+
+		[Test]
+		public void PageLabel ()
+		{
+		}
+
+		[Test]
+		public void Divert ()
+		{
+		}
+
+		[Test]
+		public void Image ()
+		{
+		}
+
+		[Test]
+		public void Flag ()
+		{
+		}
+
 	}
 }
 

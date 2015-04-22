@@ -37,10 +37,10 @@
     <Compile Include="StoryTest.cs" />
     <Compile Include="StitchTest.cs" />
     <Compile Include="EditorDataTest.cs" />
-    <Compile Include="ReadTest.cs" />
-    <Compile Include="WriteTest.cs" />
     <Compile Include="OptionTest.cs" />
     <Compile Include="StoryModelTest.cs" />
+    <Compile Include="StoryReadTest.cs" />
+    <Compile Include="StoryWriteTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

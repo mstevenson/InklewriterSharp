@@ -130,7 +130,7 @@ namespace Inklewriter
 					story.EditorData.LibraryVisible = (bool)value;
 					break;
 				case "playPoint":
-					story.EditorData.PlayPoint = (string)value;
+					story.EditorData.PlayPoint = GetOrCreateStitch (story, (string)value);
 					break;
 				case "textSize":
 					story.EditorData.TextSize = (EditorData.TextSizeType)(ParseInt(value));
