@@ -143,7 +143,8 @@ namespace Inklewriter
 		{
 			var regex = new Regex (@"^(.*?)\s*(\=|\+|\-|\>|\<|\!\=|$)");
 			var match = regex.Match (expression);
-			return match.Captures[1].Value;
+			var name = match.Groups [1].Value.ToLower ();
+			return name;
 		}
 
 		public int GetValueOfFlag (string flag, List<FlagValue> allFlags)
