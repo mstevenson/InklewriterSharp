@@ -26,9 +26,8 @@ namespace Inklewriter.Tests
 				new FlagValue { flagName = "test b", value = 2 },
 				new FlagValue { flagName = "test c", value = 3 },
 			};
-			StoryModel model = new StoryModel ();
 
-			Assert.AreEqual (1, model.GetIndexOfFlag ("Test B", flags));
+			Assert.AreEqual (1, StoryModel.GetIndexOfFlag ("Test B", flags));
 		}
 
 		[Test]
@@ -45,9 +44,8 @@ namespace Inklewriter.Tests
 				new FlagValue { flagName = "test b", value = 20 },
 				new FlagValue { flagName = "test c", value = 30 },
 			};
-			StoryModel model = new StoryModel ();
 
-			Assert.AreEqual (20, model.GetValueOfFlag ("Test B", flags));
+			Assert.AreEqual (20, StoryModel.GetValueOfFlag ("Test B", flags));
 		}
 
 		[Test]

@@ -149,7 +149,7 @@ namespace Inklewriter
 			}
 		}
 
-		public int GetIndexOfFlag (string flag, List<FlagValue> allFlags)
+		public static int GetIndexOfFlag (string flag, List<FlagValue> allFlags)
 		{
 			for (var i = 0; i < allFlags.Count; i++) {
 				if (allFlags[i].flagName == flag.ToLower ()) {
@@ -167,7 +167,7 @@ namespace Inklewriter
 			return name;
 		}
 
-		public int GetValueOfFlag (string flag, List<FlagValue> allFlags)
+		public static int GetValueOfFlag (string flag, List<FlagValue> allFlags)
 		{
 			var n = GetIndexOfFlag (flag, allFlags);
 			return n >= 0 ? allFlags[n].value : 0;
@@ -191,10 +191,10 @@ namespace Inklewriter
 				bool isBoolean = false;
 
 				if (match.Success) {
-					flag = match.Groups [1].ToString ();
+					flag = match.Groups [1].Value;
 					flagIndex = GetIndexOfFlag(flag, allFlags);
-					var matchedOperator = match.Groups [2].ToString ();
-					var matchedValue = match.Groups [3].ToString ();
+					var matchedOperator = match.Groups [2].Value;
+					var matchedValue = match.Groups [3].Value;
 
 					bool isValueNumerical = Regex.IsMatch (matchedValue, @"\d+");
 					if (isValueNumerical) {
@@ -235,9 +235,9 @@ namespace Inklewriter
 			string pattern = @"^(.*?)\s*(\<|\>|\<\=|\>\=|\=|\!\=|\=\=)\s*(\b.*\b)\s*$";
 			var match = Regex.Match (expression, pattern);
 			if (match.Success) {
-				string flag = match.Groups [1].ToString ();
-				string op = match.Groups [2].ToString ();
-				string value = match.Groups [3].ToString ();
+				string flag = match.Groups [1].Value;
+				string op = match.Groups [2].Value;
+				string value = match.Groups [3].Value;
 
 				int numberValue = -1;
 				bool isBool = !int.TryParse (value, out numberValue);
