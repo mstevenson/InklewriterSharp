@@ -42,6 +42,15 @@ namespace Inklewriter.Tests
 			Assert.AreEqual ("The number five.", player.ConvertNumberToWords ("The number [value:a].", flags));
 			Assert.AreEqual ("The number 5.", player.ConvertNumberToWords ("The number [number:a].", flags));
 		}
+
+		[Test]
+		public void ReplaceStyleMarkup ()
+		{
+			Player player = new Player (null);
+
+			Assert.AreEqual ("This is <b>bold</b> text.", player.ReplaceStyleMarkup ("This is *-bold-* text."));
+			Assert.AreEqual ("This is <i>italic</i> text.", player.ReplaceStyleMarkup ("This is /=italic=/ text."));
+		}
 	}
 }
 

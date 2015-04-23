@@ -275,6 +275,14 @@ namespace Inklewriter
 			return text;
 		}
 
+		public string ReplaceStyleMarkup (string e)
+		{
+			e = Regex.Replace (e, @"\*\-(.*?)\-\*", "<b>$1</b>");
+			e = Regex.Replace (e, @"\/\=(.*?)\=\/", "<i>$1</i>");
+			e = Regex.Replace (e, @"(\/\=|\=\/|\*\-|\-\*)", "");
+			return e;
+		}
+
 		public string ConvertNumberToWords (string text, List<FlagValue> flags)
 		{
 			var pattern = @"\[\s*(number|value)\s*\:\s*(.*?)\s*\]";
