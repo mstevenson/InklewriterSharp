@@ -4,15 +4,32 @@ using System.Text.RegularExpressions;
 
 namespace Inklewriter
 {
-	public class StoryModel
+	public class FlagValue
 	{
-		public class FlagValue
+		public string flagName;
+		public int value;
+		public bool isBoolean;
+
+		public FlagValue ()
 		{
-			public bool isBoolean;
-			public string flagName;
-			public int value;
 		}
 
+		public FlagValue (string name, bool isTrue)
+		{
+			flagName = name;
+			value = isTrue ? 1 : 0;
+			isBoolean = true;
+		}
+
+		public FlagValue (string name, int number)
+		{
+			flagName = name;
+			value = number;
+		}
+	}
+
+	public class StoryModel
+	{
 		public const string defaultStoryName = "Untitled Story";
 		public const string defaultAuthorName = "Anonymous";
 		public const int maxPreferredPageLength = 8;
@@ -160,19 +177,19 @@ namespace Inklewriter
 		{
 			for (int n = 0; n < stitch.Flags.Count; n++) {
 				string flag = stitch.FlagByIndex (n);
-				int newValue = 0;
+				int newValue = 1; // true
 
 				Console.WriteLine ("Flag directive: " + flag);
-				var expressionRegex = new Regex (@"^(.*?)\s*(\=|\+|\-)\s*(\b.*\b)\s*$");
-				var matches = expressionRegex.Matches (flag);
+				var match = Regex.Match (flag, @"^(.*?)\s*(\=|\+|\-)\s*(\b.*\b)\s*$");
+
 				int flagIndex = -1;
 				bool isBoolean = false;
 
-				if (matches.Count > 0) {
-					flag = matches[1].ToString ();
+				if (match.Success) {
+					flag = match.Groups [1].ToString ();
 					flagIndex = GetIndexOfFlag(flag, allFlags);
-					var matchedOperator = matches [2].ToString ();
-					var matchedValue = matches [3].ToString ();
+					var matchedOperator = match.Groups [2].ToString ();
+					var matchedValue = match.Groups [3].ToString ();
 
 					bool isValueNumerical = Regex.IsMatch (matchedValue, @"\d+");
 					if (isValueNumerical) {
