@@ -87,6 +87,34 @@ namespace Inklewriter.Tests
 		}
 
 		[Test]
+		public void Test ()
+		{
+			StoryModel model = new StoryModel ();
+			List<FlagValue> flags = new List<FlagValue> {
+				new FlagValue ("a", false),
+				new FlagValue ("b", true),
+				new FlagValue ("c", 10),
+			};
+			Assert.IsTrue (model.Test ("a == false", flags));
+			Assert.IsFalse (model.Test ("a == true", flags));
+			Assert.IsTrue (model.Test ("b == true", flags));
+			Assert.IsFalse (model.Test ("b == false", flags));
+			Assert.IsTrue (model.Test ("b == 1", flags));
+			Assert.IsFalse (model.Test ("b == 2", flags));
+			Assert.IsTrue (model.Test ("c == 10", flags));
+			Assert.IsFalse (model.Test ("c != 10", flags));
+			Assert.IsTrue (model.Test ("c < 11", flags));
+			Assert.IsTrue (model.Test ("c > 9", flags));
+			Assert.IsFalse (model.Test ("c > 11", flags));
+			Assert.IsFalse (model.Test ("c < 9", flags));
+			Assert.IsTrue (model.Test ("c <= 10", flags));
+			Assert.IsTrue (model.Test ("c >= 10", flags));
+
+			// TODO create a custom exception type
+			Assert.Throws<System.Exception> (() => model.Test ("a < true", flags));
+		}
+
+		[Test]
 		[Ignore]
 		public void CollateFlags ()
 		{

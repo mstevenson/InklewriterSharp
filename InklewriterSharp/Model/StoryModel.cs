@@ -173,6 +173,11 @@ namespace Inklewriter
 			return n >= 0 ? allFlags[n].value : 0;
 		}
 
+		/// <summary>
+		/// Modify the values in the given flags array based on the flags specified in the stitch.
+		/// 
+		/// Each flag in the stitch must correlate to a flag in the flags array.
+		/// </summary>
 		public void ProcessFlagSetting (Stitch stitch, List<FlagValue> allFlags)
 		{
 			for (int n = 0; n < stitch.Flags.Count; n++) {
@@ -209,7 +214,7 @@ namespace Inklewriter
 						// Handle boolean value
 						isBoolean = true;
 						if (matchedOperator == "=") {
-							newValue = ConvertStringToBooleanIfAppropriate (matchedValue);
+							newValue = ConvertStringToBoolean (matchedValue) ? 1 : 0;
 						} else {
 							Console.WriteLine ("Can't add/subtract a boolean.");
 						}
@@ -226,44 +231,49 @@ namespace Inklewriter
 
 		public bool Test (string expression, List<FlagValue> allFlags)
 		{
-			Regex regex = new Regex (@"^(.*?)\s*(\<|\>|\<\=|\>\=|\=|\!\=|\=\=)\s*(\b.*\b)\s*$");
 			bool result = false;
-			MatchCollection matches = regex.Matches (expression);
-			if (regex.IsMatch (expression)) {
-				string flag = matches [1].ToString ();
-				string op = matches [2].ToString ();
-				string valueString = matches [3].ToString ();
-				int value = int.Parse (valueString);
+			string pattern = @"^(.*?)\s*(\<|\>|\<\=|\>\=|\=|\!\=|\=\=)\s*(\b.*\b)\s*$";
+			var match = Regex.Match (expression, pattern);
+			if (match.Success) {
+				string flag = match.Groups [1].ToString ();
+				string op = match.Groups [2].ToString ();
+				string value = match.Groups [3].ToString ();
+
+				int numberValue = -1;
+				bool isBool = !int.TryParse (value, out numberValue);
+
+				if (isBool) {
+					numberValue = ConvertStringToBoolean (value) ? 1 : 0;
+				}
 				
 				int flagValue = GetValueOfFlag (flag, allFlags);
-				Console.WriteLine ("Testing " + flagValue + " " + op + " " + value);
+//				Console.WriteLine ("Testing " + flagValue + " " + op + " " + numberValue);
 				if (op == "==" || op == "=") {
-					result = flagValue == value;
+					result = flagValue == numberValue;
+				} else if (op == "!=" || op == "<>") {
+					result = flagValue != numberValue;
 				} else {
-					if (op == "!=" || op == "<>") {
-						result = flagValue != value;
-					} else {
-						if (Regex.IsMatch (valueString, @"\d+")) {
-							throw new System.Exception ("Error - Can't perform an order-test on a boolean.");
-						}
-						if (op == "<") {
-							result = flagValue < value;
-						} else if (op == "<=") {
-							result = flagValue <= value;
-						} else if (op == ">") {
-							result = flagValue > value;
-						} else if (op == ">=") {
-							result = flagValue >= value;
-						}
+					if (isBool) {
+						throw new System.Exception ("Error - Can't perform an order-test on a boolean.");
+					}
+					switch (op) {
+					case "<":
+						result = flagValue < numberValue;
+						break;
+					case "<=":
+						result = flagValue <= numberValue;
+						break;
+					case ">":
+						result = flagValue > numberValue;
+						break;
+					case ">=":
+						result = flagValue >= numberValue;
+						break;
 					}
 				}
 			} else {
-				//				result = GetValueOfFlag (expression, allFlags) == 1;
-				//				result = ConvertStringToBooleanIfAppropriate(result) == 1;
-				//				if (result == false || result == -1) {
-				//					result = false;
-				//				}
-				//				result = true; // FIXME is this right?
+				result = GetValueOfFlag (expression, allFlags) == 1;
+//				result = ConvertStringToBooleanIfAppropriate(result) == 1;
 			}
 			return result;
 		}
@@ -471,12 +481,12 @@ namespace Inklewriter
 			}
 		}
 
-		public int ConvertStringToBooleanIfAppropriate (string s)
+		public bool ConvertStringToBoolean (string s)
 		{
 			if (s.ToLower () == "true") {
-				return 1;
+				return true;
 			}
-			return 0;
+			return false;
 		}
 
 		public bool HeaderWithinDistanceOfStitch (int distance, Stitch stitch)
