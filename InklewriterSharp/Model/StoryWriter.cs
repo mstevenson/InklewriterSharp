@@ -4,7 +4,7 @@ namespace Inklewriter
 {
 	public class StoryWriter
 	{
-		static string GetDateTimeString (System.DateTime date)
+		public static string GetDateTimeString (System.DateTime date)
 		{
 			string format = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 			return date.ToUniversalTime ().ToString (format, System.Globalization.CultureInfo.InvariantCulture);

@@ -73,6 +73,13 @@ namespace Inklewriter.Tests
 		}
 
 		[Test]
+		public void GetDateTimeString ()
+		{
+			var dateString = StoryWriter.GetDateTimeString (new DateTime (2015, 01, 02, 15, 10, 5, DateTimeKind.Utc));
+			Assert.AreEqual ("2015-01-02T15:10:05Z", dateString);
+		}
+
+		[Test]
 		public void Title ()
 		{
 			string data = StoryWriter.Write (story);
@@ -99,6 +106,26 @@ namespace Inklewriter.Tests
 			var d = (JsonObject)obj["data"];
 			var e = (JsonObject)d["editorData"];
 			Assert.AreEqual ("inkle", e["authorName"]);
+		}
+
+		[Test]
+		public void UpdatedAt ()
+		{
+			string data = StoryWriter.Write (story);
+			JsonObject obj = (JsonObject)SimpleJson.DeserializeObject (data);
+			var updated = "2015-02-03T04:10:20Z";
+
+			Assert.AreEqual (updated, obj["updated_at"]);
+		}
+
+		[Test]
+		public void CreatedAt ()
+		{
+			string data = StoryWriter.Write (story);
+			JsonObject obj = (JsonObject)SimpleJson.DeserializeObject (data);
+			var created = "2015-01-02T15:10:05Z";
+
+			Assert.AreEqual (created, obj["created_at"]);
 		}
 	}
 }
