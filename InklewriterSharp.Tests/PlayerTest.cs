@@ -51,6 +51,13 @@ namespace Inklewriter.Tests
 			Assert.AreEqual ("This is <b>bold</b> text.", player.ReplaceStyleMarkup ("This is *-bold-* text."));
 			Assert.AreEqual ("This is <i>italic</i> text.", player.ReplaceStyleMarkup ("This is /=italic=/ text."));
 		}
+
+		[Test]
+		public void ReplaceRunOnMarker ()
+		{
+			Player player = new Player (null);
+			Assert.AreEqual ("Run on ", player.ReplaceRunOnMarker ("Run on[...]"));
+		}
 	}
 }
 

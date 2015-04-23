@@ -259,9 +259,10 @@ namespace Inklewriter
 //			return e = e.replace(/\*\-(.*?)\-\*/g, "<b>$1</b>"), e = e.replace(/\/\=(.*?)\=\//g, "<i>$1</i>"), e = e.replace(/(\/\=|\=\/|\*\-|\-\*)/g, ""), e
 		}
 
-		public void ReplaceRunOnMarker ()
+		public string ReplaceRunOnMarker (string text)
 		{
-//			return e.replace(/\[\.\.\.\]/g, " ")
+			text = Regex.Replace (text, @"\[\.\.\.\]", " ");
+			return text;
 		}
 
 		public string ReplaceQuotes (string text)
@@ -275,12 +276,12 @@ namespace Inklewriter
 			return text;
 		}
 
-		public string ReplaceStyleMarkup (string e)
+		public string ReplaceStyleMarkup (string text)
 		{
-			e = Regex.Replace (e, @"\*\-(.*?)\-\*", "<b>$1</b>");
-			e = Regex.Replace (e, @"\/\=(.*?)\=\/", "<i>$1</i>");
-			e = Regex.Replace (e, @"(\/\=|\=\/|\*\-|\-\*)", "");
-			return e;
+			text = Regex.Replace (text, @"\*\-(.*?)\-\*", "<b>$1</b>");
+			text = Regex.Replace (text, @"\/\=(.*?)\=\/", "<i>$1</i>");
+			text = Regex.Replace (text, @"(\/\=|\=\/|\*\-|\-\*)", "");
+			return text;
 		}
 
 		public string ConvertNumberToWords (string text, List<FlagValue> flags)
