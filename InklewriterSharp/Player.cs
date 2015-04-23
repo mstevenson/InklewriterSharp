@@ -5,26 +5,6 @@ using System;
 
 namespace Inklewriter
 {
-	public class NumToWords
-	{
-		string[] digits = new[] { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
-		string[] tens = new[] { "ten", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety" };
-		string[] teens = new[] { "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen" };
-		string[] illions = new[] { "thousand", "million", "billion", "trillion" };
-
-		public void Convert (int num)
-		{
-			string text = "";
-			if (num == 0) {
-				text = "zero";
-			} else if (num < 0) {
-				text = "minus ";
-				num = -num;
-			}
-		}
-	}
-
-
 	public class Player
 	{
 		public event Action<PlayChunk> OnChunkShown;

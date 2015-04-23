@@ -41,6 +41,7 @@
     <Compile Include="StoryModelTest.cs" />
     <Compile Include="StoryReadTest.cs" />
     <Compile Include="StoryWriteTest.cs" />
+    <Compile Include="PlayerTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

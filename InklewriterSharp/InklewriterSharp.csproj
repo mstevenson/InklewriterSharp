@@ -41,6 +41,7 @@
     <Compile Include="Model\StoryReader.cs" />
     <Compile Include="Model\StoryWriter.cs" />
     <Compile Include="SimpleJson.cs" />
+    <Compile Include="NumToWords.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
