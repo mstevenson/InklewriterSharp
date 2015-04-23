@@ -242,21 +242,17 @@ namespace Inklewriter
 //				return e
 		}
 
-		public void ShuffleRandomOptions ()
+		public string ShuffleRandomElements (string text)
 		{
-//			var t = /\{\~([^\{\}]*?)\}/,
-//			n;
-//			while (n = e.match(t)) {
-//				var r = n[1].split("|"),
-//				i = parseInt(Math.random() * r.length);
-//				e = e.replace(t, r[i])
+			var pattern = @"\{\~([^\{\}]*?)\}";
+//			foreach (Group group in ) {
+			var group = Regex.Match (text, pattern).Groups[1];
+			var r = group.Value.Split ('|');
+			var rand = new Random ();
+			int i = rand.Next (0, r.Length);
+			text = Regex.Replace (text, pattern, r [i]);
 //			}
-//			return e
-		}
-
-		public void ReplaceBoldAndItalicMarkup ()
-		{
-//			return e = e.replace(/\*\-(.*?)\-\*/g, "<b>$1</b>"), e = e.replace(/\/\=(.*?)\=\//g, "<i>$1</i>"), e = e.replace(/(\/\=|\=\/|\*\-|\-\*)/g, ""), e
+			return text;
 		}
 
 		public string ReplaceRunOnMarker (string text)

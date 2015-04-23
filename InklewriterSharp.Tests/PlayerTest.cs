@@ -58,6 +58,16 @@ namespace Inklewriter.Tests
 			Player player = new Player (null);
 			Assert.AreEqual ("Run on ", player.ReplaceRunOnMarker ("Run on[...]"));
 		}
+
+		[Test]
+		public void ShuffleRandomElements ()
+		{
+			Player player = new Player (null);
+			List<string> validResults = new List<string> { "Random red color.", "Random blue color.", "Random green color." };
+			string result = player.ShuffleRandomElements ("Random {~red|green|blue} color.");
+
+			Assert.IsTrue (validResults.Contains (result));
+		}
 	}
 }
 
