@@ -213,33 +213,47 @@ namespace Inklewriter
 //		}
 
 
-		void ParseInLineConditionals ()
+		public static string ParseInLineConditionals (string text, List<FlagValue> flags)
 		{
-//			var n = /\{([^\~\{]*?)\:([^\{]*?)(\|([^\{]*?))?\}/,
-//				r = /(^\s*|\s*$)/g,
-//				i = /\s*(&&|\band\b)\s*/,
-//				s = /\s*(\!|\bnot\b)\s*(.+?)\s*$/,
-//				o, u = 0;
-//				while (o = e.match(n)) {
-//					u++;
-//					if (u > 1e3) {
-//						alert("Error in conditional!");
-//						break
-//					}
-//					if (o.length > 0) {
-//						var a = "",
-//						f = [],
-//						l = [],
-//						c = o[1].split(i);
-//						for (var h = 0; h < c.length; h++)
-//							if (c[h] != "&&" && c[h] != "and") {
-//								var p = c[h].match(s);
-//								p ? l.push(p[2].replace(r, "")) : f.push(c[h].replace(r, ""))
-//							}
-//						StoryModel.doesArrayMeetConditions(f, l, t) ? a = o[2] : o[4] !== undefined && (a = o[4]), e = e.replace(n, " " + a + " ")
-//					}
-//				}
-//				return e
+			var conditionBoundsPattern = @"\{([^\~\{]*?)\:([^\{]*?)(\|([^\{]*?))?\}";
+			var orPattern = @"(^\s*|\s*$)";
+			var andPattern = @"\s*(&&|\band\b)\s*";
+			var notPattern = @"\s*(\!|\bnot\b)\s*(.+?)\s*$";
+			var count = 0;
+			var matches = Regex.Match (text, conditionBoundsPattern).Groups;
+			foreach (var group in matches) {
+				count++;
+				if (count > 1000) {
+					throw new System.Exception ("Error in conditional!");
+				}
+				if (matches.Count > 0) {
+					var conditions = new List<string> ();
+					var notConditions = new List<string> ();
+					// Search "and" conditions
+					var conditionMatches = Regex.Split (matches[1].Value, andPattern);
+					for (var i = 0; i < conditionMatches.Length; i++) {
+						// Is not an "and" condition
+						if (conditionMatches [i] != "&&" && conditionMatches [i] != "and") {
+							// Search "not" conditions
+							var notPatternMatches = Regex.Match (conditionMatches [i], notPattern);
+							// Is a "not condition"
+							if (notPatternMatches.Success) {
+								notConditions.Add (notPatternMatches.Groups [2].Value.Replace (orPattern, ""));
+							} else {
+								conditions.Add (conditionMatches [i].Replace (orPattern, ""));
+							}
+						}
+					}
+					var replacementValue = "";
+					if (StoryModel.DoesArrayMeetConditions (conditions, notConditions, flags)) {
+						replacementValue = matches [2].Value;
+					} else if (!string.IsNullOrEmpty (matches [4].Value)) {
+						replacementValue = matches [4].Value;
+					}
+					text = Regex.Replace (text, conditionBoundsPattern, " " + replacementValue + " ");
+				}
+			}
+			return text;
 		}
 
 		public string ShuffleRandomElements (string text)

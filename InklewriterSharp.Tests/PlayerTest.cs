@@ -68,6 +68,17 @@ namespace Inklewriter.Tests
 
 			Assert.IsTrue (validResults.Contains (result));
 		}
+
+		[Test]
+		public void ParseInLineConditionals ()
+		{
+			string input = "Moving { speed > 5 : quickly | slowly }.";
+//			string slowResult = Player.ParseInLineConditionals (input, new List<FlagValue> { new FlagValue ("speed", 1) });
+			string quickResult = Player.ParseInLineConditionals (input, new List<FlagValue> { new FlagValue ("speed", 8) });
+
+//			Assert.AreEqual ("Moving slowly.", slowResult);
+			Assert.AreEqual ("Moving quickly.", quickResult);
+		}
 	}
 }
 

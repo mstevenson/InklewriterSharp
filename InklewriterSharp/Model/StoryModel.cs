@@ -229,7 +229,7 @@ namespace Inklewriter
 			}
 		}
 
-		public bool Test (string expression, List<FlagValue> allFlags)
+		public static bool Test (string expression, List<FlagValue> allFlags)
 		{
 			bool result = false;
 			string pattern = @"^(.*?)\s*(\<|\>|\<\=|\>\=|\=|\!\=|\=\=)\s*(\b.*\b)\s*$";
@@ -481,7 +481,7 @@ namespace Inklewriter
 			}
 		}
 
-		public bool ConvertStringToBoolean (string s)
+		public static bool ConvertStringToBoolean (string s)
 		{
 			if (s.ToLower () == "true") {
 				return true;
@@ -555,6 +555,19 @@ namespace Inklewriter
 //				var r = StoryModel.stitches[n];
 //				r.verticalDistance() == -1 && r.verticalDistance(StoryModel.stitches.length + 1)
 //			}
+		}
+
+		public static bool DoesArrayMeetConditions (List<string> conditions, List<string> notConditions, List<FlagValue> flags) // n type is unknown
+		{
+			var list = new List<string> ();
+			var success = false;
+			for (var i = 0; i < conditions.Count && !success; i++) {
+				success = !StoryModel.Test (conditions [i], flags);
+			}
+			for (var i = 0; i < notConditions.Count && !success; i++) {
+				success = StoryModel.Test (notConditions [i], flags);
+			}
+			return !success;
 		}
 	}
 }
