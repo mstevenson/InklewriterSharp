@@ -73,7 +73,7 @@ namespace Inklewriter.Tests
 		{
 			Player player = new Player (null);
 
-			Assert.AreEqual ("'<a href=\"http://inklestudios.com\">Inkle</a>'", player.ReplaceUrlMarkup ("[http://inklestudios.com|Inkle]"));
+			Assert.AreEqual ("<a href=\"http://inklestudios.com\">Inkle</a>", player.ReplaceUrlMarkup ("[http://inklestudios.com|Inkle]"));
 		}
 
 		[Test]
@@ -125,6 +125,15 @@ namespace Inklewriter.Tests
 
 			// Word count is rounded to the nearest 10 when under 100 words, otherwise rounded to 100
 			Assert.AreEqual (10, wordCount);
+		}
+
+		[Test]
+		public void ReplaceImageMarkup ()
+		{
+			Player player = new Player (null);
+			var result = player.ReplaceImageMarkup (@"%|%|%image.jpg$|$|$");
+
+			Assert.AreEqual (@"<div id=""illustration""><img class=""pic"" src=""image.jpg""/></div>", result);
 		}
 
 

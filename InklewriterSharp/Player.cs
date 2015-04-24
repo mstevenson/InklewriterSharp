@@ -256,7 +256,7 @@ namespace Inklewriter
 
 		public string ReplaceUrlMarkup (string e)
 		{
-			e = Regex.Replace (e, @"\[(.*?)\|(.*?)\]", onReplacedUrl != null ? onReplacedUrl ("$1", "$2") : "'<a href=\"$1\">$2</a>'");
+			e = Regex.Replace (e, @"\[(.*?)\|(.*?)\]", onReplacedUrl != null ? onReplacedUrl ("$1", "$2") : "<a href=\"$1\">$2</a>");
 			return e;
 		}
 
@@ -288,6 +288,16 @@ namespace Inklewriter
 //				$("#wordcount").text("About " + commadString(n) + " words");
 			}
 			return wordCount;
+		}
+
+//		public string PerformAllTextSubstitutions (string text)
+//		{
+//		}
+
+		public string ReplaceImageMarkup (string text)
+		{
+			text = Regex.Replace (text, @"\%\|\%\|\%(.*?)\$\|\$\|\$", "<div id=\"illustration\"><img class=\"pic\" src=\"$1\"/></div>");
+			return text;
 		}
 
 	}
