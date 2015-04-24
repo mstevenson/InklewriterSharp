@@ -7,8 +7,7 @@ namespace Inklewriter
 {
 	public class Player
 	{
-		public event Action<PlayChunk> OnChunkShown;
-
+//		public event Action<PlayChunk> OnChunkShown;
 
 		public class PlayChunk
 		{
@@ -31,78 +30,6 @@ namespace Inklewriter
 			FlagsCollected = new List<string> ();
 		}
 
-		public void Begin ()
-		{
-			ShowChunk (model.Story.InitialStitch);
-		}
-
-		PlayChunk ShowChunk (Stitch stitch)
-		{
-			PlayChunk chunk = new PlayChunk ();
-			Stitch current = stitch;
-			while (current != null) {
-				ProcessFlags (current.Flags);
-				chunk.AddStitch (current);
-				current = current.DivertStitch;
-			}
-			return chunk;
-		}
-
-
-		public void SelectOption (int index)
-		{
-		}
-
-
-		void ProcessFlags (List<string> flags)
-		{
-			if (flags == null) {
-				return;
-			}
-			foreach (var flag in flags) {
-				var f = flag.ToLower ();
-				var regex = new Regex (@"^(.*?)\s*(\=|\+|\-)\s*(\b.*\b)\s*$");
-				regex.Match (f);
-//				bool equality = flag.Contains ("=");
-//				bool addition = flag.Contains ("+");
-//				bool subtraction = flag.Contains ("-");
-
-//				if (equality || addition || subtraction) {
-//					var f = flag.Replace (" ", "");
-//					if (f.EndsWith ("=false")) {
-//						flags.Remove (flag);
-//					} else {
-////						if (f.Contains ("+");
-//					}
-//				} else {
-//
-//				}
-			}
-		}
-
-		void Test (string expression)
-		{
-			var regex = new Regex (@"^(.*?)\s*(\<|\>|\<\=|\>\=|\=|\!\=|\=\=)\s*(\b.*\b)\s*$");
-			var match = regex.Match (expression);
-			if (match.Success) {
-
-			} else {
-			}
-		}
-
-		string GetValueOfFlag (string expression)
-		{
-			return "";
-		}
-
-		void ShowOptions (List<Option> options)
-		{
-		}
-
-
-
-
-
 
 //		List<PlayChunk> e = new List<PlayChunk> ();
 //		List<string> flagsCollected = new List<string> ();
@@ -111,8 +38,6 @@ namespace Inklewriter
 //		PlayChunk prevChunk;
 //		int wordCount = 0;
 //		bool hadSectionHeading;
-//
-		StoryModel storyModel;
 //
 //
 //		// initialize method?
@@ -207,11 +132,13 @@ namespace Inklewriter
 //			}
 //		}
 
-//		void o (Stitch t)
-//		{
-//			if (t.Text != "..." && storyModel.Story.OptionMirroring && e.last().jqPlayChunk.prepend('<div class="option_chosen">' + p(t.text()) + "</div>")
-//		}
-
+		// Show last selected option
+		void o (Stitch t)
+		{
+//			if (t.Text != "..." && storyModel.Story.OptionMirroring) {
+//				e.last().jqPlayChunk.prepend('<div class="option_chosen">' + p(t.text()) + "</div>");
+//			}
+		}
 
 		public static string ParseInLineConditionals (string text, List<FlagValue> flags)
 		{
@@ -220,8 +147,8 @@ namespace Inklewriter
 			var andPattern = @"\s*(&&|\band\b)\s*";
 			var notPattern = @"\s*(\!|\bnot\b)\s*(.+?)\s*$";
 			var count = 0;
-			var matches = Regex.Match (text, conditionBoundsPattern).Groups;
-			foreach (var group in matches) {
+			var matches = Regex.Matches (text, conditionBoundsPattern);
+			foreach (Match match in matches) {
 				count++;
 				if (count > 1000) {
 					throw new System.Exception ("Error in conditional!");
@@ -259,13 +186,14 @@ namespace Inklewriter
 		public string ShuffleRandomElements (string text)
 		{
 			var pattern = @"\{\~([^\{\}]*?)\}";
-//			foreach (Group group in ) {
-			var group = Regex.Match (text, pattern).Groups[1];
-			var r = group.Value.Split ('|');
-			var rand = new Random ();
-			int i = rand.Next (0, r.Length);
-			text = Regex.Replace (text, pattern, r [i]);
-//			}
+			var matches = Regex.Matches (text, pattern);
+			foreach (Match match in matches) {
+				var group = match.Groups[1];
+				var r = group.Value.Split ('|');
+				var rand = new Random ();
+				int i = rand.Next (0, r.Length);
+				text = Regex.Replace (text, pattern, r [i]);
+			}
 			return text;
 		}
 
@@ -297,11 +225,11 @@ namespace Inklewriter
 		public string ConvertNumberToWords (string text, List<FlagValue> flags)
 		{
 			var pattern = @"\[\s*(number|value)\s*\:\s*(.*?)\s*\]";
-			var matchSet = Regex.Match (text, pattern);
-			foreach (var match in matchSet.Groups) {
-				int number = StoryModel.GetValueOfFlag (matchSet.Groups[2].Value, flags);
+			var matchSet = Regex.Matches (text, pattern);
+			foreach (Match match in matchSet) {
+				int number = StoryModel.GetValueOfFlag (match.Groups[2].Value, flags);
 				string numberWords = number.ToString ();
-				if (matchSet.Groups[1].Value == "value") {
+				if (match.Groups[1].Value == "value") {
 					numberWords = NumToWords.Convert (number);
 				}
 				text = Regex.Replace (text, pattern, numberWords);
