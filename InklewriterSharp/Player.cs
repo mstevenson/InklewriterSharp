@@ -32,11 +32,11 @@ namespace Inklewriter
 		}
 
 
-//		List<PlayChunk> e = new List<PlayChunk> ();
+		List<PlayChunk> e = new List<PlayChunk> (); // these should be stitches, not play chunks?
 //		List<string> flagsCollected = new List<string> ();
-//		List<Stitch> stitches = new List<Stitch> ();
-//		PlayChunk playChunk;
-//		PlayChunk prevChunk;
+		List<Stitch> stitches = new List<Stitch> ();
+		PlayChunk playChunk;
+		PlayChunk prevChunk;
 //		int wordCount = 0;
 //		bool hadSectionHeading;
 //
@@ -238,6 +238,21 @@ namespace Inklewriter
 				text = Regex.Replace (text, pattern, numberWords);
 			}
 			return text;
+		}
+
+		public static int CalculateApproximateWordCount (List<Stitch> stitches)
+		{
+			var wordCount = 0;
+			for (int i = 0; i < stitches.Count; i++) {
+				wordCount += stitches [i].WordCount;
+			}
+			if (wordCount <= 100) {
+				wordCount = wordCount - wordCount % 10 + 10;
+			} else {
+				wordCount = wordCount - wordCount % 100 + 100;
+//				$("#wordcount").text("About " + commadString(n) + " words");
+			}
+			return wordCount;
 		}
 
 	}

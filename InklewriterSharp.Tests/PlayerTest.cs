@@ -94,6 +94,17 @@ namespace Inklewriter.Tests
 //			Assert.AreEqual ("Moving slowly.", slowResult);
 			Assert.AreEqual ("Moving quickly.", quickResult);
 		}
+
+		[Test]
+		public void CalculateApproximateWordCount ()
+		{
+			Stitch a = new Stitch ("The quick brown fox");
+			Stitch b = new Stitch ("jumped over the lazy dog.");
+			int wordCount = Player.CalculateApproximateWordCount (new List<Stitch> { a, b });
+
+			// Word count is rounded to the nearest 10 when under 100 words, otherwise rounded to 100
+			Assert.AreEqual (10, wordCount);
+		}
 	}
 }
 
