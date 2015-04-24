@@ -7,7 +7,8 @@ namespace Inklewriter
 {
 	public class Player
 	{
-//		public event Action<PlayChunk> OnChunkShown;
+		public Func<string, string> onStyledBold;
+		public Func<string, string> onStyledItalic;
 
 		public class PlayChunk
 		{
@@ -216,8 +217,10 @@ namespace Inklewriter
 
 		public string ReplaceStyleMarkup (string text)
 		{
-			text = Regex.Replace (text, @"\*\-(.*?)\-\*", "<b>$1</b>");
-			text = Regex.Replace (text, @"\/\=(.*?)\=\/", "<i>$1</i>");
+			// Replace inkle style markup with delegate method's output, or default to HTML tags
+			text = Regex.Replace (text, @"\*\-(.*?)\-\*", onStyledBold != null ? onStyledBold ("$1") : "<b>$1</b>");
+			text = Regex.Replace (text, @"\/\=(.*?)\=\/", onStyledItalic != null ? onStyledItalic ("$1") : "<i>$1</i>");
+			// Remove inkle style markup
 			text = Regex.Replace (text, @"(\/\=|\=\/|\*\-|\-\*)", "");
 			return text;
 		}

@@ -53,6 +53,21 @@ namespace Inklewriter.Tests
 		}
 
 		[Test]
+		public void ReplaceStyleMarkupWithDelegates ()
+		{
+			Player player = new Player (null);
+			player.onStyledBold = text => {
+				return "**" + text + "**";
+			};
+			player.onStyledItalic = text => {
+				return "_" + text + "_";
+			};
+
+			Assert.AreEqual ("This is **bold** text.", player.ReplaceStyleMarkup ("This is *-bold-* text."));
+			Assert.AreEqual ("This is _italic_ text.", player.ReplaceStyleMarkup ("This is /=italic=/ text."));
+		}
+
+		[Test]
 		public void ReplaceRunOnMarker ()
 		{
 			Player player = new Player (null);
