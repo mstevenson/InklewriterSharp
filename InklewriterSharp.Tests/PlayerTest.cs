@@ -56,6 +56,7 @@ namespace Inklewriter.Tests
 		public void ReplaceStyleMarkupWithDelegates ()
 		{
 			Player player = new Player (null);
+			// Convert to markdown syntax
 			player.onStyledBold = text => {
 				return "**" + text + "**";
 			};
@@ -65,6 +66,26 @@ namespace Inklewriter.Tests
 
 			Assert.AreEqual ("This is **bold** text.", player.ReplaceStyleMarkup ("This is *-bold-* text."));
 			Assert.AreEqual ("This is _italic_ text.", player.ReplaceStyleMarkup ("This is /=italic=/ text."));
+		}
+
+		[Test]
+		public void ReplaceUrlMarkup ()
+		{
+			Player player = new Player (null);
+
+			Assert.AreEqual ("'<a href=\"http://inklestudios.com\">Inkle</a>'", player.ReplaceUrlMarkup ("[http://inklestudios.com|Inkle]"));
+		}
+
+		[Test]
+		public void ReplaceUrlMarkupWithDelegate ()
+		{
+			Player player  = new Player (null);
+			// Convert to markdown syntax
+			player.onReplacedUrl = (url, title) => {
+				return string.Format ("[{0}]({1})", title, url);
+			};
+
+			Assert.AreEqual ("[Inkle](http://inklestudios.com)", player.ReplaceUrlMarkup ("[http://inklestudios.com|Inkle]"));
 		}
 
 		[Test]
@@ -104,6 +125,15 @@ namespace Inklewriter.Tests
 
 			// Word count is rounded to the nearest 10 when under 100 words, otherwise rounded to 100
 			Assert.AreEqual (10, wordCount);
+		}
+
+
+		public void SaveGame (StoryModel storyModel)
+		{
+		}
+
+		public void LoadGame ()
+		{
 		}
 	}
 }
