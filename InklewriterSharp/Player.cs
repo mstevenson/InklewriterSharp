@@ -11,7 +11,8 @@ namespace Inklewriter
 
 		public Func<string, string> onStyledBold; // arg: text to style
 		public Func<string, string> onStyledItalic; // arg: text to style
-		public Func<string, string, string> onReplacedUrl; // args: url, link text
+		public Func<string, string, string> onReplacedLinkUrl; // args: url, link text
+		public Func<string, string> onReplacedImageUrl; // args: url
 
 		public class PlayChunk
 		{
@@ -256,7 +257,7 @@ namespace Inklewriter
 
 		public string ReplaceUrlMarkup (string e)
 		{
-			e = Regex.Replace (e, @"\[(.*?)\|(.*?)\]", onReplacedUrl != null ? onReplacedUrl ("$1", "$2") : "<a href=\"$1\">$2</a>");
+			e = Regex.Replace (e, @"\[(.*?)\|(.*?)\]", onReplacedLinkUrl != null ? onReplacedLinkUrl ("$1", "$2") : "<a href=\"$1\">$2</a>");
 			return e;
 		}
 
@@ -296,7 +297,7 @@ namespace Inklewriter
 
 		public string ReplaceImageMarkup (string text)
 		{
-			text = Regex.Replace (text, @"\%\|\%\|\%(.*?)\$\|\$\|\$", "<div id=\"illustration\"><img class=\"pic\" src=\"$1\"/></div>");
+			text = Regex.Replace (text, @"\%\|\%\|\%(.*?)\$\|\$\|\$", (onReplacedImageUrl != null) ? onReplacedImageUrl ("$1") : "<div id=\"illustration\"><img class=\"pic\" src=\"$1\"/></div>");
 			return text;
 		}
 

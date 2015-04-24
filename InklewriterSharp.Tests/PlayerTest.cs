@@ -81,7 +81,7 @@ namespace Inklewriter.Tests
 		{
 			Player player  = new Player (null);
 			// Convert to markdown syntax
-			player.onReplacedUrl = (url, title) => {
+			player.onReplacedLinkUrl = (url, title) => {
 				return string.Format ("[{0}]({1})", title, url);
 			};
 
@@ -134,6 +134,12 @@ namespace Inklewriter.Tests
 			var result = player.ReplaceImageMarkup (@"%|%|%image.jpg$|$|$");
 
 			Assert.AreEqual (@"<div id=""illustration""><img class=""pic"" src=""image.jpg""/></div>", result);
+		}
+
+		[Test]
+		[Ignore]
+		public void ReplaceImageMarkupWithDelegate ()
+		{
 		}
 
 
