@@ -95,56 +95,67 @@ namespace Inklewriter.Tests
 		}
 
 		[Test]
+		[Ignore]
 		public void StitchText ()
 		{
 		}
 
 		[Test]
+		[Ignore]
 		public void OptionsName ()
 		{
 		}
 
 		[Test]
+		[Ignore]
 		public void OptionsLinkStitch ()
 		{
 		}
 
 		[Test]
+		[Ignore]
 		public void OptionsConditions ()
 		{
 		}
 
 		[Test]
+		[Ignore]
 		public void StitchConditions ()
 		{
 		}
 
 		[Test]
+		[Ignore]
 		public void RunOn ()
 		{
 		}
 
 		[Test]
+		[Ignore]
 		public void PageNum ()
 		{
 		}
 
 		[Test]
+		[Ignore]
 		public void PageLabel ()
 		{
 		}
 
 		[Test]
+		[Ignore]
 		public void Divert ()
 		{
 		}
 
 		[Test]
+		[Ignore]
 		public void Image ()
 		{
 		}
 
 		[Test]
+		[Ignore]
 		public void Flag ()
 		{
 		}

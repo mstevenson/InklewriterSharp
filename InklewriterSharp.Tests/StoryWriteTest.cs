@@ -127,5 +127,107 @@ namespace Inklewriter.Tests
 
 			Assert.AreEqual (created, obj["created_at"]);
 		}
+
+		[Test]
+		[Ignore]
+		public void AllowCheckpoints ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void OptionMirroring ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void InitialStitch ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void PlayPoint ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void TextSize ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void LibraryVisible ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void StitchText ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void OptionsName ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void OptionsLinkStitch ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void OptionsConditions ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void StitchConditions ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void RunOn ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void PageNum ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void PageLabel ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void Divert ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void Image ()
+		{
+		}
+
+		[Test]
+		[Ignore]
+		public void Flag ()
+		{
+		}
 	}
 }
