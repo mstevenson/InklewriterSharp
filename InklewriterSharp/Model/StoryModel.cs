@@ -190,16 +190,16 @@ namespace Inklewriter
 		}
 
 		/// <summary>
-		/// Modify the values in the given flags array based on the flags specified in the stitch.
-		/// Each flag in the stitch must correlate to a flag in the flags array.
+		/// Modify the values in the given flags array based on the flags contained in the given stitch.
+		/// Each flag in the stitch must already exist in the flags array.
 		/// </summary>
-		public void ProcessFlagSetting (Stitch stitch, List<FlagValue> allFlags)
+		public static void ProcessFlagSetting (Stitch stitch, List<FlagValue> allFlags)
 		{
 			for (int n = 0; n < stitch.Flags.Count; n++) {
+				// TODO throw an exception if allFlags does not contain this flag
 				string flag = stitch.FlagByIndex (n);
 				int newValue = 1; // true
 
-				Console.WriteLine ("Flag directive: " + flag);
 				var match = Regex.Match (flag, @"^(.*?)\s*(\=|\+|\-)\s*(\b.*\b)\s*$");
 
 				int flagIndex = -1;
@@ -227,18 +227,16 @@ namespace Inklewriter
 						}
 					} else {
 						// Handle boolean value
+						// Can't add or subtract a boolean, can only check equality
 						isBoolean = true;
 						if (matchedOperator == "=") {
 							newValue = ConvertStringToBoolean (matchedValue) ? 1 : 0;
-						} else {
-							Console.WriteLine ("Can't add/subtract a boolean.");
 						}
 					}
 				} else {
 					flagIndex = GetIndexOfFlag(flag, allFlags);
 				}
 
-				Console.WriteLine ("Assigning value: " + newValue);
 				allFlags [flagIndex].isBoolean = isBoolean;
 				allFlags [flagIndex].value = newValue;
 			}

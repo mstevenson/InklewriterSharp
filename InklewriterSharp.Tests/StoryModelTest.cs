@@ -51,7 +51,6 @@ namespace Inklewriter.Tests
 		[Test]
 		public void ProcessFlagSetting ()
 		{
-			StoryModel model = new StoryModel ();
 			List<FlagValue> flags = new List<FlagValue> {
 				new FlagValue ("a", true),
 				new FlagValue ("b", 5),
@@ -73,7 +72,7 @@ namespace Inklewriter.Tests
 				}
 			};
 
-			model.ProcessFlagSetting (stitch, flags);
+			StoryModel.ProcessFlagSetting (stitch, flags);
 
 			Assert.AreEqual (0, flags [0].value);
 			Assert.AreEqual (2, flags [1].value);

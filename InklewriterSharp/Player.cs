@@ -40,13 +40,13 @@ namespace Inklewriter
 //		List<string> flagsCollected = new List<string> ();
 		List<Stitch> visitedStitches = new List<Stitch> ();
 //		PlayChunk playChunk;
-		PlayChunk prevChunk;
+//		PlayChunk prevChunk;
 		int wordCount = 0;
 		bool hadSectionHeading;
-//
-//
-//		// initialize method?
-		void initialize (Stitch r)
+
+		bool isReadOnly;
+
+		void VisitStitch (Stitch r)
 		{
 			var i = this;
 			var t = false;
@@ -106,12 +106,12 @@ namespace Inklewriter
 					f += o.Text.Replace("\n", " ") + " ";
 					if (Regex.IsMatch (o.Text, @"\[\.\.\.\]") && !o.RunOn || o.DivertStitch == null) {
 						// if there is no more text to display...
-						a += c (f, FlagsCollected) + "\n";
+						a += ApplyRuleSubstitutions (f, FlagsCollected) + "\n";
 						f = "";
 					}
 					if (o.Flags.Count > 0) {
 						StoryModel.ProcessFlagSetting (o, this.FlagsCollected);
-						if (!t) {
+						if (!isReadOnly) {
 //							var l = this.jqFlags.find("ul");
 							for (var s = 0; s < o.Flags.Count; s++) {
 								var h = o.FlagByIndex (s);
@@ -132,7 +132,7 @@ namespace Inklewriter
 //			this.jqTextBlock.html(u(a));
 //			this.jqPlayChunk.append(this.jqTextBlock);
 //			$("#read_area").append(this.jqPlayChunk);
-//			this.createOptionBlock();
+			CreateOptionBlock ();
 //			this.jqRewindButton = $('<div class="rewindButton" tooltip="Rewind to here"></div>');
 //			this.jqPlayChunk.append(this.jqRewindButton);
 //			this.jqRewindButton.bind("mousedown tap";
@@ -152,37 +152,95 @@ namespace Inklewriter
 //			}
 		}
 
-		public int WordCountOf (string s)
+		public void CreateOptionBlock ()
+		{
+//			var r = "<div class='option-divider'></div>";
+//			this.jqOptBlock = $("<div class='option_block'>" + r + "</div>");
+			if (visitedStitches [visitedStitches.Count - 1].Options.Count == 0) {
+//				this.jqTextBlock.append('<div class="the_end">End</div>');
+				if (isReadOnly) {
+//					this.jqTextBlock.find(".the_end").append("<div class='back_to_top'></div>";
+//					this.jqTextBlock.find(".back_to_top").bind("click tap", function() { b(e.first().jqPlayChunk); });
+//					$("#read_area").append("<div id='madeby'>Text &copy; the author. <a href='http://www.inklestudios.com/inklewriter'><strong>inklewriter</strong></a> &copy; <a href='http://www.inklestudios.com'><strong>inkle</strong></a></div>"))
+				} else {
+//					this.jqTextBlock.append('<br>(<a href="javascript:EditorMenu.enterEditMode();">Go back to Write mode to continue</a>.)</div>');
+				}
+			} else {
+				var i = visitedStitches [visitedStitches.Count - 1].Options;
+				for (var o = 0; o < i.Count; o++) {
+					var u = i [o];
+					var a = StoryModel.DoesArrayMeetConditions(u.IfConditions, u.NotIfConditions, this.FlagsCollected);
+					if (a || !isReadOnly) {
+						if (a) {
+							var f = CreateOptionButton (u, a);
+//							this.optionBoxes.push(f), this.jqOptBlock.append(f.jqPlayOption), this.jqOptBlock.append(r)
+						}
+					}
+				}
+//				this.jqPlayChunk.append(this.jqOptBlock)
+			}
+//			$(".expired").remove()
+		}
+
+		// Should return the option button
+		public static string CreateOptionButton (Option n, bool arrayMeetsConditions) // s method
+		{
+			return null;
+
+//			this.jqPlayOption = $('<div class="option_button">' + p(n.text()) + "</div>");
+//			this.linkTo = n.linkStitch();
+//			var s = this.linkTo;
+//			if (!n.writeModeOnly) {
+//				if (i) {
+//					this.jqPlayOption.bind("click tap", function() {
+//						if (!t || e.last().hadSectionHeading && StoryModel.allowCheckpoints) {
+//							e.last().jqRewindButton.show();
+//						} else {
+//							e.first().jqRewindButton.show();
+//						}
+//						var i = s;
+//						$(".option_block").addClass("expired");
+//						e.push(new r(i)), k(), y(), o(n);
+//					});
+//				}
+//			} else {
+//				this.jqPlayOption.addClass("disabled");
+//				if (n.writeModeOnly) {
+//					this.jqPlayOption.attr("tooltip", "Switch to write mode to continue.")
+//				} else {
+//					this.jqPlayOption.attr("tooltip", "This option has been disallowed by conditions.")	
+//				}
+//			}
+		}
+
+		public static int WordCountOf (string s)
 		{
 			if (!string.IsNullOrEmpty (s)) {
-				return Regex.Matches (@"\S+").Count;
+				return Regex.Matches (s, @"\S+").Count;
 			}
 			return 0;
 		}
-
-		string c (string text, List<FlagValue> flags)
+			
+		string ApplyMarkupSubstitutions (string text)
 		{
-//			e = d(e), e = h(e, t);
-//			var n = "";
-//			while (n != e) {
-//				n = e;
-//				e = g(e, t);
-//				e = m(e);
-//			}
-//			e = v(e);
-//			return e;
-
-
-			return "";
-
+			text = ReplaceQuotes (text);
+			text = ReplaceUrlMarkup (text);
+			text = ReplaceImageMarkup (text);
+			return text;
 		}
 
-		// Show last selected option
-		void o (Stitch t)
+		string ApplyRuleSubstitutions (string text, List<FlagValue> flags)
 		{
-//			if (t.Text != "..." && storyModel.Story.OptionMirroring) {
-//				e.last().jqPlayChunk.prepend('<div class="option_chosen">' + p(t.text()) + "</div>");
-//			}
+			text = ReplaceRunOnMarker (text);
+			text = ConvertNumberToWords (text, flags);
+			string n = "";
+			while (n != text) {
+				n = text;
+				text = ParseInLineConditionals (text, flags);
+				text = ShuffleRandomElements (text);
+			}
+			text = ReplaceStyleMarkup (text);
+			return text;
 		}
 
 		public static string ParseInLineConditionals (string text, List<FlagValue> flags)
@@ -304,10 +362,6 @@ namespace Inklewriter
 			}
 			return wordCount;
 		}
-
-//		public string PerformAllTextSubstitutions (string text)
-//		{
-//		}
 
 		public string ReplaceImageMarkup (string text)
 		{
