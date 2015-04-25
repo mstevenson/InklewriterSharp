@@ -107,21 +107,19 @@ namespace Inklewriter
 					if (Regex.IsMatch (o.Text, @"\[\.\.\.\]") && !o.RunOn || o.DivertStitch == null) {
 						// if there is no more text to display...
 						a += c (f, FlagsCollected) + "\n";
+						f = "";
 					}
-					// incorrect flow here, makes no sense for f to be cleared after being set but before being referenced
-					f = "";
 					if (o.Flags.Count > 0) {
 						StoryModel.ProcessFlagSetting (o, this.FlagsCollected);
 						if (!t) {
 //							var l = this.jqFlags.find("ul");
 							for (var s = 0; s < o.Flags.Count; s++) {
-								var h = o.FlagByIndex(s),
-								p = @"^(.*?)\s*(\+|\-)\s*(\b.*\b)\s*$";
+								var h = o.FlagByIndex (s);
+								var p = @"^(.*?)\s*(\+|\-)\s*(\b.*\b)\s*$";
 								var matchSet = Regex.Match (h, p);
 								if (matchSet.Success) {
-									h += " (now " + StoryModel.GetValueOfFlag (matchSet.Groups[1].Value);
+									h += " (now " + StoryModel.GetValueOfFlag (matchSet.Groups[1].Value, this.FlagsCollected) + ")";
 								}
-//								this.FlagsCollected) + ")";
 //								l.append("<li>" + h + "</li>")
 							}
 //							this.jqFlags.show()
@@ -130,7 +128,7 @@ namespace Inklewriter
 				}
 				o = o.DivertStitch;
 			}
-//			this.wordCount += wordCountOf(a);
+			this.wordCount += WordCountOf(a);
 //			this.jqTextBlock.html(u(a));
 //			this.jqPlayChunk.append(this.jqTextBlock);
 //			$("#read_area").append(this.jqPlayChunk);
@@ -152,6 +150,14 @@ namespace Inklewriter
 //				this.jqRewindButton.addClass("initial");
 //				t && this.jqRewindButton.text("Start again");
 //			}
+		}
+
+		public int WordCountOf (string s)
+		{
+			if (!string.IsNullOrEmpty (s)) {
+				return Regex.Matches (@"\S+").Count;
+			}
+			return 0;
 		}
 
 		string c (string text, List<FlagValue> flags)
