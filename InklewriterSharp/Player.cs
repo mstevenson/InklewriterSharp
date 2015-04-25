@@ -9,20 +9,18 @@ namespace Inklewriter
 	{
 		public event Action OnReachedEnd;
 
+		// In-line text styling callbacks
 		public Func<string, string> onStyledBold; // arg: text to style
 		public Func<string, string> onStyledItalic; // arg: text to style
 		public Func<string, string, string> onReplacedLinkUrl; // args: url, link text
 		public Func<string, string> onReplacedImageUrl; // args: url
 
-		public class PlayChunk
+		public class StitchBlock
 		{
+			public string image;
 			public List<Stitch> stitches = new List<Stitch> ();
 			public List<FlagValue> flagsCollected = new List<FlagValue> ();
-			
-			internal void AddStitch (Stitch stitch)
-			{
-				stitches.Add (stitch);
-			}
+			public string compiledText;
 		}
 
 		StoryModel model;
@@ -36,120 +34,68 @@ namespace Inklewriter
 		}
 
 
-		List<PlayChunk> e = new List<PlayChunk> (); // these should be stitches, not play chunks?
-//		List<string> flagsCollected = new List<string> ();
+		List<StitchBlock> e = new List<StitchBlock> (); // these should be stitches, not play chunks?
 		List<Stitch> visitedStitches = new List<Stitch> ();
-//		PlayChunk playChunk;
-//		PlayChunk prevChunk;
+		StitchBlock prevChunk;
 		int wordCount = 0;
 		bool hadSectionHeading;
 
-		bool isReadOnly;
-
-		void VisitStitch (Stitch r)
+		StitchBlock TraverseStitch (Stitch stitch)
 		{
-			var i = this;
-			var t = false;
+			StitchBlock chunk = new StitchBlock ();
 
-//			this.playChunk = null;
-//			this.stitches = [];
-//			this.optionBoxes = [];
 			this.FlagsCollected = new List<FlagValue> ();
 			this.wordCount = 0;
 			this.hadSectionHeading = false;
-//			this.flags = this.jqPlayChunk.find (".flags");
-//			this.jqFlags.hide ();
-//			this.prevChunk = e.last();
 			if (this.prevChunk != null) {
 				for (var s = 0; s < this.prevChunk.flagsCollected.Count; s++) {
 					FlagsCollected.Add (this.prevChunk.flagsCollected [s]);
 				}
 			}
-			if (r != null) {
-				if (t) {
-					// Display "the end"
-					if (OnReachedEnd != null) {
-						OnReachedEnd ();
-					}
-//					this.jqPlayChunk.html("<div class='the_end'>End</div>")
-				} else {
-					
-					// remove expired page elements
 
-//					$(".expired").remove()
-//					this.jqPlayChunk.html("This page intentionally left blank.<br>(<a href='javascript:EditorMenu.enterEditMode();'>Continue the story from here</a>.)");
-				}
+			var currentStitch = stitch;
+			var compiledText = "";
+			var newlineStripped = "";
 
-				// Append play chunk
-//				$("#read_area").append(this.jqPlayChunk);
-
-				return;
-			}
-
-			var o = r;
-//			this.jqTextBlock = this.jqPlayChunk.find(".stitch_block");
-			var a = "";
-			var f = "";
-
-			// Loop through complete series of diverted stitches
-			while (o != null) {
-				this.visitedStitches.Add (o);
-				if (o.PageNumber >= 1) {
+			// Loop through complete series of stitches.
+			while (currentStitch != null) {
+				this.visitedStitches.Add (currentStitch);
+				if (currentStitch.PageNumber >= 1) {
 					this.hadSectionHeading = true;
 				}
-				if (StoryModel.DoesArrayMeetConditions (o.IfConditions, o.NotIfConditions, FlagsCollected)) {
-					if (!string.IsNullOrEmpty (o.Image)) {
-						// embed image
-						a += "\n%|%|%" + o.Image + "$|$|$\n";
+				// This stitch passes flag tests and should be included in this chunk
+				if (StoryModel.DoesArrayMeetConditions (currentStitch.IfConditions, currentStitch.NotIfConditions, FlagsCollected)) {
+					
+					// Embed illustration image url
+					if (!string.IsNullOrEmpty (currentStitch.Image)) {
+						chunk.image = currentStitch.Image;
 					}
-					// replace newlines with spaces
-					f += o.Text.Replace("\n", " ") + " ";
-					if (Regex.IsMatch (o.Text, @"\[\.\.\.\]") && !o.RunOn || o.DivertStitch == null) {
-						// if there is no more text to display...
-						a += ApplyRuleSubstitutions (f, FlagsCollected) + "\n";
-						f = "";
+
+					// Replace newlines with spaces
+					newlineStripped += currentStitch.Text.Replace("\n", " ") + " ";
+
+					// Stitch is not a run-on, or has no stitch to link to
+					if (Regex.IsMatch (currentStitch.Text, @"\[\.\.\.\]") && !currentStitch.RunOn || currentStitch.DivertStitch == null) {
+						// if there is no more text to display in this chunk...
+						compiledText += ApplyRuleSubstitutions (newlineStripped, FlagsCollected) + "\n";
+						newlineStripped = "";
 					}
-					if (o.Flags.Count > 0) {
-						StoryModel.ProcessFlagSetting (o, this.FlagsCollected);
-						if (!isReadOnly) {
-//							var l = this.jqFlags.find("ul");
-							for (var s = 0; s < o.Flags.Count; s++) {
-								var h = o.FlagByIndex (s);
-								var p = @"^(.*?)\s*(\+|\-)\s*(\b.*\b)\s*$";
-								var matchSet = Regex.Match (h, p);
-								if (matchSet.Success) {
-									h += " (now " + StoryModel.GetValueOfFlag (matchSet.Groups[1].Value, this.FlagsCollected) + ")";
-								}
-//								l.append("<li>" + h + "</li>")
-							}
-//							this.jqFlags.show()
-						}
+
+					// Process flags
+					if (currentStitch.Flags.Count > 0) {
+						StoryModel.ProcessFlagSetting (currentStitch, this.FlagsCollected);
 					}
+
+					// Add valid stitch to chunk
+					chunk.stitches.Add (currentStitch);
 				}
-				o = o.DivertStitch;
+				currentStitch = currentStitch.DivertStitch;
 			}
-			this.wordCount += WordCountOf(a);
-//			this.jqTextBlock.html(u(a));
-//			this.jqPlayChunk.append(this.jqTextBlock);
-//			$("#read_area").append(this.jqPlayChunk);
+			this.wordCount += WordCountOf (compiledText);
+
+			chunk.compiledText = compiledText;
+
 			CreateOptionBlock ();
-//			this.jqRewindButton = $('<div class="rewindButton" tooltip="Rewind to here"></div>');
-//			this.jqPlayChunk.append(this.jqRewindButton);
-//			this.jqRewindButton.bind("mousedown tap";
-//				function() {
-//					i.rewindToHere();
-//					k();
-//				});
-//			this.jqRewindButton.hide();
-//			if (e.length >= 1) {
-//				b(this.jqPlayChunk);
-//				if (t) {
-//					this.jqRewindButton.addClass("noText");
-//				}
-//			} else {
-//				this.jqRewindButton.addClass("initial");
-//				t && this.jqRewindButton.text("Start again");
-//			}
 		}
 
 		public void CreateOptionBlock ()
@@ -158,23 +104,17 @@ namespace Inklewriter
 //			this.jqOptBlock = $("<div class='option_block'>" + r + "</div>");
 			if (visitedStitches [visitedStitches.Count - 1].Options.Count == 0) {
 //				this.jqTextBlock.append('<div class="the_end">End</div>');
-				if (isReadOnly) {
-//					this.jqTextBlock.find(".the_end").append("<div class='back_to_top'></div>";
-//					this.jqTextBlock.find(".back_to_top").bind("click tap", function() { b(e.first().jqPlayChunk); });
-//					$("#read_area").append("<div id='madeby'>Text &copy; the author. <a href='http://www.inklestudios.com/inklewriter'><strong>inklewriter</strong></a> &copy; <a href='http://www.inklestudios.com'><strong>inkle</strong></a></div>"))
-				} else {
-//					this.jqTextBlock.append('<br>(<a href="javascript:EditorMenu.enterEditMode();">Go back to Write mode to continue</a>.)</div>');
-				}
+//				this.jqTextBlock.find(".the_end").append("<div class='back_to_top'></div>";
+//				this.jqTextBlock.find(".back_to_top").bind("click tap", function() { b(e.first().jqPlayChunk); });
+//				$("#read_area").append("<div id='madeby'>Text &copy; the author. <a href='http://www.inklestudios.com/inklewriter'><strong>inklewriter</strong></a> &copy; <a href='http://www.inklestudios.com'><strong>inkle</strong></a></div>"))
 			} else {
 				var i = visitedStitches [visitedStitches.Count - 1].Options;
 				for (var o = 0; o < i.Count; o++) {
 					var u = i [o];
 					var a = StoryModel.DoesArrayMeetConditions(u.IfConditions, u.NotIfConditions, this.FlagsCollected);
-					if (a || !isReadOnly) {
-						if (a) {
-							var f = CreateOptionButton (u, a);
-//							this.optionBoxes.push(f), this.jqOptBlock.append(f.jqPlayOption), this.jqOptBlock.append(r)
-						}
+					if (a) {
+						var f = CreateOptionButton (u, a);
+//						this.optionBoxes.push(f), this.jqOptBlock.append(f.jqPlayOption), this.jqOptBlock.append(r)
 					}
 				}
 //				this.jqPlayChunk.append(this.jqOptBlock)
