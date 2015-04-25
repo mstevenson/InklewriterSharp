@@ -98,31 +98,35 @@ namespace Inklewriter
 					this.hadSectionHeading = true;
 				}
 				if (StoryModel.DoesArrayMeetConditions (o.IfConditions, o.NotIfConditions, FlagsCollected)) {
-//					if (!string.IsNullOrEmpty (o.Image)) {
-//						(a += "\n%|%|%" + o.Image + "$|$|$\n");
-//					}
-//					f += o.Text.Replace("\n", " ") + " ";
-//					if (Regex.IsMatch (o.Text, @"\[\.\.\.\]") && !o.RunOn || !o.DivertStitch) {
-//						a += c (f, FlagsCollected) + "\n";
-//					}
-//					f = "";
-//					if (o.Flags.Count > 0) {
-//						storyModel.ProcessFlagSetting (o, this.flagsCollected);
-//						if (!t) {
-////							var l = this.jqFlags.find("ul");
-//							for (var s = 0; s < o.Flags.Count; s++) {
-//								var h = o.FlagByIndex(s),
-//								p = @"^(.*?)\s*(\+|\-)\s*(\b.*\b)\s*$";
-//								var matchSet = Regex.Match (h, p);
-//								if (matchSet.Success) {
-//									h += " (now " + storyModel.GetValueOfFlag(matchSet.Groups[1]);
-//								}
-//								this.flagsCollected) + ")";
-////								l.append("<li>" + h + "</li>")
-//							}
-////							this.jqFlags.show()
-//						}
-//					}
+					if (!string.IsNullOrEmpty (o.Image)) {
+						// embed image
+						a += "\n%|%|%" + o.Image + "$|$|$\n";
+					}
+					// replace newlines with spaces
+					f += o.Text.Replace("\n", " ") + " ";
+					if (Regex.IsMatch (o.Text, @"\[\.\.\.\]") && !o.RunOn || o.DivertStitch == null) {
+						// if there is no more text to display...
+						a += c (f, FlagsCollected) + "\n";
+					}
+					// incorrect flow here, makes no sense for f to be cleared after being set but before being referenced
+					f = "";
+					if (o.Flags.Count > 0) {
+						StoryModel.ProcessFlagSetting (o, this.FlagsCollected);
+						if (!t) {
+//							var l = this.jqFlags.find("ul");
+							for (var s = 0; s < o.Flags.Count; s++) {
+								var h = o.FlagByIndex(s),
+								p = @"^(.*?)\s*(\+|\-)\s*(\b.*\b)\s*$";
+								var matchSet = Regex.Match (h, p);
+								if (matchSet.Success) {
+									h += " (now " + StoryModel.GetValueOfFlag (matchSet.Groups[1].Value);
+								}
+//								this.FlagsCollected) + ")";
+//								l.append("<li>" + h + "</li>")
+							}
+//							this.jqFlags.show()
+						}
+					}
 				}
 				o = o.DivertStitch;
 			}
@@ -150,7 +154,7 @@ namespace Inklewriter
 //			}
 		}
 
-		void c (string text)
+		string c (string text, List<FlagValue> flags)
 		{
 //			e = d(e), e = h(e, t);
 //			var n = "";
@@ -161,6 +165,10 @@ namespace Inklewriter
 //			}
 //			e = v(e);
 //			return e;
+
+
+			return "";
+
 		}
 
 		// Show last selected option
