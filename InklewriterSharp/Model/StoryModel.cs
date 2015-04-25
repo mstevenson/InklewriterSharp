@@ -138,7 +138,8 @@ namespace Inklewriter
 		}
 
 		/// <summary>
-		/// Adds a flag name to the index, but strips off the value in a flag expression.
+		/// Adds a flag name to the story model's flag index.
+		/// The flag index contains flag names, but no values.
 		/// </summary>
 		public void AddFlagToIndex (string flag)
 		{
@@ -149,6 +150,9 @@ namespace Inklewriter
 			}
 		}
 
+		/// <summary>
+		/// Returns the numerical index of the given flag from the given flags list.
+		/// </summary>
 		public static int GetIndexOfFlag (string flag, List<FlagValue> allFlags)
 		{
 			for (var i = 0; i < allFlags.Count; i++) {
@@ -159,6 +163,12 @@ namespace Inklewriter
 			return -1;
 		}
 
+		/// <summary>
+		/// Strips operators and values from an expression and returns its flag name.
+		/// </summary>
+		/// <example>
+		/// "cunning >= 5" returns "cunning"
+		/// </example>
 		public static string ExtractFlagNameFromExpression (string expression)
 		{
 			var regex = new Regex (@"^(.*?)\s*(\=|\+|\-|\>|\<|\!\=|$)");
@@ -167,15 +177,20 @@ namespace Inklewriter
 			return name;
 		}
 
+		/// <summary>
+		/// Finds the given flag in an array of flags and returns its value.
+		/// </summary>
 		public static int GetValueOfFlag (string flag, List<FlagValue> allFlags)
 		{
-			var n = GetIndexOfFlag (flag, allFlags);
-			return n >= 0 ? allFlags[n].value : 0;
+			var i = GetIndexOfFlag (flag, allFlags);
+			if (i >= 0) {
+				return allFlags [i].value;
+			}
+			return 0;
 		}
 
 		/// <summary>
 		/// Modify the values in the given flags array based on the flags specified in the stitch.
-		/// 
 		/// Each flag in the stitch must correlate to a flag in the flags array.
 		/// </summary>
 		public void ProcessFlagSetting (Stitch stitch, List<FlagValue> allFlags)
@@ -229,6 +244,14 @@ namespace Inklewriter
 			}
 		}
 
+		/// <summary>
+		/// Tests a given flag expression against a given list of flags.
+		/// Returns true on success.
+		/// </summary>
+		/// <example>>
+		/// The expression "fruit > 1 && nuts == 7" will return true if
+		/// the allFlags list contains FlagValue("fruit", 3) and FlagValue("nuts", 7).
+		/// </example>
 		public static bool Test (string expression, List<FlagValue> allFlags)
 		{
 			bool result = false;
@@ -247,7 +270,6 @@ namespace Inklewriter
 				}
 				
 				int flagValue = GetValueOfFlag (flag, allFlags);
-//				Console.WriteLine ("Testing " + flagValue + " " + op + " " + numberValue);
 				if (op == "==" || op == "=") {
 					result = flagValue == numberValue;
 				} else if (op == "!=" || op == "<>") {
@@ -273,7 +295,6 @@ namespace Inklewriter
 				}
 			} else {
 				result = GetValueOfFlag (expression, allFlags) == 1;
-//				result = ConvertStringToBooleanIfAppropriate(result) == 1;
 			}
 			return result;
 		}
@@ -282,6 +303,10 @@ namespace Inklewriter
 
 		#region Stitches
 
+		/// <summary>
+		/// Creates a new Stitch with the given body text and adds it
+		/// to the current Story.
+		/// </summary>
 		public Stitch CreateStitch (string text)
 		{
 			Stitch s = new Stitch (text);
@@ -289,68 +314,82 @@ namespace Inklewriter
 			return s;
 		}
 
-		public void RemoveStitch (Stitch e)
+		/// <summary>
+		/// Deletes the given stitch and cleans up stitch references.
+		/// </summary>
+		public void RemoveStitch (Stitch stitch)
 		{
-			if (WatchRefCounts ()) {
-				Console.WriteLine ("Removing " + e.Name + " entirely.");
-			}
-			if (e.RefCount != 0) {
-				RepointStitchToStitch (e, null);
-				Console.WriteLine ("Deleting stitch with references, so first unpointing stitches from this stitch.");
-				if (e.RefCount != 0) {
+			// Stitch has references, so unpoint all stitches from this stitch
+			if (stitch.RefCount != 0) {
+				RepointStitchToStitch (stitch, null);
+				if (stitch.RefCount != 0) {
 					throw new System.Exception ("Fixing ref-count on stitch removal failed.");
 				}
 			}
-			e.Undivert ();
-			for (int t = e.Options.Count - 1; t >= 0; t--) {
-				e.RemoveOption (e.Options [t]);
+			stitch.Undivert ();
+			// Detach options
+			for (int t = stitch.Options.Count - 1; t >= 0; t--) {
+				stitch.RemoveOption (stitch.Options [t]);
 			}
-			RemovePageNumber(e, true);
+			RemovePageNumber (stitch);
+			// Remove the stitch from its Story
 			for (var t = 0; t < Story.Stitches.Count; ++t) {
-				if (Story.Stitches [t] == e) {
+				if (Story.Stitches [t] == stitch) {
 					Story.Stitches.RemoveAt (t);
 					return;
 				}
 			}
 		}
 
+		/// <summary>
+		/// Replaces each reference to the source stitch with a reference
+		/// to the target stitch. All stitches and options that link to
+		/// the source stitch will be modified.
+		/// </summary>
 		public void RepointStitchToStitch (Stitch source, Stitch target)
 		{
-			if (WatchRefCounts ()) {
-				Console.WriteLine ("Repointing stitch links from " + source.Name + " to " + (target != null ? target.Name : "to null."));
-			}
-			var stitches = Story.Stitches;
-			for (int n = 0; n < stitches.Count; n++) {
-				var r = stitches[n];
-				if (r.DivertStitch == source) {
-					r.Undivert ();
+			foreach (var stitch in Story.Stitches) {
+				// Find all stitches that link to the source stitch
+				// and swap it with the target stitch
+				if (stitch.DivertStitch == source) {
+					stitch.Undivert ();
 					if (target != null) {
-						r.DivertTo (target);
+						stitch.DivertTo (target);
 					}
 				}
-				for (var i = 0; i < r.Options.Count; i++) {
-					if (r.Options[i].LinkStitch == source) {
-						r.Options [i].Unlink ();
+				foreach (var option in stitch.Options) {
+					// Find all options that link to the source stitch
+					// and relink them to the target stitch
+					if (option.LinkStitch == source) {
+						option.Unlink ();
 						if (target != null) {
-							r.Options [i].CreateLinkStitch (target);
+							option.CreateLinkStitch (target);
 						}
 					}
 				}
 			}
 		}
 
+		/// <summary>
+		/// Creates globally unique short names for all stitches
+		/// in the current Story.
+		/// Stitches are not guaranteed to retain the same
+		/// short name throughout their lifetime.
+		/// </summary>
 		public void NameStitches ()
 		{
 			HashSet<string> usedShortNames = new HashSet<string> ();
-			foreach (var currentStitch in Story.Stitches) {
-				string shortName = currentStitch.CreateShortName ();
+			foreach (var stitch in Story.Stitches) {
+				string shortName = stitch.CreateShortName ();
+				// Enforce globally unique names by appending a number
+				// to stitches that return an existing short name.
 				string incrementedShortName = shortName;
 				for (int num = 1; usedShortNames.Contains (shortName); num++) {
 					incrementedShortName = shortName + num;
 				}
 				shortName = incrementedShortName;
 				usedShortNames.Add (shortName);
-				currentStitch.Name = shortName;
+				stitch.Name = shortName;
 			}
 		}
 
@@ -358,54 +397,63 @@ namespace Inklewriter
 
 		#region Options
 
+		/// <summary>
+		/// Appends a new and empty Option to the given Stitch.
+		/// </summary>
 		public Option CreateOption (Stitch stitch)
 		{
 			var t = stitch.AddOption ();
 			return t;
 		}
 
-		public void RemoveOption (Stitch stitch, Option opt)
+		/// <summary>
+		/// Removes an option from the given stitch.
+		/// </summary>
+		public void RemoveOption (Stitch stitch, Option option)
 		{
-			stitch.RemoveOption (opt);
+			stitch.RemoveOption (option);
 		}
 
 		#endregion
 
 		#region Page Numbers
 
-		public void InsertPageNumber (Stitch e)
+		public void InsertPageNumber (Stitch stitch)
 		{
-			if (Loading || e.VerticalDistanceFromPageNumberHeader < 2
-				|| PageSize (e.PageNumber) < StoryModel.maxPreferredPageLength / 2
-				|| HeaderWithinDistanceOfStitch (3, e))
+			if (Loading || stitch.VerticalDistanceFromPageNumberHeader < 2
+				|| PageSize (stitch.PageNumber) < StoryModel.maxPreferredPageLength / 2
+				|| HeaderWithinDistanceOfStitch (3, stitch))
 			{
 				return;
 			}
-			if (e.PageNumber != 0) {
+			if (stitch.PageNumber != 0) {
 				return;
 			}
-			var n = e.PageNumber + 1;
+			var number = stitch.PageNumber + 1;
 			var stitches = Story.Stitches;
 			for (var r = 0; r < stitches.Count; r++) {
 				var i = stitches[r].PageNumber;
-				if (i >= n) {
+				if (i >= number) {
 					stitches [r].SetPageNumberLabel (this, i + 1);
 				}
 			}
-			e.SetPageNumberLabel (this, n);
+			stitch.SetPageNumberLabel (this, number);
 			ComputePageNumbers ();
 		}
 
-		public void RemovePageNumber (Stitch e, bool doIt)
+		public void RemovePageNumber (Stitch stitch)
 		{
-//			var n = e.pageNumberLabel();
-//			if (n <= 0) return;
-//			e.pageNumberLabel(-1);
-//			for (var r = 0; r < StoryModel.stitches.length; r++) {
-//				var i = StoryModel.stitches[r].pageNumberLabel();
-//				i > n && StoryModel.stitches[r].pageNumberLabel(i - 1)
-//			}
-//			t || StoryModel.computePageNumbers()
+			var currentNumber = stitch.PageNumber;
+			if (currentNumber <= 0) {
+				return;
+			}
+			stitch.SetPageNumberLabel (this, -1);
+			foreach (var s in Story.Stitches) {
+				if (s.PageNumber > currentNumber) {
+					s.SetPageNumberLabel (this, s.PageNumber - 1);
+				}
+			}
+			ComputePageNumbers ();
 		}
 
 		public void ComputePageNumbers ()
@@ -557,15 +605,19 @@ namespace Inklewriter
 //			}
 		}
 
-		public static bool DoesArrayMeetConditions (List<string> conditions, List<string> notConditions, List<FlagValue> flags) // n type is unknown
+		/// <summary>
+		/// Determines if the given list of flags satisfies the given 'if' and 'not if' conditions.
+		/// 
+		/// </summary>
+		public static bool DoesArrayMeetConditions (List<string> ifConditions, List<string> notIfConditions, List<FlagValue> flags) // n type is unknown
 		{
 			var list = new List<string> ();
 			var success = false;
-			for (var i = 0; i < conditions.Count && !success; i++) {
-				success = !StoryModel.Test (conditions [i], flags);
+			for (var i = 0; i < ifConditions.Count && !success; i++) {
+				success = !StoryModel.Test (ifConditions [i], flags);
 			}
-			for (var i = 0; i < notConditions.Count && !success; i++) {
-				success = StoryModel.Test (notConditions [i], flags);
+			for (var i = 0; i < notIfConditions.Count && !success; i++) {
+				success = StoryModel.Test (notIfConditions [i], flags);
 			}
 			return !success;
 		}
