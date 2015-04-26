@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Text;
 using System.Linq;
 using System.IO;
 using Inklewriter;
@@ -11,7 +14,7 @@ namespace Inklewriter.Examples
 		public static void Main (string[] args)
 		{
 			// Load story file
-			string storyJson = File.ReadAllText ("Stories/tutorial.json");
+			string storyJson = File.ReadAllText ("Stories/musgraveritual.json");
 			StoryModel model = new StoryModel ();
 			model.ImportStory (storyJson);
 
@@ -28,7 +31,7 @@ namespace Inklewriter.Examples
 			Stitch lastStitch = player.InitialStitch;
 			while (lastStitch != null) {
 				Console.WriteLine ();
-				HorizontalLine ();
+				DrawHorizontalLine ();
 				Console.WriteLine ();
 
 				var nextChunk = player.GetChunkFromStitch (lastStitch);
@@ -43,7 +46,7 @@ namespace Inklewriter.Examples
 		static Stitch DisplayChunk (PlayChunk chunk)
 		{
 			// Show main text
-			Console.WriteLine (chunk.Text);
+			DrawText (chunk.Text);
 
 			// Find all available options
 			var visibleOptions = chunk.Options.Where (o => o.isVisible).Select (o => o.content).ToList ();
@@ -67,12 +70,20 @@ namespace Inklewriter.Examples
 			return visibleOptions [choice - 1].LinkStitch;
 		}
 
-		static void HorizontalLine ()
+		static void DrawHorizontalLine ()
 		{
 			for (int i = 0; i < Console.BufferWidth; i++) {
 				Console.Write ("─");
 			}
 			Console.Write ("\n");
+		}
+
+		public static void DrawText (string text)
+		{
+			text = text.Replace ("\n", "\n\n");
+			// Word wrap
+			text = Regex.Replace (text, @"(.{" + (Console.BufferWidth - 20) + @"}[^\s]*)\s+", "$1\n");
+			Console.Write (text);
 		}
 	}
 }

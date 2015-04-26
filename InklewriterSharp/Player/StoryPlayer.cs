@@ -69,7 +69,7 @@ namespace Inklewriter.Player
 		{
 			PlayChunk chunk = new PlayChunk ();
 
-			AllFlagsCollected = new List<FlagValue> ();
+			AllFlagsCollected.Clear ();
 			WordCount = 0;
 			if (LastChunk != null) {
 				for (var s = 0; s < LastChunk.FlagsCollected.Count; s++) {
@@ -184,7 +184,7 @@ namespace Inklewriter.Player
 					var conditions = new List<string> ();
 					var notConditions = new List<string> ();
 					// Search "and" conditions
-					var conditionMatches = Regex.Split (matches[1].Value, andPattern);
+					var conditionMatches = Regex.Split (match.Groups [1].Value, andPattern);
 					for (var i = 0; i < conditionMatches.Length; i++) {
 						// Is not an "and" condition
 						if (conditionMatches [i] != "&&" && conditionMatches [i] != "and") {
@@ -200,9 +200,9 @@ namespace Inklewriter.Player
 					}
 					var replacementValue = "";
 					if (StoryModel.DoesArrayMeetConditions (conditions, notConditions, flags)) {
-						replacementValue = matches [2].Value;
-					} else if (!string.IsNullOrEmpty (matches [4].Value)) {
-						replacementValue = matches [4].Value;
+						replacementValue = match.Groups [2].Value;
+					} else if (!string.IsNullOrEmpty (match.Groups [4].Value)) {
+						replacementValue = match.Groups [4].Value;
 					}
 					text = Regex.Replace (text, conditionBoundsPattern, " " + replacementValue + " ");
 				}

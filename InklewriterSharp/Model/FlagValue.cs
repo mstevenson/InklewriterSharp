@@ -1,14 +1,10 @@
 ﻿namespace Inklewriter
 {
-	public class FlagValue
+	public struct FlagValue
 	{
-		public string flagName;
-		public int value;
-		public bool isBoolean;
-
-		public FlagValue ()
-		{
-		}
+		public readonly string flagName;
+		public readonly int value;
+		public readonly bool isBoolean;
 
 		public FlagValue (string name, bool isTrue)
 		{
@@ -21,6 +17,7 @@
 		{
 			flagName = name;
 			value = number;
+			isBoolean = false;
 		}
 	}
 }

@@ -22,9 +22,9 @@ namespace Inklewriter.Tests
 		public void GetIndexOfFlag ()
 		{
 			List<FlagValue> flags = new List<FlagValue> {
-				new FlagValue { flagName = "test a", value = 1 },
-				new FlagValue { flagName = "test b", value = 2 },
-				new FlagValue { flagName = "test c", value = 3 },
+				new FlagValue ("test a", 1),
+				new FlagValue ("test b", 2),
+				new FlagValue ("test c", 3),
 			};
 
 			Assert.AreEqual (1, StoryModel.GetIndexOfFlag ("Test B", flags));
@@ -40,9 +40,9 @@ namespace Inklewriter.Tests
 		public void GetValueOfFlag ()
 		{
 			List<FlagValue> flags = new List<FlagValue> {
-				new FlagValue { flagName = "test a", value = 10 },
-				new FlagValue { flagName = "test b", value = 20 },
-				new FlagValue { flagName = "test c", value = 30 },
+				new FlagValue ("test a", 10),
+				new FlagValue ("test b", 20),
+				new FlagValue ("test c", 30),
 			};
 
 			Assert.AreEqual (20, StoryModel.GetValueOfFlag ("Test B", flags));

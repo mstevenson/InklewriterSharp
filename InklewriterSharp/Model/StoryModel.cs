@@ -152,7 +152,6 @@ namespace Inklewriter
 		public static void ProcessFlagSetting (Stitch stitch, List<FlagValue> allFlags)
 		{
 			for (int n = 0; n < stitch.Flags.Count; n++) {
-				// TODO throw an exception if allFlags does not contain this flag
 				string flag = stitch.FlagByIndex (n);
 				int newValue = 1; // true
 
@@ -192,9 +191,12 @@ namespace Inklewriter
 				} else {
 					flagIndex = GetIndexOfFlag(flag, allFlags);
 				}
-
-				allFlags [flagIndex].isBoolean = isBoolean;
-				allFlags [flagIndex].value = newValue;
+					
+				if (isBoolean) {
+					allFlags.Add (new FlagValue (flag, newValue == 0 ? false : true));
+				} else {
+					allFlags.Add (new FlagValue (flag, newValue));
+				}
 			}
 		}
 
