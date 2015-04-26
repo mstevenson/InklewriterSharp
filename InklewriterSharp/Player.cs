@@ -9,12 +9,12 @@ namespace Inklewriter
 	public class BlockContent<T>
 	{
 		public T content;
-		public bool isShown;
+		public bool isVisible;
 
-		public BlockContent (T content, bool isShown)
+		public BlockContent (T content, bool isVisible)
 		{
 			this.content = content;
-			this.isShown = isShown;
+			this.isVisible = isVisible;
 		}
 	}
 
@@ -30,7 +30,7 @@ namespace Inklewriter
 
 		/// <summary>
 		/// All stitches belonging to this play chunk. Stitches that pass flag validation
-		/// will have the isShown value set to true.
+		/// will have the isVisible value set to true.
 		/// The text from all visible stitches will be processed, styled, and stored in compiledText.
 		/// </summary>
 		public List<BlockContent<Stitch>> stitches = new List<BlockContent<Stitch>> ();
@@ -49,37 +49,17 @@ namespace Inklewriter
 
 	public class Player
 	{
-		public event Action OnReachedEnd;
-
-//		/// <summary>
-//		/// Callback to handle the styling of a block of bolded text.
-//		/// </summary>
-//		public Func<string, string> onStyledBold; // arg: text to style
-//
-//		/// <summary>
-//		/// Callback to handle the styling of a block of italicized text.
-//		/// </summary>
-//		public Func<string, string> onStyledItalic;
-//
-//		/// <summary>
-//		/// Callback to handle the styling of a block of italicized text.
-//		/// </summary>
-//		public Func<string, string, string> onReplacedLinkUrl; // args: url, link text
-//		public Func<string, string> onReplacedImageUrl; // args: url
+		public List<FlagValue> AllFlagsCollected { get; private set; }
 
 		StoryModel model;
-
-		public List<FlagValue> FlagsCollected { get; private set; }
-
 		IMarkupConverter markupConverter;
 
 		public Player (StoryModel model, IMarkupConverter markupConverter)
 		{
 			this.model = model;
 			this.markupConverter = markupConverter;
-			FlagsCollected = new List<FlagValue> ();
+			AllFlagsCollected = new List<FlagValue> ();
 		}
-
 
 		List<PlayChunk> e = new List<PlayChunk> (); // these should be stitches, not play chunks?
 		List<Stitch> visitedStitches = new List<Stitch> ();
@@ -91,12 +71,12 @@ namespace Inklewriter
 		{
 			PlayChunk chunk = new PlayChunk ();
 
-			this.FlagsCollected = new List<FlagValue> ();
+			this.AllFlagsCollected = new List<FlagValue> ();
 			this.wordCount = 0;
 			this.hadSectionHeading = false;
 			if (this.prevChunk != null) {
 				for (var s = 0; s < this.prevChunk.flagsCollected.Count; s++) {
-					FlagsCollected.Add (this.prevChunk.flagsCollected [s]);
+					AllFlagsCollected.Add (this.prevChunk.flagsCollected [s]);
 				}
 			}
 
@@ -110,11 +90,11 @@ namespace Inklewriter
 				if (currentStitch.PageNumber >= 1) {
 					this.hadSectionHeading = true;
 				}
-				bool isStitchShown = false;
+				bool isStitchVisible = false;
 				// This stitch passes flag tests and should be included in this chunk
-				if (StoryModel.DoesArrayMeetConditions (currentStitch.IfConditions, currentStitch.NotIfConditions, FlagsCollected)) {
+				if (StoryModel.DoesArrayMeetConditions (currentStitch.IfConditions, currentStitch.NotIfConditions, AllFlagsCollected)) {
 
-					isStitchShown = true;
+					isStitchVisible = true;
 
 					// Embed illustration image url
 					if (!string.IsNullOrEmpty (currentStitch.Image)) {
@@ -127,17 +107,17 @@ namespace Inklewriter
 					// Stitch is not a run-on, or has no stitch to link to
 					if (Regex.IsMatch (currentStitch.Text, @"\[\.\.\.\]") && !currentStitch.RunOn || currentStitch.DivertStitch == null) {
 						// if there is no more text to display in this chunk...
-						compiledText += ApplyRuleSubstitutions (newlineStripped, FlagsCollected) + "\n";
+						compiledText += ApplyRuleSubstitutions (newlineStripped, AllFlagsCollected) + "\n";
 						newlineStripped = "";
 					}
 
 					// Process flags
 					if (currentStitch.Flags.Count > 0) {
-						StoryModel.ProcessFlagSetting (currentStitch, this.FlagsCollected);
+						StoryModel.ProcessFlagSetting (currentStitch, this.AllFlagsCollected);
 					}
 				}
 				// Add stitch to chunk
-				chunk.stitches.Add (new BlockContent<Stitch> (currentStitch, isStitchShown));
+				chunk.stitches.Add (new BlockContent<Stitch> (currentStitch, isStitchVisible));
 				currentStitch = currentStitch.DivertStitch;
 			}
 			this.wordCount += WordCountOf (compiledText);
@@ -162,7 +142,7 @@ namespace Inklewriter
 				var i = visitedStitches [visitedStitches.Count - 1].Options;
 				for (var o = 0; o < i.Count; o++) {
 					var u = i [o];
-					var a = StoryModel.DoesArrayMeetConditions(u.IfConditions, u.NotIfConditions, this.FlagsCollected);
+					var a = StoryModel.DoesArrayMeetConditions(u.IfConditions, u.NotIfConditions, this.AllFlagsCollected);
 					if (a) {
 						var f = CreateOptionButton (u, a);
 //						this.optionBoxes.push(f), this.jqOptBlock.append(f.jqPlayOption), this.jqOptBlock.append(r)
