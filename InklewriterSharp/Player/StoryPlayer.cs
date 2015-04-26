@@ -25,6 +25,26 @@ namespace Inklewriter.Player
 
 		public int WordCount { get; private set; }
 
+		public string Title
+		{
+			get {
+				return model.Story.Title;
+			}
+		}
+
+		public string Author
+		{
+			get {
+				return model.Story.EditorData.AuthorName;
+			}
+		}
+
+		public Stitch InitialStitch {
+			get {
+				return model.Story.InitialStitch;
+			}
+		}
+
 		public Stitch LastStitch {
 			get {
 				var index = visitedStitches.Count - 1;

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.IO;
 using Inklewriter;
+using Inklewriter.Player;
 
 namespace Inklewriter.Examples
 {
@@ -8,76 +10,61 @@ namespace Inklewriter.Examples
 	{
 		public static void Main (string[] args)
 		{
+			// Load story file
 			string storyJson = File.ReadAllText ("Stories/tutorial.json");
 			StoryModel model = new StoryModel ();
 			model.ImportStory (storyJson);
 
+			// Load story into player
+			StoryPlayer player = new StoryPlayer (model, new Inklewriter.MarkupConverters.MarkdownConverter ());
+
+			// Display header
 			Console.Clear ();
 			Console.WriteLine ();
-			Console.WriteLine (model.Story.Title);
-			Console.WriteLine ("by " + model.Story.EditorData.AuthorName);
+			Console.WriteLine (player.Title);
+			Console.WriteLine ("by " + player.Author);
 
-			Stitch selectedStitch = model.Story.InitialStitch;
-			while (selectedStitch != null) {
+			// Main loop
+			Stitch lastStitch = player.InitialStitch;
+			while (lastStitch != null) {
 				Console.WriteLine ();
 				HorizontalLine ();
 				Console.WriteLine ();
 
-				selectedStitch = DisplayAllStitches (selectedStitch);
+				var nextChunk = player.GetChunkFromStitch (lastStitch);
+				lastStitch = DisplayChunk (nextChunk);
 			}
-		}
-
-		/// <summary>
-		/// Display a series of stitches up to a branch.
-		/// </summary>
-		static Stitch DisplayAllStitches (Stitch stitch)
-		{
-			Stitch divert = stitch;
-			Stitch lastStitch = null;
-			while (divert != null) {
-				lastStitch = DisplayStitch (divert);
-				divert = divert.DivertStitch;
-			}
-			return lastStitch;
 		}
 
 		/// <summary>
 		/// Takes a single stitch to display, and returns the stitch
 		// /referenced by the player selected option if one is available.
 		/// </summary>
-		static Stitch DisplayStitch (Stitch stitch)
+		static Stitch DisplayChunk (PlayChunk chunk)
 		{
-			if (stitch.RunOn) {
-				Console.Write (" " + stitch.Text);
-			} else {
-				Console.WriteLine (stitch.Text);
-				Console.WriteLine ();
-			}
-			return PresentOptions (stitch);
-		}
+			// Show main text
+			Console.WriteLine (chunk.Text);
 
-		/// <summary>
-		/// Presents a series of branching options for the given stitch, if available.
-		/// </summary>
-		static Stitch PresentOptions (Stitch stitch)
-		{
-			// Check for options
-			int count = stitch.Options.Count;
-			if (count == 0) {
+			// Find all available options
+			var visibleOptions = chunk.Options.Where (o => o.isVisible).Select (o => o.content).ToList ();
+
+			// Bail out if no options were visible and we have nowhere to go
+			if (visibleOptions.Count == 0) {
 				return null;
 			}
-			// Draw options
-			for (int i = 0; i < count; i++) {
-				var opt = stitch.Options [i];
-				Console.WriteLine (string.Format ("{0}. {1}", (i + 1), opt.Text));
+
+			// Display options
+			for (int i = 0; i < visibleOptions.Count; i++) {
+				Console.WriteLine (string.Format ("{0}. {1}", (i + 1), visibleOptions[i].Text));
 			}
-			// Wait for input, return stitch for valid selected option
+
+			// Wait for input, return selected option's linked stitch
 			int choice = -1;
-			while (choice < 1 || choice > stitch.Options.Count) {
+			while (choice < 1 || choice > visibleOptions.Count) {
 				var key = Console.ReadKey (true);
 				int.TryParse (key.KeyChar.ToString (), out choice);
 			}
-			return stitch.Options [choice - 1].LinkStitch;
+			return visibleOptions [choice - 1].LinkStitch;
 		}
 
 		static void HorizontalLine ()
