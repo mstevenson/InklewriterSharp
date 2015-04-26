@@ -19,7 +19,7 @@ namespace Inklewriter.Examples
 			model.ImportStory (storyJson);
 
 			// Load story into player
-			StoryPlayer player = new StoryPlayer (model, new Inklewriter.MarkupConverters.MarkdownConverter ());
+			StoryPlayer player = new StoryPlayer (model, new Inklewriter.MarkupConverters.ConsoleMarkupConverter ());
 
 			// Display header
 			Console.Clear ();
@@ -45,6 +45,11 @@ namespace Inklewriter.Examples
 		/// </summary>
 		static Stitch DisplayChunk (PlayChunk chunk)
 		{
+			if (!string.IsNullOrEmpty (chunk.Image)) {
+				Console.WriteLine (string.Format ("[Image: {0}]", chunk.Image));
+				Console.WriteLine ();
+			}
+
 			// Show main text
 			DrawText (chunk.Text);
 

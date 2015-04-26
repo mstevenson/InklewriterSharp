@@ -1,6 +1,6 @@
 ﻿namespace Inklewriter.MarkupConverters
 {
-	public class MarkdownConverter : IMarkupConverter
+	public class ConsoleMarkupConverter : IMarkupConverter
 	{
 		public string ReplaceLinkUrlMarkup (string url, string label)
 		{
@@ -15,7 +15,7 @@
 			if (string.IsNullOrEmpty (url)) {
 				return "";
 			}
-			return string.Format ("![\"\"]({1})", "", url);
+			return string.Format ("[Image: {1}]", "", url);
 		}
 
 		public string ReplaceBoldStyleMarkup (string text)
@@ -23,7 +23,7 @@
 			if (string.IsNullOrEmpty (text)) {
 				return "";
 			}
-			return string.Format ("**{0}**", text);
+			return string.Format ("{0}", text);
 		}
 
 		public string ReplaceItalicStyleMarkup (string text)
@@ -31,8 +31,7 @@
 			if (string.IsNullOrEmpty (text)) {
 				return "";
 			}
-			return string.Format ("_{0}_", text);
+			return string.Format ("{0}", text);
 		}
 	}
 }
-
