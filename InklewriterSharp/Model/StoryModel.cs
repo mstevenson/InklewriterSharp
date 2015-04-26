@@ -435,7 +435,7 @@ namespace Inklewriter
 //			//				return e.pageNumberLabel() - t.pageNumberLabel()
 //			//				});
 //			for (var i = e.Count - 1; i >= 0; i--) {
-//				Process (e[i], true, 0);
+//				ComputePageNumbersSubProcess (e[i], true, 0);
 //			}
 //			List<int> u = new List<int> ();
 ////			u.Add (initialStitch.pageNumber());
@@ -457,7 +457,7 @@ namespace Inklewriter
 ////			}
 		}
 
-		void Process (Stitch t2, bool r2, int s) {
+//		void ComputePageNumbersSubProcess (Stitch t2, bool r2, int s) {
 //			if (!t2) {
 //				return;
 //			}
@@ -476,7 +476,7 @@ namespace Inklewriter
 //			for (var u = 0; u < t.Options.Count; u++) {
 //				o (t.Options[u].LinkStitch, false, s + 1 + .1 * u);
 //			}
-		}
+//		}
 
 		#endregion
 
@@ -575,12 +575,10 @@ namespace Inklewriter
 		}
 
 		/// <summary>
-		/// Determines if the given list of flags satisfies the given 'if' and 'not if' conditions.
-		/// 
+		/// Returns true if the 'if' and 'not if' conditions are satisfied by the given list of flags.
 		/// </summary>
 		public static bool DoesArrayMeetConditions (List<string> ifConditions, List<string> notIfConditions, List<FlagValue> flags) // n type is unknown
 		{
-			var list = new List<string> ();
 			var success = false;
 			for (var i = 0; i < ifConditions.Count && !success; i++) {
 				success = !StoryModel.Test (ifConditions [i], flags);

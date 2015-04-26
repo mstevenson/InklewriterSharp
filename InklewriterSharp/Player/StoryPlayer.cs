@@ -20,22 +20,40 @@ namespace Inklewriter.Player
 			AllFlagsCollected = new List<FlagValue> ();
 		}
 
-		List<PlayChunk> e = new List<PlayChunk> (); // these should be stitches, not play chunks?
+		List<PlayChunk> allChunks = new List<PlayChunk> ();
 		List<Stitch> visitedStitches = new List<Stitch> ();
-		PlayChunk prevChunk;
-		int wordCount = 0;
-		bool hadSectionHeading;
 
-		PlayChunk TraverseStitch (Stitch stitch)
+		public int WordCount { get; private set; }
+
+		public Stitch LastStitch {
+			get {
+				var index = visitedStitches.Count - 1;
+				if (index >= 0) {
+					return visitedStitches [index];
+				}
+				return null;
+			}
+		}
+
+		public PlayChunk LastChunk {
+			get {
+				var index = allChunks.Count - 1;
+				if (index >= 0) {
+					return allChunks [index];
+				}
+				return null;
+			}
+		}
+
+		public PlayChunk GetChunkFromStitch (Stitch stitch)
 		{
 			PlayChunk chunk = new PlayChunk ();
 
 			AllFlagsCollected = new List<FlagValue> ();
-			wordCount = 0;
-			hadSectionHeading = false;
-			if (this.prevChunk != null) {
-				for (var s = 0; s < prevChunk.flagsCollected.Count; s++) {
-					AllFlagsCollected.Add (prevChunk.flagsCollected [s]);
+			WordCount = 0;
+			if (LastChunk != null) {
+				for (var s = 0; s < LastChunk.FlagsCollected.Count; s++) {
+					AllFlagsCollected.Add (LastChunk.FlagsCollected [s]);
 				}
 			}
 
@@ -47,7 +65,7 @@ namespace Inklewriter.Player
 			while (currentStitch != null) {
 				visitedStitches.Add (currentStitch);
 				if (currentStitch.PageNumber >= 1) {
-					hadSectionHeading = true;
+					chunk.HasSectionHeading = true;
 				}
 				bool isStitchVisible = StoryModel.DoesArrayMeetConditions (currentStitch.IfConditions, currentStitch.NotIfConditions, AllFlagsCollected);
 				// This stitch passes flag tests and should be included in this chunk
@@ -57,15 +75,15 @@ namespace Inklewriter.Player
 
 					// Embed illustration image
 					if (!string.IsNullOrEmpty (currentStitch.Image)) {
-						chunk.image = currentStitch.Image;
+						chunk.Image = currentStitch.Image;
 					}
 
 					// Replace newlines with spaces
 					newlineStripped += currentStitch.Text.Replace("\n", " ") + " ";
 
-					// Stitch is not a run-on, or has no stitch to link to
-					if (Regex.IsMatch (currentStitch.Text, @"\[\.\.\.\]") && !currentStitch.RunOn || currentStitch.DivertStitch == null) {
-						// if there is no more text to display in this chunk...
+					// Apply text substitutions if we are at the final stitch in this chunk
+					bool isRunOn = Regex.IsMatch (currentStitch.Text, @"\[\.\.\.\]") || currentStitch.RunOn;
+					if (!isRunOn || currentStitch.DivertStitch == null) {
 						compiledText += ApplyRuleSubstitutions (newlineStripped, AllFlagsCollected) + "\n";
 						newlineStripped = "";
 					}
@@ -76,35 +94,25 @@ namespace Inklewriter.Player
 					}
 				}
 				// Add stitch to chunk
-				chunk.stitches.Add (new BlockContent<Stitch> (currentStitch, isStitchVisible));
+				chunk.Stitches.Add (new BlockContent<Stitch> (currentStitch, isStitchVisible));
 				currentStitch = currentStitch.DivertStitch;
 			}
-			wordCount += WordCountOf (compiledText);
+			WordCount += WordCountOf (compiledText);
 
-			chunk.text = compiledText;
+			chunk.Text = compiledText;
 
-			// Handle options
-			//			var r = "<div class='option-divider'></div>";
-			//			this.jqOptBlock = $("<div class='option_block'>" + r + "</div>");
-			if (visitedStitches [visitedStitches.Count - 1].Options.Count == 0) {
-				//				this.jqTextBlock.append('<div class="the_end">End</div>');
-				//				this.jqTextBlock.find(".the_end").append("<div class='back_to_top'></div>";
-				//				this.jqTextBlock.find(".back_to_top").bind("click tap", function() { b(e.first().jqPlayChunk); });
-				//				$("#read_area").append("<div id='madeby'>Text &copy; the author. <a href='http://www.inklestudios.com/inklewriter'><strong>inklewriter</strong></a> &copy; <a href='http://www.inklestudios.com'><strong>inkle</strong></a></div>"))
-			} else {
-				var options = visitedStitches [visitedStitches.Count - 1].Options;
-				for (var o = 0; o < options.Count; o++) {
-					var option = options [o];
-					var isVisible = StoryModel.DoesArrayMeetConditions(option.IfConditions, option.NotIfConditions, AllFlagsCollected);
+			// Add options to chunk
+			if (LastStitch.Options.Count > 0) {
+				var options = LastStitch.Options;
+				foreach (var option in LastStitch.Options) {
+					var isVisible = StoryModel.DoesArrayMeetConditions (option.IfConditions, option.NotIfConditions, AllFlagsCollected);
 					if (isVisible) {
-						chunk.options.Add (new BlockContent<Option> (option, isVisible));
-//						var f = CreateOptionButton (u, a);
-						//						this.optionBoxes.push(f), this.jqOptBlock.append(f.jqPlayOption), this.jqOptBlock.append(r)
+						chunk.Options.Add (new BlockContent<Option> (option, isVisible));
 					}
 				}
-				//				this.jqPlayChunk.append(this.jqOptBlock)
+			} else {
+				chunk.IsEnd = true;
 			}
-			//			$(".expired").remove()
 
 			return chunk;
 		}
@@ -117,7 +125,7 @@ namespace Inklewriter.Player
 			return 0;
 		}
 			
-		string ApplyMarkupSubstitutions (string text)
+		public string ApplyMarkupSubstitutions (string text)
 		{
 			text = ReplaceQuotes (text);
 			text = ReplaceUrlMarkup (text);
@@ -125,10 +133,10 @@ namespace Inklewriter.Player
 			return text;
 		}
 
-		string ApplyRuleSubstitutions (string text, List<FlagValue> flags)
+		public string ApplyRuleSubstitutions (string text, List<FlagValue> flags)
 		{
 			text = ReplaceRunOnMarker (text);
-			text = ConvertNumberToWords (text, flags);
+			text = ConvertNumbersToWords (text, flags);
 			string n = "";
 			while (n != text) {
 				n = text;
@@ -223,13 +231,19 @@ namespace Inklewriter.Player
 			return text;
 		}
 
-		public string ReplaceUrlMarkup (string e)
+		public string ReplaceUrlMarkup (string text)
 		{
-			e = Regex.Replace (e, @"\[(.*?)\|(.*?)\]", markupConverter.ReplaceLinkUrlMarkup ("$1", "$2"));
-			return e;
+			text = Regex.Replace (text, @"\[(.*?)\|(.*?)\]", markupConverter.ReplaceLinkUrlMarkup ("$1", "$2"));
+			return text;
 		}
 
-		public string ConvertNumberToWords (string text, List<FlagValue> flags)
+		public string ReplaceImageMarkup (string text)
+		{
+			text = Regex.Replace (text, @"\%\|\%\|\%(.*?)\$\|\$\|\$", markupConverter.ReplaceImageUrlMarkup ("$1"));
+			return text;
+		}
+
+		public string ConvertNumbersToWords (string text, List<FlagValue> flags)
 		{
 			var pattern = @"\[\s*(number|value)\s*\:\s*(.*?)\s*\]";
 			var matchSet = Regex.Matches (text, pattern);
@@ -254,17 +268,8 @@ namespace Inklewriter.Player
 				wordCount = wordCount - wordCount % 10 + 10;
 			} else {
 				wordCount = wordCount - wordCount % 100 + 100;
-//				$("#wordcount").text("About " + commadString(n) + " words");
 			}
 			return wordCount;
 		}
-
-		public string ReplaceImageMarkup (string text)
-		{
-			text = Regex.Replace (text, @"\%\|\%\|\%(.*?)\$\|\$\|\$", markupConverter.ReplaceImageUrlMarkup ("$1"));
-			return text;
-		}
-
 	}
-	
 }

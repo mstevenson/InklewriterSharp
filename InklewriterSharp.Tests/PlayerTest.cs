@@ -33,7 +33,7 @@ namespace Inklewriter.Tests
 		}
 
 		[Test]
-		public void ConvertNumberToWords ()
+		public void ConvertNumbersToWords ()
 		{
 			StoryPlayer player = new StoryPlayer (null, new HtmlConverter ());
 			List<FlagValue> flags = new List<FlagValue> {
@@ -41,8 +41,8 @@ namespace Inklewriter.Tests
 				new FlagValue ("b", 10),
 			};
 
-			Assert.AreEqual ("The number five.", player.ConvertNumberToWords ("The number [value:a].", flags));
-			Assert.AreEqual ("The number 5.", player.ConvertNumberToWords ("The number [number:a].", flags));
+			Assert.AreEqual ("The number five.", player.ConvertNumbersToWords ("The number [value:a].", flags));
+			Assert.AreEqual ("The number 5.", player.ConvertNumbersToWords ("The number [number:a].", flags));
 		}
 
 		[Test]
