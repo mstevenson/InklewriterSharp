@@ -1,7 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
-
-namespace Inklewriter.MarkupConverters
+﻿namespace Inklewriter.MarkupConverters
 {
 	public class HtmlConverter : IMarkupConverter
 	{

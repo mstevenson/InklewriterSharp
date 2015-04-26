@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Inklewriter.MarkupConverters
+﻿namespace Inklewriter.MarkupConverters
 {
 	public class MarkdownConverter : IMarkupConverter
 	{
