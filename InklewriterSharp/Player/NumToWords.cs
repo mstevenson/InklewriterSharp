@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Inklewriter
+namespace Inklewriter.Player
 {
 	public static class NumToWords
 	{

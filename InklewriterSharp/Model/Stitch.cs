@@ -271,12 +271,6 @@ namespace Inklewriter
 
 		#endregion
 
-//		public int NumberOfConditionals {
-//			get {
-//				
-//			}
-//		}
-
 		public override int GetHashCode ()
 		{
 			return Name.GetHashCode ();

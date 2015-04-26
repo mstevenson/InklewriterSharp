@@ -1,60 +1,19 @@
 ﻿using System.Text.RegularExpressions;
-using System.Collections;
 using System.Collections.Generic;
 using System;
+using Inklewriter;
 using Inklewriter.MarkupConverters;
 
-namespace Inklewriter
+namespace Inklewriter.Player
 {
-	public class BlockContent<T>
-	{
-		public T content;
-		public bool isVisible;
-
-		public BlockContent (T content, bool isVisible)
-		{
-			this.content = content;
-			this.isVisible = isVisible;
-		}
-	}
-
-	/// <summary>
-	/// A series of stitches ending in a block of selectable options. Includes an optional illustration image.
-	/// </summary>
-	public class PlayChunk
-	{
-		/// <summary>
-		/// In-line illustration image URL.
-		/// </summary>
-		public string image;
-
-		/// <summary>
-		/// All stitches belonging to this play chunk. Stitches that pass flag validation
-		/// will have the isVisible value set to true.
-		/// The text from all visible stitches will be processed, styled, and stored in compiledText.
-		/// </summary>
-		public List<BlockContent<Stitch>> stitches = new List<BlockContent<Stitch>> ();
-
-		/// <summary>
-		/// All flags recorded during play up to and including to this chunk.
-		/// </summary>
-		public List<FlagValue> flagsCollected = new List<FlagValue> ();
-
-		/// <summary>
-		/// Body text compiled from all stitches belonging to this chunk, post-styling.
-		/// Stitches that do not pass flag validation will not be included in this text.
-		/// </summary>
-		public string compiledText;
-	}
-
-	public class Player
+	public class StoryPlayer
 	{
 		public List<FlagValue> AllFlagsCollected { get; private set; }
 
 		StoryModel model;
 		IMarkupConverter markupConverter;
 
-		public Player (StoryModel model, IMarkupConverter markupConverter)
+		public StoryPlayer (StoryModel model, IMarkupConverter markupConverter)
 		{
 			this.model = model;
 			this.markupConverter = markupConverter;
@@ -71,12 +30,12 @@ namespace Inklewriter
 		{
 			PlayChunk chunk = new PlayChunk ();
 
-			this.AllFlagsCollected = new List<FlagValue> ();
-			this.wordCount = 0;
-			this.hadSectionHeading = false;
+			AllFlagsCollected = new List<FlagValue> ();
+			wordCount = 0;
+			hadSectionHeading = false;
 			if (this.prevChunk != null) {
-				for (var s = 0; s < this.prevChunk.flagsCollected.Count; s++) {
-					AllFlagsCollected.Add (this.prevChunk.flagsCollected [s]);
+				for (var s = 0; s < prevChunk.flagsCollected.Count; s++) {
+					AllFlagsCollected.Add (prevChunk.flagsCollected [s]);
 				}
 			}
 
@@ -86,17 +45,17 @@ namespace Inklewriter
 
 			// Loop through complete series of stitches.
 			while (currentStitch != null) {
-				this.visitedStitches.Add (currentStitch);
+				visitedStitches.Add (currentStitch);
 				if (currentStitch.PageNumber >= 1) {
-					this.hadSectionHeading = true;
+					hadSectionHeading = true;
 				}
-				bool isStitchVisible = false;
+				bool isStitchVisible = StoryModel.DoesArrayMeetConditions (currentStitch.IfConditions, currentStitch.NotIfConditions, AllFlagsCollected);
 				// This stitch passes flag tests and should be included in this chunk
-				if (StoryModel.DoesArrayMeetConditions (currentStitch.IfConditions, currentStitch.NotIfConditions, AllFlagsCollected)) {
+				if (isStitchVisible) {
 
 					isStitchVisible = true;
 
-					// Embed illustration image url
+					// Embed illustration image
 					if (!string.IsNullOrEmpty (currentStitch.Image)) {
 						chunk.image = currentStitch.Image;
 					}
@@ -113,75 +72,41 @@ namespace Inklewriter
 
 					// Process flags
 					if (currentStitch.Flags.Count > 0) {
-						StoryModel.ProcessFlagSetting (currentStitch, this.AllFlagsCollected);
+						StoryModel.ProcessFlagSetting (currentStitch, AllFlagsCollected);
 					}
 				}
 				// Add stitch to chunk
 				chunk.stitches.Add (new BlockContent<Stitch> (currentStitch, isStitchVisible));
 				currentStitch = currentStitch.DivertStitch;
 			}
-			this.wordCount += WordCountOf (compiledText);
+			wordCount += WordCountOf (compiledText);
 
-			chunk.compiledText = compiledText;
+			chunk.text = compiledText;
 
-			CreateOptionBlock ();
-
-			return chunk;
-		}
-
-		public void CreateOptionBlock ()
-		{
-//			var r = "<div class='option-divider'></div>";
-//			this.jqOptBlock = $("<div class='option_block'>" + r + "</div>");
+			// Handle options
+			//			var r = "<div class='option-divider'></div>";
+			//			this.jqOptBlock = $("<div class='option_block'>" + r + "</div>");
 			if (visitedStitches [visitedStitches.Count - 1].Options.Count == 0) {
-//				this.jqTextBlock.append('<div class="the_end">End</div>');
-//				this.jqTextBlock.find(".the_end").append("<div class='back_to_top'></div>";
-//				this.jqTextBlock.find(".back_to_top").bind("click tap", function() { b(e.first().jqPlayChunk); });
-//				$("#read_area").append("<div id='madeby'>Text &copy; the author. <a href='http://www.inklestudios.com/inklewriter'><strong>inklewriter</strong></a> &copy; <a href='http://www.inklestudios.com'><strong>inkle</strong></a></div>"))
+				//				this.jqTextBlock.append('<div class="the_end">End</div>');
+				//				this.jqTextBlock.find(".the_end").append("<div class='back_to_top'></div>";
+				//				this.jqTextBlock.find(".back_to_top").bind("click tap", function() { b(e.first().jqPlayChunk); });
+				//				$("#read_area").append("<div id='madeby'>Text &copy; the author. <a href='http://www.inklestudios.com/inklewriter'><strong>inklewriter</strong></a> &copy; <a href='http://www.inklestudios.com'><strong>inkle</strong></a></div>"))
 			} else {
-				var i = visitedStitches [visitedStitches.Count - 1].Options;
-				for (var o = 0; o < i.Count; o++) {
-					var u = i [o];
-					var a = StoryModel.DoesArrayMeetConditions(u.IfConditions, u.NotIfConditions, this.AllFlagsCollected);
-					if (a) {
-						var f = CreateOptionButton (u, a);
-//						this.optionBoxes.push(f), this.jqOptBlock.append(f.jqPlayOption), this.jqOptBlock.append(r)
+				var options = visitedStitches [visitedStitches.Count - 1].Options;
+				for (var o = 0; o < options.Count; o++) {
+					var option = options [o];
+					var isVisible = StoryModel.DoesArrayMeetConditions(option.IfConditions, option.NotIfConditions, AllFlagsCollected);
+					if (isVisible) {
+						chunk.options.Add (new BlockContent<Option> (option, isVisible));
+//						var f = CreateOptionButton (u, a);
+						//						this.optionBoxes.push(f), this.jqOptBlock.append(f.jqPlayOption), this.jqOptBlock.append(r)
 					}
 				}
-//				this.jqPlayChunk.append(this.jqOptBlock)
+				//				this.jqPlayChunk.append(this.jqOptBlock)
 			}
-//			$(".expired").remove()
-		}
+			//			$(".expired").remove()
 
-		// Should return the option button
-		public static string CreateOptionButton (Option n, bool arrayMeetsConditions) // s method
-		{
-			return null;
-
-//			this.jqPlayOption = $('<div class="option_button">' + p(n.text()) + "</div>");
-//			this.linkTo = n.linkStitch();
-//			var s = this.linkTo;
-//			if (!n.writeModeOnly) {
-//				if (i) {
-//					this.jqPlayOption.bind("click tap", function() {
-//						if (!t || e.last().hadSectionHeading && StoryModel.allowCheckpoints) {
-//							e.last().jqRewindButton.show();
-//						} else {
-//							e.first().jqRewindButton.show();
-//						}
-//						var i = s;
-//						$(".option_block").addClass("expired");
-//						e.push(new r(i)), k(), y(), o(n);
-//					});
-//				}
-//			} else {
-//				this.jqPlayOption.addClass("disabled");
-//				if (n.writeModeOnly) {
-//					this.jqPlayOption.attr("tooltip", "Switch to write mode to continue.")
-//				} else {
-//					this.jqPlayOption.attr("tooltip", "This option has been disallowed by conditions.")	
-//				}
-//			}
+			return chunk;
 		}
 
 		public static int WordCountOf (string s)

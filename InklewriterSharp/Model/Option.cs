@@ -58,9 +58,6 @@ namespace Inklewriter
 				return;
 			}
 			LinkStitch.RefCount--;
-			if (StoryModel.WatchRefCounts ()) {
-				Console.WriteLine ("Unlinking " + Text + " - option on " + ParentStitch.Name);
-			}
 			LinkStitch = null;
 		}
 	}

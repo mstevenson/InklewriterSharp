@@ -1,33 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace Inklewriter
 {
-	public class FlagValue
-	{
-		public string flagName;
-		public int value;
-		public bool isBoolean;
-
-		public FlagValue ()
-		{
-		}
-
-		public FlagValue (string name, bool isTrue)
-		{
-			flagName = name;
-			value = isTrue ? 1 : 0;
-			isBoolean = true;
-		}
-
-		public FlagValue (string name, int number)
-		{
-			flagName = name;
-			value = number;
-		}
-	}
-
 	public class StoryModel
 	{
 		public const string defaultStoryName = "Untitled Story";
@@ -44,14 +20,10 @@ namespace Inklewriter
 
 		public int LooseEndCount { get; set; }
 
-		public bool Loading { get; set; }
-
 		public StoryModel ()
 		{
 			FlagIndex = new List<string> ();
 		}
-
-		#region IO
 
 		public void ImportStory (string data)
 		{
@@ -68,44 +40,29 @@ namespace Inklewriter
 			return null;
 		}
 
-		#endregion
-
-//		public void RebuildBacklinks ()
-//		{
-//			EndCount = 0;
-//			var stitches = Stitches;
-//			for (int e = 0; e < stitches.Count; e++) {
-//				stitches [e].Backlinks = new List<Stitch> ();
-//			}
-//			for (int e = 0; e < stitches.Count; e++)
-//				if (stitches [e].Options.Count > 0) {
-//					for (var t = 0; t < stitches [e].Options.Count; t++) {
-//						if (stitches [e].Options [t].LinkStitch != null) {
-//							stitches [e].Options [t].LinkStitch.Backlinks.Add (stitches [e]);
-//						} else {
-//							LooseEndCount++;
-//						}
-//					}
-//				} else {
-//					if (stitches [e].DivertStitch != null) {
-//						stitches [e].DivertStitch.Backlinks.Add (stitches [e]);
-//					} else {
-//						EndCount++;
-//					}
-//				}
-//			if (WatchRefCounts ()) {
-//				for (int e = 0; e < stitches.Count; e++) {
-//					if (stitches[e].Backlinks.Count != stitches[e].RefCount) {
-//						throw new System.Exception ("Stitch with text '" + stitches[e].Text + "' has invalid ref-count!");
-//					}
-//				}
-//			}
-//		}
-
-		public static bool WatchRefCounts ()
+		public void RebuildBacklinks ()
 		{
-			// FIXME
-			return false;
+			EndCount = 0;
+			for (int e = 0; e < Story.Stitches.Count; e++) {
+				Story.Stitches [e].Backlinks = new List<Stitch> ();
+			}
+			for (int e = 0; e < Story.Stitches.Count; e++) {
+				if (Story.Stitches [e].Options.Count > 0) {
+					for (var t = 0; t < Story.Stitches [e].Options.Count; t++) {
+						if (Story.Stitches [e].Options [t].LinkStitch != null) {
+							Story.Stitches [e].Options [t].LinkStitch.Backlinks.Add (Story.Stitches [e]);
+						} else {
+							LooseEndCount++;
+						}
+					}
+				} else {
+					if (Story.Stitches [e].DivertStitch != null) {
+						Story.Stitches [e].DivertStitch.Backlinks.Add (Story.Stitches [e]);
+					} else {
+						EndCount++;
+					}
+				}
+			}
 		}
 
 		#region Flags
@@ -143,7 +100,6 @@ namespace Inklewriter
 		/// </summary>
 		public void AddFlagToIndex (string flag)
 		{
-			Console.WriteLine ("Adding flag string " + flag);
 			var name = ExtractFlagNameFromExpression (flag);
 			if (!FlagIndex.Contains (name)) {
 				FlagIndex.Add (name);
@@ -418,7 +374,7 @@ namespace Inklewriter
 
 		public void InsertPageNumber (Stitch stitch)
 		{
-			if (Loading || stitch.VerticalDistanceFromPageNumberHeader < 2
+			if (stitch.VerticalDistanceFromPageNumberHeader < 2
 				|| PageSize (stitch.PageNumber) < StoryModel.maxPreferredPageLength / 2
 				|| HeaderWithinDistanceOfStitch (3, stitch))
 			{
@@ -456,55 +412,70 @@ namespace Inklewriter
 
 		public void ComputePageNumbers ()
 		{
-			var e = new List<Stitch> ();
-			var t = 0;
-			//			var n = {}		;
-			//			var r = {};
-			var stitches = Story.Stitches;
-			for (var i = 0; i < stitches.Count; i++) {
-				var s = stitches[i].PageNumber;
-				if (s > 0) {
-					e.Add (stitches [i]);
-					if (s > t) {
-						t = s;
-					}
-					stitches [i].SetPageNumberLabel (this, s);
-					//					n[s] = [];
-					//					r[s] = !0;
-				} else {
-					stitches [i].SetPageNumberLabel (this, 0);
-				}
-			}
-			//			e.sort(function(e, t) {
-			//				return e.pageNumberLabel() - t.pageNumberLabel()
-			//				});
-			for (var i = e.Count - 1; i >= 0; i--) {
-				//				var o = function(t, r, s) {
-				//					if (!t) return;
-				//					if (!r && t.pageNumber() > 0) {
-				//						t.verticalDistanceFromHeader() > s && t.pageNumber() == e[i].pageNumber() && t.verticalDistanceFromHeader(s), n[e[i].pageNumber()].push(t.pageNumber());
-				//						return
-				//						}
-				//					t.pageNumber(e[i].pageNumber()), t.headerStitch(e[i]), e[i].sectionStitches.push(t), t.verticalDistanceFromHeader(s), o(t.divertStitch, !1, s + .01);
-				//					for (var u = 0; u < t.options.length; u++) o(t.options[u].linkStitch(), !1, s + 1 + .1 * u)
-				//					};
-				//				o(e[i], !0, 0)
-			}
-			//			var u = [];
-			//			u.push(initialStitch.pageNumber());
-			//			while (u.length > 0) {
-			//				var a = [];
-			//				for (var i = 0; i < u.length; i++)
-			//					if (r[u[i]]) {
-			//						r[u[i]] = !1;
-			//						for (var f = 0; f < n[u[i]].length; f++) a.push(n[u[i]][f])
-			//						}
-			//				u = a
-			//			}
-			//			for (var i = 0; i < StoryModel.stitches.length; i++) {
-			//				var l = StoryModel.stitches[i].pageNumber();
-			//				l && r[l] && (StoryModel.stitches[i].pageNumber(0), StoryModel.stitches[i].sectionStitches = [])
-			//			}
+//			List<Stitch> e = new List<Stitch> ();
+//			Stitch t = null;
+////			var n = new List<Stitch> ();
+//			var r = new List<Stitch> ();
+//			var stitches = Story.Stitches;
+//			for (var i = 0; i < stitches.Count; i++) {
+//				var s = stitches[i].PageNumber;
+//				if (s > 0) {
+//					e.Add (stitches [i]);
+//					if (s > t) {
+//						t = s;
+//					}
+//					stitches [i].SetPageNumberLabel (this, s);
+//					//					n[s] = [];
+//					//					r[s] = !0;
+//				} else {
+//					stitches [i].SetPageNumberLabel (this, 0);
+//				}
+//			}
+//			//			e.sort(function(e, t) {
+//			//				return e.pageNumberLabel() - t.pageNumberLabel()
+//			//				});
+//			for (var i = e.Count - 1; i >= 0; i--) {
+//				Process (e[i], true, 0);
+//			}
+//			List<int> u = new List<int> ();
+////			u.Add (initialStitch.pageNumber());
+//			while (u.Count > 0) {
+////				var a = [];
+////				for (var i = 0; i < u.length; i++) {
+////					if (r[u[i]]) {
+////						r[u[i]] = !1;
+////						for (var f = 0; f < n[u[i]].length; f++) {
+////							a.Add (n [u [i]] [f]);
+////						}
+////					}
+////				}
+////				u = a;
+//			}
+////			for (var i = 0; i < StoryModel.stitches.length; i++) {
+////				var l = StoryModel.stitches[i].pageNumber();
+////				l && r[l] && (StoryModel.stitches[i].pageNumber(0), StoryModel.stitches[i].sectionStitches = [])
+////			}
+		}
+
+		void Process (Stitch t2, bool r2, int s) {
+//			if (!t2) {
+//				return;
+//			}
+//
+//			if (!r2 && t2.PageNumber > 0) {
+//				if (t2.VerticalDistanceFromPageNumberHeader > s && t2.PageNumber == e[i].PageNumber && t2.verticalDistanceFromHeader(s)) {
+//					n[e[i].pageNumber()].push(t.pageNumber());
+//				}
+//				return;
+//			}
+//			//					t.pageNumber(e[i].PageNumber);
+//			//					t.headerStitch (e[i]);
+//			//					e[i].sectionStitches.push(t);
+//			//					t.verticalDistanceFromHeader(s);
+//			o(t.DivertStitch, false, s + .01);
+//			for (var u = 0; u < t.Options.Count; u++) {
+//				o (t.Options[u].LinkStitch, false, s + 1 + .1 * u);
+//			}
 		}
 
 		#endregion

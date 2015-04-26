@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -37,15 +37,23 @@
     <Compile Include="Model\Option.cs" />
     <Compile Include="Model\Story.cs" />
     <Compile Include="Model\EditorData.cs" />
-    <Compile Include="Player.cs" />
     <Compile Include="Model\StoryReader.cs" />
     <Compile Include="Model\StoryWriter.cs" />
     <Compile Include="SimpleJson.cs" />
-    <Compile Include="NumToWords.cs" />
+    <Compile Include="MarkupConverters\MarkdownConverter.cs" />
+    <Compile Include="MarkupConverters\IMarkupConverter.cs" />
+    <Compile Include="MarkupConverters\HtmlConverter.cs" />
+    <Compile Include="Player\BlockContent.cs" />
+    <Compile Include="Player\NumToWords.cs" />
+    <Compile Include="Player\PlayChunk.cs" />
+    <Compile Include="Model\FlagValue.cs" />
+    <Compile Include="Player\StoryPlayer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="Model\" />
+    <Folder Include="MarkupConverters\" />
+    <Folder Include="Player\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
