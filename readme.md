@@ -1,4 +1,4 @@
-InkleSharp
+InklewriterSharp
 ==========
 
 An unofficial C# reimplementation of [inklewriter](https://writer.inklestudios.com), an interactive story system created by [inkle studios](http://www.inklestudios.com).
