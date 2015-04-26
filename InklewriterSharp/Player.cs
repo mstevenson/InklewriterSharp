@@ -2,47 +2,94 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using Inklewriter.MarkupConverters;
 
 namespace Inklewriter
 {
+	public class BlockContent<T>
+	{
+		public T content;
+		public bool isShown;
+
+		public BlockContent (T content, bool isShown)
+		{
+			this.content = content;
+			this.isShown = isShown;
+		}
+	}
+
+	/// <summary>
+	/// A series of stitches ending in a block of selectable options. Includes an optional illustration image.
+	/// </summary>
+	public class PlayChunk
+	{
+		/// <summary>
+		/// In-line illustration image URL.
+		/// </summary>
+		public string image;
+
+		/// <summary>
+		/// All stitches belonging to this play chunk. Stitches that pass flag validation
+		/// will have the isShown value set to true.
+		/// The text from all visible stitches will be processed, styled, and stored in compiledText.
+		/// </summary>
+		public List<BlockContent<Stitch>> stitches = new List<BlockContent<Stitch>> ();
+
+		/// <summary>
+		/// All flags recorded during play up to and including to this chunk.
+		/// </summary>
+		public List<FlagValue> flagsCollected = new List<FlagValue> ();
+
+		/// <summary>
+		/// Body text compiled from all stitches belonging to this chunk, post-styling.
+		/// Stitches that do not pass flag validation will not be included in this text.
+		/// </summary>
+		public string compiledText;
+	}
+
 	public class Player
 	{
 		public event Action OnReachedEnd;
 
-		// In-line text styling callbacks
-		public Func<string, string> onStyledBold; // arg: text to style
-		public Func<string, string> onStyledItalic; // arg: text to style
-		public Func<string, string, string> onReplacedLinkUrl; // args: url, link text
-		public Func<string, string> onReplacedImageUrl; // args: url
-
-		public class StitchBlock
-		{
-			public string image;
-			public List<Stitch> stitches = new List<Stitch> ();
-			public List<FlagValue> flagsCollected = new List<FlagValue> ();
-			public string compiledText;
-		}
+//		/// <summary>
+//		/// Callback to handle the styling of a block of bolded text.
+//		/// </summary>
+//		public Func<string, string> onStyledBold; // arg: text to style
+//
+//		/// <summary>
+//		/// Callback to handle the styling of a block of italicized text.
+//		/// </summary>
+//		public Func<string, string> onStyledItalic;
+//
+//		/// <summary>
+//		/// Callback to handle the styling of a block of italicized text.
+//		/// </summary>
+//		public Func<string, string, string> onReplacedLinkUrl; // args: url, link text
+//		public Func<string, string> onReplacedImageUrl; // args: url
 
 		StoryModel model;
 
 		public List<FlagValue> FlagsCollected { get; private set; }
 
-		public Player (StoryModel model)
+		IMarkupConverter markupConverter;
+
+		public Player (StoryModel model, IMarkupConverter markupConverter)
 		{
 			this.model = model;
+			this.markupConverter = markupConverter;
 			FlagsCollected = new List<FlagValue> ();
 		}
 
 
-		List<StitchBlock> e = new List<StitchBlock> (); // these should be stitches, not play chunks?
+		List<PlayChunk> e = new List<PlayChunk> (); // these should be stitches, not play chunks?
 		List<Stitch> visitedStitches = new List<Stitch> ();
-		StitchBlock prevChunk;
+		PlayChunk prevChunk;
 		int wordCount = 0;
 		bool hadSectionHeading;
 
-		StitchBlock TraverseStitch (Stitch stitch)
+		PlayChunk TraverseStitch (Stitch stitch)
 		{
-			StitchBlock chunk = new StitchBlock ();
+			PlayChunk chunk = new PlayChunk ();
 
 			this.FlagsCollected = new List<FlagValue> ();
 			this.wordCount = 0;
@@ -63,9 +110,12 @@ namespace Inklewriter
 				if (currentStitch.PageNumber >= 1) {
 					this.hadSectionHeading = true;
 				}
+				bool isStitchShown = false;
 				// This stitch passes flag tests and should be included in this chunk
 				if (StoryModel.DoesArrayMeetConditions (currentStitch.IfConditions, currentStitch.NotIfConditions, FlagsCollected)) {
-					
+
+					isStitchShown = true;
+
 					// Embed illustration image url
 					if (!string.IsNullOrEmpty (currentStitch.Image)) {
 						chunk.image = currentStitch.Image;
@@ -85,10 +135,9 @@ namespace Inklewriter
 					if (currentStitch.Flags.Count > 0) {
 						StoryModel.ProcessFlagSetting (currentStitch, this.FlagsCollected);
 					}
-
-					// Add valid stitch to chunk
-					chunk.stitches.Add (currentStitch);
 				}
+				// Add stitch to chunk
+				chunk.stitches.Add (new BlockContent<Stitch> (currentStitch, isStitchShown));
 				currentStitch = currentStitch.DivertStitch;
 			}
 			this.wordCount += WordCountOf (compiledText);
@@ -96,6 +145,8 @@ namespace Inklewriter
 			chunk.compiledText = compiledText;
 
 			CreateOptionBlock ();
+
+			return chunk;
 		}
 
 		public void CreateOptionBlock ()
@@ -260,8 +311,8 @@ namespace Inklewriter
 		public string ReplaceStyleMarkup (string text)
 		{
 			// Replace inkle style markup with delegate method's output, or default to HTML tags
-			text = Regex.Replace (text, @"\*\-(.*?)\-\*", onStyledBold != null ? onStyledBold ("$1") : "<b>$1</b>");
-			text = Regex.Replace (text, @"\/\=(.*?)\=\/", onStyledItalic != null ? onStyledItalic ("$1") : "<i>$1</i>");
+			text = Regex.Replace (text, @"\*\-(.*?)\-\*", markupConverter.ReplaceBoldStyleMarkup ("$1"));
+			text = Regex.Replace (text, @"\/\=(.*?)\=\/", markupConverter.ReplaceItalicStyleMarkup ("$1"));
 			// Remove inkle style markup
 			text = Regex.Replace (text, @"(\/\=|\=\/|\*\-|\-\*)", "");
 			return text;
@@ -269,7 +320,7 @@ namespace Inklewriter
 
 		public string ReplaceUrlMarkup (string e)
 		{
-			e = Regex.Replace (e, @"\[(.*?)\|(.*?)\]", onReplacedLinkUrl != null ? onReplacedLinkUrl ("$1", "$2") : "<a href=\"$1\">$2</a>");
+			e = Regex.Replace (e, @"\[(.*?)\|(.*?)\]", markupConverter.ReplaceLinkUrlMarkup ("$1", "$2"));
 			return e;
 		}
 
@@ -305,7 +356,7 @@ namespace Inklewriter
 
 		public string ReplaceImageMarkup (string text)
 		{
-			text = Regex.Replace (text, @"\%\|\%\|\%(.*?)\$\|\$\|\$", (onReplacedImageUrl != null) ? onReplacedImageUrl ("$1") : "<div id=\"illustration\"><img class=\"pic\" src=\"$1\"/></div>");
+			text = Regex.Replace (text, @"\%\|\%\|\%(.*?)\$\|\$\|\$", markupConverter.ReplaceImageUrlMarkup ("$1"));
 			return text;
 		}
 
