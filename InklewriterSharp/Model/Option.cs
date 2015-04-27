@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace Inklewriter
 {
-	[System.Serializable]
 	public class Option
 	{
 		/// <summary>

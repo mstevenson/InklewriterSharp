@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 
 namespace Inklewriter
 {
-	[System.Serializable]
 	public class Stitch
 	{
 		/// <summary>
