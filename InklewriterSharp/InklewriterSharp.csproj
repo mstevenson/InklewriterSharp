@@ -49,6 +49,7 @@
     <Compile Include="Model\FlagValue.cs" />
     <Compile Include="Player\StoryPlayer.cs" />
     <Compile Include="MarkupConverters\ConsoleMarkupConverter.cs" />
+    <Compile Include="Player\Paragraph.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

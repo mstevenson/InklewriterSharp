@@ -8,9 +8,10 @@ namespace Inklewriter.Player
 	public class PlayChunk
 	{
 		/// <summary>
-		/// In-line illustration image URL.
+		/// Paragraphs of styled text that compose the chunk.
+		/// This is a processed and display-ready form of the Stitches list.
 		/// </summary>
-		public string Image { get; internal set; }
+		public List<Paragraph> Paragraphs { get; internal set; }
 
 		/// <summary>
 		/// All stitches belonging to this play chunk. Stitches that pass flag validation
@@ -26,15 +27,18 @@ namespace Inklewriter.Player
 		public List<FlagValue> FlagsCollected { get; private set; }
 
 		/// <summary>
-		/// Body text compiled from all stitches belonging to this chunk, post-styling.
-		/// Stitches that do not pass flag validation will not be included in this text.
-		/// </summary>
-		public string Text { get; internal set; }
-
-		/// <summary>
 		/// Is the final chunk in the story.
 		/// </summary>
-		public bool IsEnd { get; internal set; }
+		public bool IsEnd {
+			get {
+				foreach (var o in Options) {
+					if (o.isVisible) {
+						return false;
+					}
+				}
+				return true;
+			}
+		}
 
 		/// <summary>
 		/// Is the beginning of a new story section.
@@ -46,6 +50,7 @@ namespace Inklewriter.Player
 			Stitches = new List<BlockContent<Stitch>> ();
 			Options = new List<BlockContent<Option>> ();
 			FlagsCollected = new List<FlagValue> ();
+			Paragraphs = new List<Paragraph> ();
 		}
 	}
 }

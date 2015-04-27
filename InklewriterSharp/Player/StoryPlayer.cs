@@ -79,7 +79,6 @@ namespace Inklewriter.Player
 
 			var currentStitch = stitch;
 			var compiledText = "";
-			var newlineStripped = "";
 
 			// Loop through complete series of stitches.
 			while (currentStitch != null) {
@@ -91,21 +90,15 @@ namespace Inklewriter.Player
 				// This stitch passes flag tests and should be included in this chunk
 				if (isStitchVisible) {
 
-					isStitchVisible = true;
+					// Remove newlines in preparation for compiling run-on stitches into one paragraph
+					compiledText += currentStitch.Text.Replace("\n", " ") + " ";
 
-					// Embed illustration image
-					if (!string.IsNullOrEmpty (currentStitch.Image)) {
-						chunk.Image = currentStitch.Image;
-					}
-
-					// Replace newlines with spaces
-					newlineStripped += currentStitch.Text.Replace("\n", " ") + " ";
-
-					// Apply text substitutions if we are at the final stitch in this chunk
+					// If no more processing is needed, apply text substitutions and store the paragraph
 					bool isRunOn = Regex.IsMatch (currentStitch.Text, @"\[\.\.\.\]") || currentStitch.RunOn;
 					if (!isRunOn || currentStitch.DivertStitch == null) {
-						compiledText += ApplyRuleSubstitutions (newlineStripped, AllFlagsCollected) + "\n";
-						newlineStripped = "";
+						var styledText = ApplyRuleSubstitutions (compiledText, AllFlagsCollected);
+						chunk.Paragraphs.Add (new Paragraph (styledText, currentStitch.Image, currentStitch.PageLabel));
+						compiledText = "";
 					}
 
 					// Process flags
@@ -117,21 +110,19 @@ namespace Inklewriter.Player
 				chunk.Stitches.Add (new BlockContent<Stitch> (currentStitch, isStitchVisible));
 				currentStitch = currentStitch.DivertStitch;
 			}
-			WordCount += WordCountOf (compiledText);
 
-			chunk.Text = compiledText;
+			foreach (var p in chunk.Paragraphs) {
+				WordCount += WordCountOf (p.Text);
+			}
 
 			// Add options to chunk
 			if (LastStitch.Options.Count > 0) {
-				var options = LastStitch.Options;
 				foreach (var option in LastStitch.Options) {
 					var isVisible = StoryModel.DoesArrayMeetConditions (option.IfConditions, option.NotIfConditions, AllFlagsCollected);
 					if (isVisible) {
 						chunk.Options.Add (new BlockContent<Option> (option, isVisible));
 					}
 				}
-			} else {
-				chunk.IsEnd = true;
 			}
 
 			return chunk;

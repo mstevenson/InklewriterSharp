@@ -45,13 +45,14 @@ namespace Inklewriter.Examples
 		/// </summary>
 		static Stitch DisplayChunk (PlayChunk chunk)
 		{
-			if (!string.IsNullOrEmpty (chunk.Image)) {
-				Console.WriteLine (string.Format ("[Image: {0}]", chunk.Image));
+			foreach (var paragraph in chunk.Paragraphs) {
+				if (!string.IsNullOrEmpty (paragraph.Image)) {
+					WriteImage (paragraph.Image);
+					Console.WriteLine ();
+				}
+				WriteWrappedText (paragraph.Text);
 				Console.WriteLine ();
 			}
-
-			// Show main text
-			DrawText (chunk.Text);
 
 			// Find all available options
 			var visibleOptions = chunk.Options.Where (o => o.isVisible).Select (o => o.content).ToList ();
@@ -83,12 +84,16 @@ namespace Inklewriter.Examples
 			Console.Write ("\n");
 		}
 
-		public static void DrawText (string text)
+		public static void WriteImage (string url)
 		{
-			text = text.Replace ("\n", "\n\n");
+			Console.WriteLine (string.Format ("[Image: {0}]", url));
+		}
+
+		public static void WriteWrappedText (string text)
+		{
 			// Word wrap
 			text = Regex.Replace (text, @"(.{" + (Console.BufferWidth - 20) + @"}[^\s]*)\s+", "$1\n");
-			Console.Write (text);
+			Console.WriteLine (text);
 		}
 	}
 }
