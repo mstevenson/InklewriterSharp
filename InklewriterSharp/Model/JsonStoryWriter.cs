@@ -1,16 +1,24 @@
 ﻿using System;
+using System.IO;
 
 namespace Inklewriter
 {
-	public class StoryWriter
+	public class JsonStoryWriter : IStoryWriter
 	{
-		public static string GetDateTimeString (System.DateTime date)
+		TextWriter writer;
+
+		public JsonStoryWriter (TextWriter writer)
 		{
-			string format = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-			return date.ToUniversalTime ().ToString (format, System.Globalization.CultureInfo.InvariantCulture);
+			this.writer = writer;
 		}
 
-		public static string Write (Story story)
+		public void Write (Story story)
+		{
+			DoWrite (story);
+			writer.Close ();
+		}
+
+		void DoWrite (Story story)
 		{
 			JsonObject rootObj = new JsonObject ();
 
@@ -121,7 +129,13 @@ namespace Inklewriter
 				}
 			}
 
-			return SimpleJson.SerializeObject (rootObj);
+			writer.Write (SimpleJson.SerializeObject (rootObj));
+		}
+
+		public static string GetDateTimeString (System.DateTime date)
+		{
+			string format = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+			return date.ToUniversalTime ().ToString (format, System.Globalization.CultureInfo.InvariantCulture);
 		}
 	}
 }

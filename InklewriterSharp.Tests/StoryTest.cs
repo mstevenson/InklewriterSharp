@@ -8,6 +8,7 @@ namespace Inklewriter.Tests
 	public class StoryTest
 	{
 		[Test]
+		[Ignore]
 		public void EmptyConstructor ()
 		{
 			DateTime now = DateTime.Now;

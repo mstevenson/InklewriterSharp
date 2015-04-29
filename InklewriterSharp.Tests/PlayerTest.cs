@@ -112,7 +112,7 @@ namespace Inklewriter.Tests
 		[Test]
 		public void ParseInLineConditionals ()
 		{
-			string input = "Moving { speed > 5 : quickly | slowly }.";
+			string input = "Moving { speed > 5 :    quickly    |    slowly    }.";
 //			string slowResult = StoryPlayer.ParseInLineConditionals (input, new List<FlagValue> { new FlagValue ("speed", 1) });
 			string quickResult = StoryPlayer.ParseInLineConditionals (input, new List<FlagValue> { new FlagValue ("speed", 8) });
 

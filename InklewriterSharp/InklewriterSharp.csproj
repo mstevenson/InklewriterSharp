@@ -37,8 +37,6 @@
     <Compile Include="Model\Option.cs" />
     <Compile Include="Model\Story.cs" />
     <Compile Include="Model\EditorData.cs" />
-    <Compile Include="Model\StoryReader.cs" />
-    <Compile Include="Model\StoryWriter.cs" />
     <Compile Include="SimpleJson.cs" />
     <Compile Include="MarkupConverters\MarkdownConverter.cs" />
     <Compile Include="MarkupConverters\IMarkupConverter.cs" />
@@ -50,6 +48,10 @@
     <Compile Include="Player\StoryPlayer.cs" />
     <Compile Include="MarkupConverters\ConsoleMarkupConverter.cs" />
     <Compile Include="Player\Paragraph.cs" />
+    <Compile Include="Model\IStoryReader.cs" />
+    <Compile Include="Model\IStoryWriter.cs" />
+    <Compile Include="Model\JsonStoryReader.cs" />
+    <Compile Include="Model\JsonStoryWriter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

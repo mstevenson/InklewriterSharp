@@ -15,8 +15,7 @@ namespace Inklewriter.Examples
 		{
 			// Load story file
 			string storyJson = File.ReadAllText ("Stories/musgraveritual.json");
-			StoryModel model = new StoryModel ();
-			model.ImportStory (storyJson);
+			StoryModel model = StoryModel.Create (storyJson);
 
 			// Load story into player
 			StoryPlayer player = new StoryPlayer (model, new Inklewriter.MarkupConverters.ConsoleMarkupConverter ());

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Inklewriter;
+using System.IO;
 
 namespace Inklewriter.Tests
 {
@@ -75,14 +76,23 @@ namespace Inklewriter.Tests
 		[Test]
 		public void GetDateTimeString ()
 		{
-			var dateString = StoryWriter.GetDateTimeString (new DateTime (2015, 01, 02, 15, 10, 5, DateTimeKind.Utc));
+			var dateString = JsonStoryWriter.GetDateTimeString (new DateTime (2015, 01, 02, 15, 10, 5, DateTimeKind.Utc));
 			Assert.AreEqual ("2015-01-02T15:10:05Z", dateString);
+		}
+
+		string WriteStory ()
+		{
+			var sw = new StringWriter ();
+			var writer = new JsonStoryWriter (sw);
+			writer.Write (story);
+			string data = sw.ToString ();
+			return data;
 		}
 
 		[Test]
 		public void Title ()
 		{
-			string data = StoryWriter.Write (story);
+			string data = WriteStory ();
 			JsonObject obj = (JsonObject)SimpleJson.DeserializeObject (data);
 
 			Assert.AreEqual ("Test Story", obj ["title"]);
@@ -91,7 +101,7 @@ namespace Inklewriter.Tests
 		[Test]
 		public void UrlKey ()
 		{
-			string data = StoryWriter.Write (story);
+			string data = WriteStory ();
 			JsonObject obj = (JsonObject)SimpleJson.DeserializeObject (data);
 
 			Assert.AreEqual ("abcd", obj ["url_key"]);
@@ -100,7 +110,7 @@ namespace Inklewriter.Tests
 		[Test]
 		public void Author ()
 		{
-			string data = StoryWriter.Write (story);
+			string data = WriteStory ();
 			JsonObject obj = (JsonObject)SimpleJson.DeserializeObject (data);
 
 			var d = (JsonObject)obj["data"];
@@ -111,7 +121,7 @@ namespace Inklewriter.Tests
 		[Test]
 		public void UpdatedAt ()
 		{
-			string data = StoryWriter.Write (story);
+			string data = WriteStory ();
 			JsonObject obj = (JsonObject)SimpleJson.DeserializeObject (data);
 			var updated = "2015-02-03T04:10:20Z";
 
@@ -121,7 +131,7 @@ namespace Inklewriter.Tests
 		[Test]
 		public void CreatedAt ()
 		{
-			string data = StoryWriter.Write (story);
+			string data = WriteStory ();
 			JsonObject obj = (JsonObject)SimpleJson.DeserializeObject (data);
 			var created = "2015-01-02T15:10:05Z";
 

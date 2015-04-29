@@ -1,20 +1,30 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.IO;
 
 namespace Inklewriter
 {
-	public class StoryReader
+	public class JsonStoryReader : IStoryReader
 	{
-		public static Story Read (string jsonData)
+		TextReader reader;
+
+		public JsonStoryReader (TextReader reader)
+		{
+			this.reader = reader;
+		}
+
+		public Story Read ()
 		{
 			Story story = new Story ();
-			var obj = (JsonObject)SimpleJson.DeserializeObject (jsonData);
+			var data = reader.ReadToEnd ();
+			reader.Close ();
+			var obj = (JsonObject)SimpleJson.DeserializeObject (data);
 			ReadStoryRoot (obj, story);
 			return story;
 		}
 
-		static void ReadStoryRoot (JsonObject obj, Story story)
+		void ReadStoryRoot (JsonObject obj, Story story)
 		{
 			story.Title = (string)obj ["title"];
 			JsonObject data = (JsonObject)obj ["data"];
@@ -44,7 +54,7 @@ namespace Inklewriter
 			}
 		}
 
-		static void ReadData (JsonObject obj, Story story)
+		void ReadData (JsonObject obj, Story story)
 		{
 			foreach (var kvp in obj) {
 				string property = kvp.Key;
@@ -70,7 +80,7 @@ namespace Inklewriter
 			}
 		}
 
-		static void ReadDataEditor (JsonObject obj, Story story)
+		void ReadDataEditor (JsonObject obj, Story story)
 		{
 			story.EditorData = new EditorData ();
 			foreach (var kvp in obj) {
@@ -93,12 +103,12 @@ namespace Inklewriter
 			}
 		}
 
-		static int ParseInt (object obj)
+		int ParseInt (object obj)
 		{
 			return System.Convert.ToInt32 ((long)obj);
 		}
 
-		static void ReadStitches (JsonObject obj, Story story)
+		void ReadStitches (JsonObject obj, Story story)
 		{
 			foreach (var kvp in obj) {
 				string name = (string)kvp.Key;
@@ -127,7 +137,7 @@ namespace Inklewriter
 			}
 		}
 
-		static void ReadOptionContentItem (JsonObject obj, Story story, Stitch stitch)
+		void ReadOptionContentItem (JsonObject obj, Story story, Stitch stitch)
 		{
 			Option option = stitch.AddOption ();
 			foreach (var kvp in obj) {
@@ -165,7 +175,7 @@ namespace Inklewriter
 			}
 		}
 
-		static void ReadContentItem (JsonObject obj, Story story, Stitch stitch)
+		void ReadContentItem (JsonObject obj, Story story, Stitch stitch)
 		{
 			foreach (var kvp in obj) {
 				string property = (string)kvp.Key;
@@ -200,7 +210,7 @@ namespace Inklewriter
 			}
 		}
 
-		static Stitch GetOrCreateStitch (Story story, string stitchName)
+		Stitch GetOrCreateStitch (Story story, string stitchName)
 		{
 			if (string.IsNullOrEmpty (stitchName)) {
 				return null;

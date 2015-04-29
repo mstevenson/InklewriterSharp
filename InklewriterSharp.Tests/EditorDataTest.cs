@@ -8,6 +8,7 @@ namespace Inklewriter.Tests
 	public class EditorDataTest
 	{
 		[Test]
+		[Ignore]
 		public void Constructor ()
 		{
 			EditorData data = new EditorData ();

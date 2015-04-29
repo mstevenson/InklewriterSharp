@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.IO;
 
 namespace Inklewriter
 {
@@ -20,28 +21,51 @@ namespace Inklewriter
 
 		public int LooseEndCount { get; set; }
 
+		public static StoryModel Create (string jsonData)
+		{
+			JsonStoryReader reader = new JsonStoryReader (new StringReader (jsonData));
+			var model = Create (reader);
+			return model;
+		}
+
+		public static StoryModel Create (IStoryReader reader)
+		{
+			var model = new StoryModel ();
+			model.Story = reader.Read ();
+			return model.Story != null ? model : null;
+		}
+
 		public StoryModel ()
 		{
 			FlagIndex = new List<string> ();
 		}
 
-		public void ImportStory (string data)
+		public string Export ()
 		{
-			Story = StoryReader.Read (data);
+			if (Story == null) {
+				return null;
+			}
+			using (StringWriter sw = new StringWriter ()) {
+				var jsonWriter = new JsonStoryWriter (sw);
+				Export (jsonWriter);
+				return sw.ToString ();
+			}
 		}
 
-		public string ExportStory ()
+		public void Export (IStoryWriter writer)
 		{
-			if (Story != null) {
-				NameStitches ();
-				var data = StoryWriter.Write (Story);
-				return data;
+			if (Story == null) {
+				return;
 			}
-			return null;
+			NameStitches ();
+			writer.Write (Story);
 		}
 
 		public void RebuildBacklinks ()
 		{
+			if (Story == null) {
+				return;
+			}
 			EndCount = 0;
 			for (int e = 0; e < Story.Stitches.Count; e++) {
 				Story.Stitches [e].Backlinks = new List<Stitch> ();
@@ -72,6 +96,9 @@ namespace Inklewriter
 		/// </summary>
 		public void CollateFlags ()
 		{
+			if (Story == null) {
+				return;
+			}
 			FlagIndex = new List<string> ();
 			foreach (var stitch in Story.Stitches) {
 				foreach (var flag in stitch.Flags) {

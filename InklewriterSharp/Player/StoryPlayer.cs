@@ -195,7 +195,7 @@ namespace Inklewriter.Player
 					} else if (!string.IsNullOrEmpty (match.Groups [4].Value)) {
 						replacementValue = match.Groups [4].Value;
 					}
-					text = Regex.Replace (text, conditionBoundsPattern, " " + replacementValue + " ");
+					text = Regex.Replace (text, conditionBoundsPattern, replacementValue);
 				}
 			}
 			return text;
