@@ -6,7 +6,6 @@
     <ProjectGuid>{3064FF6F-B820-4E3E-B657-CFF109E9A0A3}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Inklewriter.Examples</RootNamespace>
-    <AssemblyName>Inklewriter.Examples</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -18,6 +17,8 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Externalconsole>true</Externalconsole>
+    <AssemblyName>Inklewriter.Examples</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>full</DebugType>
@@ -26,6 +27,14 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Externalconsole>true</Externalconsole>
+    <AssemblyName>Inklewriter.Examples</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Editor (Debug)|AnyCPU' ">
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Editor</OutputPath>
+    <WarningLevel>4</WarningLevel>
+    <AssemblyName>InklewriterSharp.Examples</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

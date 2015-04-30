@@ -7,22 +7,50 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InklewriterSharp.Examples",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InklewriterSharp.Tests", "InklewriterSharp.Tests\InklewriterSharp.Tests.csproj", "{7AEFD4DF-AB2E-4188-B1FF-DE7CEC9C52BD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InklewriterEditor.Mac", "InklewriterEditor.Mac\InklewriterEditor.Mac.csproj", "{0EF66206-290D-4B80-B89F-A79A27EB5AC7}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "InklewriterEditor", "InklewriterEditor\InklewriterEditor.shproj", "{E6BEF481-1F4E-4638-B69A-ECBC58077B47}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InklewriterEditorXamMac2", "InklewriterEditor.XamMac2\InklewriterEditorXamMac2.csproj", "{476E8996-F195-496D-9C3E-D7E2B2DAF04B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InklewriterEditor.Desktop", "InklewriterEditor.Desktop\InklewriterEditor.Desktop.csproj", "{24F8ECA2-8483-4ED0-8F43-ABCE7BDC58CC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		Editor (Debug)|Any CPU = Editor (Debug)|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0EF66206-290D-4B80-B89F-A79A27EB5AC7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EF66206-290D-4B80-B89F-A79A27EB5AC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EF66206-290D-4B80-B89F-A79A27EB5AC7}.Editor (Debug)|Any CPU.ActiveCfg = Editor (Debug)|Any CPU
+		{0EF66206-290D-4B80-B89F-A79A27EB5AC7}.Editor (Debug)|Any CPU.Build.0 = Editor (Debug)|Any CPU
+		{0EF66206-290D-4B80-B89F-A79A27EB5AC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EF66206-290D-4B80-B89F-A79A27EB5AC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24F8ECA2-8483-4ED0-8F43-ABCE7BDC58CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24F8ECA2-8483-4ED0-8F43-ABCE7BDC58CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24F8ECA2-8483-4ED0-8F43-ABCE7BDC58CC}.Editor (Debug)|Any CPU.ActiveCfg = Editor (Debug)|Any CPU
+		{24F8ECA2-8483-4ED0-8F43-ABCE7BDC58CC}.Editor (Debug)|Any CPU.Build.0 = Editor (Debug)|Any CPU
+		{24F8ECA2-8483-4ED0-8F43-ABCE7BDC58CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24F8ECA2-8483-4ED0-8F43-ABCE7BDC58CC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3064FF6F-B820-4E3E-B657-CFF109E9A0A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3064FF6F-B820-4E3E-B657-CFF109E9A0A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3064FF6F-B820-4E3E-B657-CFF109E9A0A3}.Editor (Debug)|Any CPU.ActiveCfg = Editor (Debug)|Any CPU
 		{3064FF6F-B820-4E3E-B657-CFF109E9A0A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3064FF6F-B820-4E3E-B657-CFF109E9A0A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{476E8996-F195-496D-9C3E-D7E2B2DAF04B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{476E8996-F195-496D-9C3E-D7E2B2DAF04B}.Editor (Debug)|Any CPU.ActiveCfg = Editor (Debug)|Any CPU
+		{476E8996-F195-496D-9C3E-D7E2B2DAF04B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{476E8996-F195-496D-9C3E-D7E2B2DAF04B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7AEFD4DF-AB2E-4188-B1FF-DE7CEC9C52BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7AEFD4DF-AB2E-4188-B1FF-DE7CEC9C52BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AEFD4DF-AB2E-4188-B1FF-DE7CEC9C52BD}.Editor (Debug)|Any CPU.ActiveCfg = Editor (Debug)|Any CPU
 		{7AEFD4DF-AB2E-4188-B1FF-DE7CEC9C52BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7AEFD4DF-AB2E-4188-B1FF-DE7CEC9C52BD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{98CDC893-7F79-47C5-B609-A8FB40F73924}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{98CDC893-7F79-47C5-B609-A8FB40F73924}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98CDC893-7F79-47C5-B609-A8FB40F73924}.Editor (Debug)|Any CPU.ActiveCfg = Editor (Debug)|Any CPU
 		{98CDC893-7F79-47C5-B609-A8FB40F73924}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98CDC893-7F79-47C5-B609-A8FB40F73924}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
