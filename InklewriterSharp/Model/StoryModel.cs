@@ -604,9 +604,9 @@ namespace Inklewriter
 		}
 
 		/// <summary>
-		/// Returns true if the 'if' and 'not if' conditions are satisfied by the given list of flags.
+		/// Returns true if the given 'if' and 'not if' conditions are satisfied by the given list of flags.
 		/// </summary>
-		public static bool DoesArrayMeetConditions (List<string> ifConditions, List<string> notIfConditions, List<FlagValue> flags) // n type is unknown
+		public static bool DoesArrayMeetConditions (List<string> ifConditions, List<string> notIfConditions, List<FlagValue> flags)
 		{
 			var success = false;
 			for (var i = 0; i < ifConditions.Count && !success; i++) {

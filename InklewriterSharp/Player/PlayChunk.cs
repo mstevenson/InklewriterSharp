@@ -27,12 +27,12 @@ namespace Inklewriter.Player
 		public List<FlagValue> FlagsCollected { get; private set; }
 
 		/// <summary>
-		/// Is the final chunk in the story.
+		/// Is this the final chunk in the story?
 		/// </summary>
 		public bool IsEnd {
 			get {
 				foreach (var o in Options) {
-					if (o.isVisible) {
+					if (o.IsVisible) {
 						return false;
 					}
 				}
@@ -41,7 +41,7 @@ namespace Inklewriter.Player
 		}
 
 		/// <summary>
-		/// Is the beginning of a new story section.
+		/// Is the beginning of a new story section?
 		/// </summary>
 		public bool HasSectionHeading { get; internal set; }
 

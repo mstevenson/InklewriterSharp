@@ -54,7 +54,7 @@ namespace Inklewriter.Examples
 			}
 
 			// Find all available options
-			var visibleOptions = chunk.Options.Where (o => o.isVisible).Select (o => o.content).ToList ();
+			var visibleOptions = chunk.Options.Where (o => o.IsVisible).Select (o => o.Content).ToList ();
 
 			// Bail out if no options were visible and we have nowhere to go
 			if (visibleOptions.Count == 0) {

@@ -69,18 +69,16 @@ namespace Inklewriter.Player
 		{
 			PlayChunk chunk = new PlayChunk ();
 
+			// Reload all flags from the previous stitch
 			AllFlagsCollected.Clear ();
-			WordCount = 0;
 			if (LastChunk != null) {
-				for (var s = 0; s < LastChunk.FlagsCollected.Count; s++) {
-					AllFlagsCollected.Add (LastChunk.FlagsCollected [s]);
-				}
+				AllFlagsCollected.AddRange (LastChunk.FlagsCollected);
 			}
 
 			var currentStitch = stitch;
 			var compiledText = "";
 
-			// Loop through complete series of stitches.
+			// Loop through all linked stitches
 			while (currentStitch != null) {
 				visitedStitches.Add (currentStitch);
 				if (currentStitch.PageNumber >= 1) {
@@ -101,7 +99,7 @@ namespace Inklewriter.Player
 						compiledText = "";
 					}
 
-					// Process flags
+					// Modify all flags with flag states from the current stitch
 					if (currentStitch.Flags.Count > 0) {
 						StoryModel.ProcessFlagSetting (currentStitch, AllFlagsCollected);
 					}
@@ -111,6 +109,7 @@ namespace Inklewriter.Player
 				currentStitch = currentStitch.DivertStitch;
 			}
 
+			WordCount = 0;
 			foreach (var p in chunk.Paragraphs) {
 				WordCount += WordCountOf (p.Text);
 			}
@@ -135,7 +134,7 @@ namespace Inklewriter.Player
 			}
 			return 0;
 		}
-			
+
 		public string ApplyMarkupSubstitutions (string text)
 		{
 			text = ReplaceQuotes (text);
@@ -144,21 +143,65 @@ namespace Inklewriter.Player
 			return text;
 		}
 
+		public string ReplaceQuotes (string text)
+		{
+			// straight quotes to curly quotes
+			text = Regex.Replace (text, @"\""([^\n]*?)\""", "“$1”");
+			text = Regex.Replace (text, @"(\s|^|\n|<b>|<i>|\(|\“)\'", "$1‘");
+			// straight apostrophe to curly apostrophe
+			text = Regex.Replace (text, @"\'", "’");
+			text = Regex.Replace (text, @"(^|\n)\""", "$1“");
+			return text;
+		}
+
+		public string ReplaceUrlMarkup (string text)
+		{
+			text = Regex.Replace (text, @"\[(.*?)\|(.*?)\]", markupConverter.ReplaceLinkUrlMarkup ("$1", "$2"));
+			return text;
+		}
+
+		public string ReplaceImageMarkup (string text)
+		{
+			text = Regex.Replace (text, @"\%\|\%\|\%(.*?)\$\|\$\|\$", markupConverter.ReplaceImageUrlMarkup ("$1"));
+			return text;
+		}
+
 		public string ApplyRuleSubstitutions (string text, List<FlagValue> flags)
 		{
-			text = ReplaceRunOnMarker (text);
+			text = RemoveRunOnMarker (text);
 			text = ConvertNumbersToWords (text, flags);
 			string n = "";
 			while (n != text) {
 				n = text;
-				text = ParseInLineConditionals (text, flags);
+				text = ReplaceInLineConditionals (text, flags);
 				text = ShuffleRandomElements (text);
 			}
 			text = ReplaceStyleMarkup (text);
 			return text;
 		}
 
-		public static string ParseInLineConditionals (string text, List<FlagValue> flags)
+		public string RemoveRunOnMarker (string text)
+		{
+			text = Regex.Replace (text, @"\[\.\.\.\]", " ");
+			return text;
+		}
+
+		public string ConvertNumbersToWords (string text, List<FlagValue> flags)
+		{
+			var pattern = @"\[\s*(number|value)\s*\:\s*(.*?)\s*\]";
+			var matchSet = Regex.Matches (text, pattern);
+			foreach (Match match in matchSet) {
+				int number = StoryModel.GetValueOfFlag (match.Groups[2].Value, flags);
+				string numberWords = number.ToString ();
+				if (match.Groups[1].Value == "value") {
+					numberWords = NumToWords.Convert (number);
+				}
+				text = Regex.Replace (text, pattern, numberWords);
+			}
+			return text;
+		}
+
+		public static string ReplaceInLineConditionals (string text, List<FlagValue> flags)
 		{
 			var conditionBoundsPattern = @"\{([^\~\{]*?)\:([^\{]*?)(\|([^\{]*?))?\}";
 			var orPattern = @"(^\s*|\s*$)";
@@ -215,23 +258,6 @@ namespace Inklewriter.Player
 			return text;
 		}
 
-		public string ReplaceRunOnMarker (string text)
-		{
-			text = Regex.Replace (text, @"\[\.\.\.\]", " ");
-			return text;
-		}
-
-		public string ReplaceQuotes (string text)
-		{
-			// straight quotes to curly quotes
-			text = Regex.Replace (text, @"\""([^\n]*?)\""", "“$1”");
-			text = Regex.Replace (text, @"(\s|^|\n|<b>|<i>|\(|\“)\'", "$1‘");
-			// straight apostrophe to curly apostrophe
-			text = Regex.Replace (text, @"\'", "’");
-			text = Regex.Replace (text, @"(^|\n)\""", "$1“");
-			return text;
-		}
-
 		public string ReplaceStyleMarkup (string text)
 		{
 			// Replace inkle style markup with delegate method's output, or default to HTML tags
@@ -239,33 +265,6 @@ namespace Inklewriter.Player
 			text = Regex.Replace (text, @"\/\=(.*?)\=\/", markupConverter.ReplaceItalicStyleMarkup ("$1"));
 			// Remove inkle style markup
 			text = Regex.Replace (text, @"(\/\=|\=\/|\*\-|\-\*)", "");
-			return text;
-		}
-
-		public string ReplaceUrlMarkup (string text)
-		{
-			text = Regex.Replace (text, @"\[(.*?)\|(.*?)\]", markupConverter.ReplaceLinkUrlMarkup ("$1", "$2"));
-			return text;
-		}
-
-		public string ReplaceImageMarkup (string text)
-		{
-			text = Regex.Replace (text, @"\%\|\%\|\%(.*?)\$\|\$\|\$", markupConverter.ReplaceImageUrlMarkup ("$1"));
-			return text;
-		}
-
-		public string ConvertNumbersToWords (string text, List<FlagValue> flags)
-		{
-			var pattern = @"\[\s*(number|value)\s*\:\s*(.*?)\s*\]";
-			var matchSet = Regex.Matches (text, pattern);
-			foreach (Match match in matchSet) {
-				int number = StoryModel.GetValueOfFlag (match.Groups[2].Value, flags);
-				string numberWords = number.ToString ();
-				if (match.Groups[1].Value == "value") {
-					numberWords = NumToWords.Convert (number);
-				}
-				text = Regex.Replace (text, pattern, numberWords);
-			}
 			return text;
 		}
 

@@ -96,7 +96,7 @@ namespace Inklewriter.Tests
 		public void ReplaceRunOnMarker ()
 		{
 			StoryPlayer player = new StoryPlayer (null, new HtmlConverter ());
-			Assert.AreEqual ("Run on ", player.ReplaceRunOnMarker ("Run on[...]"));
+			Assert.AreEqual ("Run on ", player.RemoveRunOnMarker ("Run on[...]"));
 		}
 
 		[Test]
@@ -114,7 +114,7 @@ namespace Inklewriter.Tests
 		{
 			string input = "Moving { speed > 5 :    quickly    |    slowly    }.";
 //			string slowResult = StoryPlayer.ParseInLineConditionals (input, new List<FlagValue> { new FlagValue ("speed", 1) });
-			string quickResult = StoryPlayer.ParseInLineConditionals (input, new List<FlagValue> { new FlagValue ("speed", 8) });
+			string quickResult = StoryPlayer.ReplaceInLineConditionals (input, new List<FlagValue> { new FlagValue ("speed", 8) });
 
 //			Assert.AreEqual ("Moving slowly.", slowResult);
 			Assert.AreEqual ("Moving quickly.", quickResult);

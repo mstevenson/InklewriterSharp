@@ -2,6 +2,9 @@
 
 namespace Inklewriter.Player
 {
+	/// <summary>
+	/// Utility for converting numbers to words, such as 72 to "seventy two".
+	/// </summary>
 	public static class NumToWords
 	{
 		static string[] digits = new[] { "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
@@ -9,6 +12,9 @@ namespace Inklewriter.Player
 		static string[] teens = new[] { "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen" };
 		static string[] illions = new[] { "thousand", "million", "billion", "trillion" };
 
+		/// <summary>
+		/// Convert the given number to its text representation.
+		/// </summary>
 		public static string Convert (long number)
 		{
 			string text = "";
