@@ -35,6 +35,13 @@ namespace Inklewriter
 			return model.Story != null ? model : null;
 		}
 
+		public static StoryModel Create (Story story)
+		{
+			var model = new StoryModel ();
+			model.Story = story;
+			return model.Story != null ? model : null;
+		}
+
 		public StoryModel ()
 		{
 			FlagIndex = new List<string> ();
