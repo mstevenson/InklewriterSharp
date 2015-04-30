@@ -16,17 +16,88 @@ namespace InklewriterEditor
 		public MainForm ()
 		{
 			Title = "My Eto Form";
-			ClientSize = new Size (400, 350);
+			ClientSize = new Size (500, 700);
 
-			// scrollable region as the main content
+//			// scrollable region as the main content
+//			Content = new Scrollable {
+//				// table with three rows
+//				Content = new TableLayout (
+//					null,
+//					// row with three columns
+//					new TableRow (null, new Label { Text = "Hello World!" }, null),
+//					null
+//				)
+//			};
+
 			Content = new Scrollable {
-				// table with three rows
-				Content = new TableLayout (
-					null,
-					// row with three columns
-					new TableRow (null, new Label { Text = "Hello World!" }, null),
-					null
-				)
+				Content = new TableLayout
+				{
+					Size = new Size (400, 200),
+					Spacing = new Size(5, 5), // space between each cell
+					Padding = new Padding(10, 10, 10, 10), // space around the table's sides
+					Rows =
+					{
+						new TableRow (GetTableLayout ()),
+						new TableRow (GetTableLayout ()),
+						new TableRow (GetTableLayout ()),
+//						new TableRow(
+//							new TextBox { Text = "Some text" },
+//							new DropDown { Items = { "Item 1", "Item 2", "Item 3" } },
+//							new CheckBox { Text = "A checkbox" }
+//						),
+						// by default, the last row & column will get scaled. This adds a row at the end to take the extra space of the form.
+						// otherwise, the above row will get scaled and stretch the TextBox/ComboBox/CheckBox to fill the remaining height.
+						new TableRow { ScaleHeight = true }
+					}
+				}
+			};
+
+			var bold = new Command {
+				MenuText = "Bold",
+				ToolBarText = "Bold",
+				Shortcut = Application.Instance.CommonModifier | Keys.B,
+			};
+			bold.Executed += (sender, e) => {
+			};
+
+			var italic = new Command {
+				MenuText = "Italic",
+				ToolBarText = "Italic",
+				Shortcut = Application.Instance.CommonModifier | Keys.I,
+			};
+			italic.Executed += (sender, e) => {
+			};
+
+			var runOn = new Command {
+				MenuText = "Run On",
+				ToolBarText = "Run On",
+//				Shortcut = Application.Instance.CommonModifier | Keys.N,
+			};
+			runOn.Executed += (sender, e) => {
+			};
+
+			var insertSection = new Command {
+				MenuText = "Insert Section",
+				ToolBarText = "Section",
+//				Shortcut = Application.Instance.CommonModifier | Keys.N,
+			};
+			insertSection.Executed += (sender, e) => {
+			};
+
+			var insertCondition = new Command {
+				MenuText = "Insert Condition",
+				ToolBarText = "Condition",
+//				Shortcut = Application.Instance.CommonModifier | Keys.I,
+			};
+			insertSection.Executed += (sender, e) => {
+			};
+
+			var insertImage = new Command {
+				MenuText = "Insert Image",
+				ToolBarText = "Image",
+//				Shortcut = Application.Instance.CommonModifier | Keys.I,
+			};
+			insertSection.Executed += (sender, e) => {
 			};
 
 			var newStory = new Command {
@@ -100,7 +171,23 @@ namespace InklewriterEditor
 			};
 
 			// create toolbar			
-//			ToolBar = new ToolBar { Items = { clickMe } };
+			ToolBar = new ToolBar { Items = { bold, italic, runOn, insertSection, insertCondition, insertImage } };
+		}
+
+		TableLayout GetTableLayout ()
+		{
+			return new TableLayout {
+				Rows = {
+					new TableRow (
+						new TableCell (new TextArea {
+							Font = new Font ("serif", 16)
+						})
+					),
+					new TableRow (
+						new TableCell (new Button { Text = "Add Option" })
+					)
+				}
+			};
 		}
 
 		void NewStory ()
