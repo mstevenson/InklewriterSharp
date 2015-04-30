@@ -1,5 +1,5 @@
 InklewriterSharp
-==========
+================
 
 An unofficial C# reimplementation of [inklewriter](https://writer.inklestudios.com), an interactive story system created by [inkle studios](http://www.inklestudios.com).
 
@@ -28,7 +28,11 @@ It's now up to you to display your story's content and to advance the story stat
 5. Wait for player input. When the player selects an option, call `storyPlayer.GetChunkFromStitch(option.LinkStitch)` to grab the next chunk.
 6. Repeat this process until chunk.IsEnd is true, indicating a chunk that has no visible options. With nowhere else to go, the story has come to an end.
 
-See InkleSharp.Examples.Program.cs for a complete example implementation that runs in the console.
+Examples
+--------
+
+- **Console App** - see InkleSharp.Examples.Program.cs included in this project for a complete text-only implementation that runs in a Windows command prompt or OS X/Linux terminal.
+- **Unity App** - the InklewriterUnity project runs inklewriter stories in the Unity game engine, mimicking the appearance and functionality of the inklewriter web app.
 
 License
 -------
