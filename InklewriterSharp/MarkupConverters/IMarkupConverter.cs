@@ -1,5 +1,6 @@
 ﻿/*
-	Copyright (c) 2015 Michael Stevenson
+	inklewriter Copyright (c) 2012 inkle Ltd
+	C# port Copyright (c) 2015 Michael Stevenson
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
