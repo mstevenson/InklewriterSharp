@@ -56,7 +56,7 @@ namespace Inklewriter.Examples
 				DrawHorizontalLine ();
 				Console.WriteLine ();
 
-				var nextChunk = player.GetChunkFromStitch (lastStitch);
+				var nextChunk = player.CreateChunkForStitch (lastStitch);
 				lastStitch = DisplayChunk (nextChunk);
 			}
 		}

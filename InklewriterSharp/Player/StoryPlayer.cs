@@ -88,8 +88,34 @@ namespace Inklewriter.Player
 			}
 		}
 
-		public PlayChunk GetChunkFromStitch (Stitch stitch)
+		/// <summary>
+		/// Generates and returns a PlayChunk for the first content shown
+		/// to the player before selecting their first option.
+		/// </summary>
+		public PlayChunk CreateFirstChunk ()
 		{
+			return CreateChunkForStitch (InitialStitch);
+		}
+
+		/// <summary>
+		/// Generates and returns a PlayChunk for the section of the story
+		/// linked from the given Option object.
+		/// </summary>
+		public PlayChunk CreateChunkForOption (Option option)
+		{
+			return CreateChunkForStitch (option.LinkStitch);
+		}
+
+		/// <summary>
+		/// Generates and returns a PlayChunk that begins with the given Stitch
+		/// and continues through the first available block of options.
+		/// </summary>
+		public PlayChunk CreateChunkForStitch (Stitch stitch)
+		{
+			if (stitch == null) {
+				return null;
+			}
+
 			PlayChunk chunk = new PlayChunk ();
 
 			// Reload all flags from the previous stitch
