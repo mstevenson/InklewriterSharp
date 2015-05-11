@@ -32,9 +32,9 @@ Examples
 --------
 
 - **Console App** - see InkleSharp.Examples.Program.cs included in this project for a complete text-only implementation that runs in a Windows command prompt or OS X/Linux terminal.
-- **Unity App** - the InklewriterUnity project runs inklewriter stories in the Unity game engine, mimicking the appearance and functionality of the inklewriter web app.
+- **Unity App** - available as a separate project, the [InklewriterUnity library](https://github.com/mstevenson/InklewriterUnity) plays inklewriter stories through the Unity game engine.
 
 License
 -------
 
-The InkleSharp source code is licensed under the MIT License. Inkle story files may be used commercially with a credit to inkle studios.
+The InkleSharp source code is licensed under the MIT License. Inklewriter story files may be used commercially with a credit to inkle studios.
