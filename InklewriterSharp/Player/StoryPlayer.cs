@@ -98,6 +98,22 @@ namespace Inklewriter.Player
 		}
 
 		/// <summary>
+		/// Generates and returns a PlayChunk for the first content shown
+		/// to the player before selecting their first option, and shoehorns
+		/// in a list of pre-set flags. This is useful for retaining state
+		/// across multiple inklewriter story files that have been strung together
+		/// into a larger story.
+		/// </summary>
+		public PlayChunk CreateFirstChunkWithFlags (List<FlagValue> startingFlags)
+		{
+			var dummyChunk = new PlayChunk ();
+			dummyChunk.FlagsCollected = startingFlags;
+			allChunks.Add (dummyChunk);
+
+			return CreateChunkForStitch (InitialStitch);
+		}
+
+		/// <summary>
 		/// Generates and returns a PlayChunk for the section of the story
 		/// linked from the given Option object.
 		/// </summary>
