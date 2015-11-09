@@ -197,7 +197,6 @@ namespace Inklewriter
 
 		/// <summary>
 		/// Modify the values in the given flags array based on the flags contained in the given stitch.
-		/// Each flag in the stitch must already exist in the flags array.
 		/// </summary>
 		public static void ProcessFlagSetting (Stitch stitch, List<FlagValue> allFlags)
 		{
@@ -241,11 +240,13 @@ namespace Inklewriter
 				} else {
 					flagIndex = GetIndexOfFlag(flag, allFlags);
 				}
-					
-				if (isBoolean) {
-					allFlags.Add (new FlagValue (flag, newValue == 0 ? false : true));
+
+				// Update global flags
+				var newFlag = isBoolean ? new FlagValue (flag, newValue == 1 ? true : false) : new FlagValue (flag, newValue);
+				if (flagIndex >= 0) {
+					allFlags[flagIndex] = newFlag;
 				} else {
-					allFlags.Add (new FlagValue (flag, newValue));
+					allFlags.Add (newFlag);
 				}
 			}
 		}

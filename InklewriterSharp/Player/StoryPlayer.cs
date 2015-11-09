@@ -173,6 +173,9 @@ namespace Inklewriter.Player
 				}
 			}
 
+			chunk.FlagsCollected.AddRange (AllFlagsCollected);
+			allChunks.Add (chunk);
+
 			return chunk;
 		}
 

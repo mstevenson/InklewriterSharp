@@ -60,7 +60,10 @@ namespace Inklewriter.Tests
 				new FlagValue ("f", 1),
 				new FlagValue ("g", true),
 			};
-			Stitch stitch = new Stitch {
+
+			// Test new flags
+
+			Stitch stitchA = new Stitch {
 				Flags = new List<string> {
 					"a = false", // set a boolean
 					"b = 2", // set a number
@@ -72,7 +75,7 @@ namespace Inklewriter.Tests
 				}
 			};
 
-			StoryModel.ProcessFlagSetting (stitch, flags);
+			StoryModel.ProcessFlagSetting (stitchA, flags);
 
 			Assert.AreEqual (0, flags [0].value);
 			Assert.AreEqual (2, flags [1].value);
@@ -81,6 +84,22 @@ namespace Inklewriter.Tests
 			Assert.AreEqual (2, flags [4].value);
 			Assert.AreEqual (1, flags [5].value);
 			Assert.AreEqual (1, flags [6].value);
+
+			// Test updating flags
+
+			Stitch stitchB = new Stitch {
+				Flags = new List<string> {
+					"b = 3",
+					"a = true",
+					"h = 5" // new flag
+				}
+			};
+
+			StoryModel.ProcessFlagSetting (stitchB, flags);
+
+			Assert.AreEqual (1, flags [0].value); // a = true
+			Assert.AreEqual (3, flags [1].value); // b = 3
+			Assert.AreEqual (5, flags [7].value); // h = 5
 		}
 
 		[Test]
