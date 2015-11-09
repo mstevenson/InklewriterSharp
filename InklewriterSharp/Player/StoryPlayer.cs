@@ -107,7 +107,8 @@ namespace Inklewriter.Player
 		public PlayChunk CreateFirstChunkWithFlags (List<FlagValue> startingFlags)
 		{
 			var dummyChunk = new PlayChunk ();
-			dummyChunk.FlagsCollected = startingFlags;
+
+			dummyChunk.FlagsCollected.AddRange (startingFlags);
 			allChunks.Add (dummyChunk);
 
 			return CreateChunkForStitch (InitialStitch);
